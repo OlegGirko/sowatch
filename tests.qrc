@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/">
+        <file>testdeclarativewatchlet.qml</file>
+        <file>qt.png</file>
+    </qresource>
+</RCC>

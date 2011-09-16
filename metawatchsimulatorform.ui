@@ -1,0 +1,294 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MetaWatchSimulatorForm</class>
+ <widget class="QWidget" name="MetaWatchSimulatorForm">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>262</width>
+    <height>113</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MetaWatch-Digital Simulator</string>
+  </property>
+  <layout class="QHBoxLayout" name="horizontalLayout">
+   <item>
+    <layout class="QVBoxLayout" name="btnsLeft">
+     <item>
+      <widget class="QPushButton" name="btnA">
+       <property name="text">
+        <string>A</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="btnB">
+       <property name="text">
+        <string>B</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="btnC">
+       <property name="text">
+        <string>C</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="QLabel" name="lblDisplay">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <layout class="QVBoxLayout" name="btnsRight">
+     <item>
+      <widget class="QPushButton" name="btnD">
+       <property name="text">
+        <string>D</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="btnE">
+       <property name="text">
+        <string>E</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="btnF">
+       <property name="text">
+        <string>F</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>btnA</sender>
+   <signal>pressed()</signal>
+   <receiver>MetaWatchSimulatorForm</receiver>
+   <slot>btnAPressed()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>44</x>
+     <y>20</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>105</x>
+     <y>4</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>btnA</sender>
+   <signal>released()</signal>
+   <receiver>MetaWatchSimulatorForm</receiver>
+   <slot>btnAReleased()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>71</x>
+     <y>21</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>4</x>
+     <y>10</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>btnB</sender>
+   <signal>pressed()</signal>
+   <receiver>MetaWatchSimulatorForm</receiver>
+   <slot>btnBPressed()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>68</x>
+     <y>57</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>98</x>
+     <y>75</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>btnB</sender>
+   <signal>released()</signal>
+   <receiver>MetaWatchSimulatorForm</receiver>
+   <slot>btnBReleased()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>86</x>
+     <y>56</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>98</x>
+     <y>58</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>btnC</sender>
+   <signal>pressed()</signal>
+   <receiver>MetaWatchSimulatorForm</receiver>
+   <slot>btnCPressed()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>37</x>
+     <y>90</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>73</x>
+     <y>108</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>btnC</sender>
+   <signal>released()</signal>
+   <receiver>MetaWatchSimulatorForm</receiver>
+   <slot>btnCReleased()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>21</x>
+     <y>89</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>19</x>
+     <y>105</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>btnD</sender>
+   <signal>pressed()</signal>
+   <receiver>MetaWatchSimulatorForm</receiver>
+   <slot>btnDPressed()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>203</x>
+     <y>18</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>205</x>
+     <y>5</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>btnD</sender>
+   <signal>released()</signal>
+   <receiver>MetaWatchSimulatorForm</receiver>
+   <slot>btnDReleased()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>244</x>
+     <y>22</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>258</x>
+     <y>21</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>btnE</sender>
+   <signal>pressed()</signal>
+   <receiver>MetaWatchSimulatorForm</receiver>
+   <slot>btnEPressed()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>237</x>
+     <y>50</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>256</x>
+     <y>51</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>btnE</sender>
+   <signal>released()</signal>
+   <receiver>MetaWatchSimulatorForm</receiver>
+   <slot>btnEReleased()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>174</x>
+     <y>46</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>164</x>
+     <y>40</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>btnF</sender>
+   <signal>pressed()</signal>
+   <receiver>MetaWatchSimulatorForm</receiver>
+   <slot>btnFPressed()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>236</x>
+     <y>89</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>258</x>
+     <y>87</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>btnF</sender>
+   <signal>released()</signal>
+   <receiver>MetaWatchSimulatorForm</receiver>
+   <slot>btnFReleased()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>185</x>
+     <y>90</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>187</x>
+     <y>108</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>btnAPressed()</slot>
+  <slot>btnAReleased()</slot>
+  <slot>btnBPressed()</slot>
+  <slot>btnBReleased()</slot>
+  <slot>btnCPressed()</slot>
+  <slot>btnCReleased()</slot>
+  <slot>btnDPressed()</slot>
+  <slot>btnDReleased()</slot>
+  <slot>btnEPressed()</slot>
+  <slot>btnEReleased()</slot>
+  <slot>btnFPressed()</slot>
+  <slot>btnFReleased()</slot>
+ </slots>
+</ui>
