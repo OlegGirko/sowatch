@@ -12,14 +12,18 @@ QTM_USE_NAMESPACE
 
 static Watch *watch;
 static WatchServer *server;
-static Watchlet *watchlet;
 
 int main(int argc, char *argv[])
 {
 	QApplication a(argc, argv);
 
-	//watch = new MetaWatchSimulator();
-	watch = new MetaWatch(QBluetoothAddress("D0:37:61:C3:C7:99"));
+	if (a.arguments().count() > 1) {
+		watch = new MetaWatch(QBluetoothAddress(a.arguments().at(1)));
+	} else {
+		watch = new MetaWatchSimulator();
+	}
+
+	/* D0:37:61:C3:C7:99 */
 	server = new WatchServer(watch);
 	new TestDeclarativeWatchlet(server);
 	new TestWatchlet(server);
