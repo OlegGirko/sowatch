@@ -19,7 +19,7 @@ DeclarativeWatchlet::DeclarativeWatchlet(WatchServer* server, const QString& id)
 
 	if (!_registered) {
 		qmlRegisterUncreatableType<DeclarativeWatchWrapper>("com.javispedro.sowatch", 1, 0,
-			"Watch", "Watch is only available via attached properties");
+			"Watch", "Watch is only available via the 'watch' object");
 		_registered = true;
 	}
 
@@ -56,12 +56,14 @@ void DeclarativeWatchlet::setSource(const QUrl &url)
 
 void DeclarativeWatchlet::activate()
 {
+	Watchlet::activate();
 	_wrapper->activate();
 	_scene->update();
 }
 
 void DeclarativeWatchlet::deactivate()
 {
+	Watchlet::deactivate();
 	_wrapper->deactivate();
 }
 

@@ -19,17 +19,13 @@ public:
 
 	void setSource(const QUrl& url);
 
-	void activate();
-	void deactivate();
-
-signals:
-
-public slots:
-
 protected slots:
 	void handleComponentStatus(QDeclarativeComponent::Status status);
 
 protected:
+	void activate();
+	void deactivate();
+
 	static bool _registered;
 	QDeclarativeEngine* _engine;
 	QDeclarativeComponent* _component;

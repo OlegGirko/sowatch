@@ -12,7 +12,8 @@ class WatchServer;
 class Watchlet : public QObject
 {
     Q_OBJECT
-	Q_PROPERTY(QString id READ id)
+	Q_PROPERTY(QString id READ id CONSTANT)
+	Q_PROPERTY(bool isActive READ isActive NOTIFY activeChanged)
 
 public:
 	explicit Watchlet(WatchServer *server, const QString& id);
@@ -20,14 +21,22 @@ public:
 	WatchServer* server();
 	Watch* watch();
 
-	QString id();
+	Q_INVOKABLE QString id() const;
+	Q_INVOKABLE bool isActive() const;
+
+signals:
+	void activeChanged();
+	void activated();
+	void deactivated();
 
 protected:
-	virtual void activate() = 0;
-	virtual void deactivate() = 0;
+	virtual void activate();
+	virtual void deactivate();
+
+	const QString _id;
+	bool _active;
 
 private:
-	QString _id;
 	WatchServer* _server;
 
 friend class WatchServer;

@@ -128,14 +128,14 @@ void MetaWatch::update(const QList<QRect> &rects)
 		}
 	}
 
-	updateLines(1, _image, lines);
-	updateDisplay(1);
+	updateLines(ApplicationMode, _image, lines);
+	updateDisplay(ApplicationMode);
 }
 
 void MetaWatch::clear(bool white)
-{
+{qDebug() << "MWclear" << white;
 	if (_socket->state() != QBluetoothSocket::ConnectedState) return;
-	loadTemplate(1, white ? 1 : 0);
+	loadTemplate(ApplicationMode, white ? 1 : 0);
 }
 
 void MetaWatch::vibrate(bool on)
@@ -214,7 +214,7 @@ void MetaWatch::handleMessage(const Message &msg)
 	}
 }
 
-void MetaWatch::updateLine(int mode, const QImage& image, int line)
+void MetaWatch::updateLine(Mode mode, const QImage& image, int line)
 {
 	Message msg(WriteBuffer, QByteArray(13, 0), (1 << 4) | (mode & 0xF));
 	const char * scanLine = (const char *) image.constScanLine(line);
@@ -225,7 +225,7 @@ void MetaWatch::updateLine(int mode, const QImage& image, int line)
 	send(msg);
 }
 
-void MetaWatch::updateLines(int mode, const QImage& image, int lineA, int lineB)
+void MetaWatch::updateLines(Mode mode, const QImage& image, int lineA, int lineB)
 {
 	Message msg(WriteBuffer, QByteArray(26, 0), mode & 0xF);
 	const char * scanLine = (const char *) image.constScanLine(lineA);
@@ -240,7 +240,7 @@ void MetaWatch::updateLines(int mode, const QImage& image, int lineA, int lineB)
 	send(msg);
 }
 
-void MetaWatch::updateLines(int mode, const QImage& image, const QVector<bool>& lines)
+void MetaWatch::updateLines(Mode mode, const QImage& image, const QVector<bool>& lines)
 {
 	int lineCount = lines.count(true);
 	int lineA = -1;
@@ -269,7 +269,7 @@ void MetaWatch::updateLines(int mode, const QImage& image, const QVector<bool>& 
 	}
 }
 
-void MetaWatch::configureWatchMode(int mode, int timeout, bool invert)
+void MetaWatch::configureWatchMode(Mode mode, int timeout, bool invert)
 {
 	Message msg(ConfigureMode, QByteArray(2, 0), mode & 0xF);
 	msg.data[0] = timeout;
@@ -277,14 +277,14 @@ void MetaWatch::configureWatchMode(int mode, int timeout, bool invert)
 	send(msg);
 }
 
-void MetaWatch::updateDisplay(int mode, bool copy)
+void MetaWatch::updateDisplay(Mode mode, bool copy)
 {
 	Message msg(UpdateDisplay, QByteArray(),
 				(copy ? 0x10 : 0) | (mode & 0xF));
 	send(msg);
 }
 
-void MetaWatch::loadTemplate(int mode, int templ)
+void MetaWatch::loadTemplate(Mode mode, int templ)
 {
 	Message msg(LoadTemplate, QByteArray(1, templ), mode & 0xF);
 	send(msg);
@@ -292,7 +292,7 @@ void MetaWatch::loadTemplate(int mode, int templ)
 
 void MetaWatch::handleStatusChange(const Message &msg)
 {
-	qDebug() << "watch status changed";
+	qDebug() << "watch status changed" << msg.data.size();
 }
 
 void MetaWatch::handleButtonEvent(const Message &msg)
@@ -310,7 +310,7 @@ void MetaWatch::socketConnected()
 	_partialReceived.data.clear();
 	_buttonState = 0;
 	setDateTime(QDateTime::currentDateTime());
-	configureWatchMode(1);
+	configureWatchMode(ApplicationMode);
 	emit connected();
 }
 

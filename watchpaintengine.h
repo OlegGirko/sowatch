@@ -36,6 +36,7 @@ public:
 	void updateState(const QPaintEngineState &state);
 
 protected:
+	void damageMappedRect(const QRect& r);
 	void damageRect(const QRect& r);
 	void damageRect(const QRectF& r);
 	void damagePenStroke(const QLineF& line);
@@ -52,6 +53,8 @@ protected:
 
 	bool _clipEnabled;
 	QRegion _clipRegion;
+
+	QTransform _transform;
 };
 
 }

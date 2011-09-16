@@ -14,7 +14,7 @@ void MetaWatchPaintEngine::drawRects(const QRectF *rects, int rectCount)
 	int i;
 	for (i = 0; i < rectCount; i++) {
 		const QRectF& r = rects[i];
-		if (_hasBrush && r.toRect() == _imageRect && (_isBrushBlack | _isBrushWhite)) {
+		if (_hasBrush && fillsEntireImage(r.toRect()) && (_isBrushBlack | _isBrushWhite)) {
 			_watch->clear(_isBrushWhite);
 			_damaged = QRegion();
 			continue;
@@ -37,7 +37,7 @@ void MetaWatchPaintEngine::drawRects(const QRect *rects, int rectCount)
 	int i;
 	for (i = 0; i < rectCount; i++) {
 		const QRect& r = rects[i];
-		if (_hasBrush && r == _imageRect && (_isBrushBlack | _isBrushWhite)) {
+		if (_hasBrush && fillsEntireImage(r) && (_isBrushBlack | _isBrushWhite)) {
 			_watch->clear(_isBrushWhite);
 			_damaged = QRegion();
 			continue;
@@ -72,4 +72,11 @@ void MetaWatchPaintEngine::updateState(const QPaintEngineState &state)
 			}
 		}
 	}
+}
+
+bool MetaWatchPaintEngine::fillsEntireImage(const QRect& rect)
+{
+	return rect == _imageRect &&
+			(!_clipEnabled ||
+			 (_clipRegion.numRects() == 1 && _clipRegion.rects().at(0) == _imageRect));
 }

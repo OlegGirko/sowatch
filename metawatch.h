@@ -16,7 +16,7 @@ namespace sowatch
 class MetaWatch : public Watch
 {
     Q_OBJECT
-	Q_ENUMS(MessageType)
+	Q_ENUMS(MessageType Mode)
 
 public:
 	explicit MetaWatch(const QBluetoothAddress& address, QObject *parent = 0);
@@ -62,6 +62,11 @@ public:
 		Accelerometer = 0xea
 	};
 
+	enum Mode {
+		IdleMode = 0,
+		ApplicationMode = 1
+	};
+
 protected:
 	QBluetoothSocket* _socket;
 
@@ -90,12 +95,12 @@ protected:
 	void send(const Message& msg);
 	void handleMessage(const Message& msg);
 
-	void updateLine(int mode, const QImage& image, int line);
-	void updateLines(int mode, const QImage& image, int lineA, int lineB);
-	void updateLines(int mode, const QImage& image, const QVector<bool>& lines);
-	void configureWatchMode(int mode, int timeout = 10, bool invert = false);
-	void updateDisplay(int mode, bool copy = true);
-	void loadTemplate(int mode, int templ);
+	void updateLine(Mode mode, const QImage& image, int line);
+	void updateLines(Mode mode, const QImage& image, int lineA, int lineB);
+	void updateLines(Mode mode, const QImage& image, const QVector<bool>& lines);
+	void configureWatchMode(Mode mode, int timeout = 10, bool invert = false);
+	void updateDisplay(Mode mode, bool copy = true);
+	void loadTemplate(Mode mode, int templ);
 
 	void handleStatusChange(const Message& msg);
 	void handleButtonEvent(const Message& msg);

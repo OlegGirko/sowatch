@@ -17,10 +17,6 @@ public:
 	QGraphicsScene* scene();
 	void setScene(QGraphicsScene* scene);
 
-signals:
-
-public slots:
-
 protected:
 	QGraphicsScene* _scene;
 	QRegion _damaged;

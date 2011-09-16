@@ -11,6 +11,7 @@ WatchPaintEngine::WatchPaintEngine(Watch* watch, QImage* image)
 	  _watch(watch), _painter(),
 	  _hasPen(false), _hasBrush(false), _clipEnabled(false)
 {
+	Q_UNUSED(image);
 }
 
 bool WatchPaintEngine::begin(QPaintDevice *pdev)
@@ -30,18 +31,23 @@ bool WatchPaintEngine::end()
 	return ret;
 }
 
-void WatchPaintEngine::damageRect(const QRect &r)
+void WatchPaintEngine::damageMappedRect(const QRect &r)
 {
 	if (_clipEnabled) {
-		_damaged += _clipRegion.intersect(r);
+		_damaged += _clipRegion.intersected(r);
 	} else {
 		_damaged += r;
 	}
 }
 
+void WatchPaintEngine::damageRect(const QRect &r)
+{
+	damageMappedRect(_transform.mapRect(r));
+}
+
 void WatchPaintEngine::damageRect(const QRectF &r)
 {
-	damageRect(r.toRect());
+	damageMappedRect(_transform.mapRect(r).toRect());
 }
 
 void WatchPaintEngine::damagePenStroke(const QLineF &line)
@@ -65,6 +71,7 @@ void WatchPaintEngine::updateClipRegion(const QRegion& region, Qt::ClipOperation
 	switch(op) {
 		case Qt::NoClip:
 			_clipEnabled = false;
+			_clipRegion = QRegion(0, 0, _watch->width(), _watch->height());
 			break;
 		case Qt::ReplaceClip:
 			_clipEnabled = true;
@@ -83,10 +90,14 @@ void WatchPaintEngine::updateClipRegion(const QRegion& region, Qt::ClipOperation
 
 void WatchPaintEngine::drawEllipse(const QRectF &r)
 {
+	damageRect(r);
+	_painter.drawEllipse(r);
 }
 
 void WatchPaintEngine::drawEllipse(const QRect &r)
 {
+	damageRect(r);
+	_painter.drawEllipse(r);
 }
 
 void WatchPaintEngine::drawImage(const QRectF &r, const QImage &pm, const QRectF &sr, Qt::ImageConversionFlags flags)
@@ -258,14 +269,12 @@ void WatchPaintEngine::updateState(const QPaintEngineState &state)
 	}
 	if (flags & QPaintEngine::DirtyClipPath)
 	{
-		_clipEnabled = true;
 		QRegion region = state.clipPath().boundingRect().toRect();
 		updateClipRegion(region, state.clipOperation());
 		_painter.setClipPath(state.clipPath(), state.clipOperation());
 	}
 	if (flags & QPaintEngine::DirtyClipRegion)
 	{
-		_clipEnabled = true;
 		updateClipRegion(state.clipRegion(), state.clipOperation());
 		_painter.setClipRegion(state.clipRegion(), state.clipOperation());
 	}
@@ -290,6 +299,7 @@ void WatchPaintEngine::updateState(const QPaintEngineState &state)
 	}
 	if (flags & QPaintEngine::DirtyTransform)
 	{
-		_painter.setTransform(state.transform());
+		_transform = state.transform();
+		_painter.setTransform(_transform);
 	}
 }

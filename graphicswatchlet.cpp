@@ -35,7 +35,7 @@ void GraphicsWatchlet::sceneChanged(const QList<QRectF> &region)
 		_damaged += r.toRect();
 	}
 
-	if (!_damaged.isEmpty() && !watch()->busy()) {
+	if (!_damaged.isEmpty() && _active && !watch()->busy()) {
 		const QVector<QRect> rects = _damaged.rects();
 		QPainter p(watch());
 		foreach(const QRect& r, rects)

@@ -4,13 +4,15 @@
 #include "metawatchsimulator.h"
 
 #define SIMULATE_DAMAGES 1
+#define SIMULATE_FRAMERATE 1
 
 using namespace sowatch;
 
 MetaWatchSimulator::MetaWatchSimulator(QObject *parent) :
 	WatchSimulator(QImage(96, 96, QImage::Format_Mono), parent),
 	_screen(96, 96),
-	_form(new MetaWatchSimulatorForm)
+	_form(new MetaWatchSimulatorForm),
+	_nextFrame(QTime::currentTime())
 {
 	_form->showNormal();
 	connect(_form, SIGNAL(destroyed()), SIGNAL(disconnected()));
@@ -35,7 +37,11 @@ bool MetaWatchSimulator::isConnected() const
 
 bool MetaWatchSimulator::busy() const
 {
+#if SIMULATE_FRAMERATE
+	return _nextFrame > QTime::currentTime();
+#else
 	return false;
+#endif
 }
 
 void MetaWatchSimulator::update(const QList<QRect> &rects)
@@ -44,7 +50,7 @@ void MetaWatchSimulator::update(const QList<QRect> &rects)
 	const QRect imageRect = _image.rect();
 	QPainter p;
 	QVector<bool> rows(96, false);
-	unsigned total = 0;
+	unsigned total = 0, totalRows;
 
 	p.begin(&_screen);
 	foreach (const QRect& rect, rects) {
@@ -58,15 +64,19 @@ void MetaWatchSimulator::update(const QList<QRect> &rects)
 	}
 	p.end();
 
+	totalRows = rows.count(true);
+
 	_form->refreshScreen(_screen);
 
-	qDebug() << "updated " << total << " pixels " << rows.count(true) << " lines";
+	qDebug() << "updated " << total << " pixels " << totalRows << " lines";
+	_nextFrame = QTime::currentTime().addMSecs(((totalRows / 2) + 1) * 30);
 #else
 	_form->refreshScreen(QPixmap::fromImage(_image));
+	_nextFrame = QTime::currentTime().addMSecs(30);
 #endif
 }
 
 void MetaWatchSimulator::vibrate(bool on)
 {
-
+	qDebug() << "vibrate" << on;
 }

@@ -1,6 +1,7 @@
 #ifndef METAWATCHSIMULATOR_H
 #define METAWATCHSIMULATOR_H
 
+#include <QtCore/QTime>
 #include "watchsimulator.h"
 #include "metawatchsimulatorform.h"
 
@@ -23,6 +24,7 @@ public:
 protected:
 	QPixmap _screen;
 	MetaWatchSimulatorForm* _form;
+	QTime _nextFrame;
 };
 
 }

@@ -13,15 +13,10 @@ class TestWatchlet : public Watchlet
 public:
 	explicit TestWatchlet(WatchServer* server);
 
-	void activate();
-	void deactivate();
-
-signals:
-
-public slots:
-
 protected slots:
 	void interv();
+	void handleActivated();
+	void handleDeactivated();
 
 private:
 	QTimer *_timer;

@@ -11,20 +11,8 @@ TestWatchlet::TestWatchlet(WatchServer* server) :
 {
 	_timer->setInterval(50);
 	connect(_timer, SIGNAL(timeout()), SLOT(interv()));
-}
-
-void TestWatchlet::activate()
-{
-	qDebug() << "test watchlet activated";
-	QPainter p(watch());
-	p.fillRect(0, 0, watch()->width(), watch()->height(), Qt::white);
-	_timer->start();
-}
-
-void TestWatchlet::deactivate()
-{
-	_timer->stop();
-	qDebug() << "test watchlet deactivated";
+	connect(this, SIGNAL(activated()), SLOT(handleActivated()));
+	connect(this, SIGNAL(deactivated()), SLOT(handleDeactivated()));
 }
 
 void TestWatchlet::interv()
@@ -34,4 +22,19 @@ void TestWatchlet::interv()
 	_y = (_y + 1) % watch()->height();
 	p.fillRect(0, _y, _y, 2, Qt::black);
 	//p.fillRect(0, 0, watch()->width(), watch()->height(), Qt::black);
+}
+
+
+void TestWatchlet::handleActivated()
+{
+	qDebug() << "test watchlet activated";
+	QPainter p(watch());
+	p.fillRect(0, 0, watch()->width(), watch()->height(), Qt::white);
+	_timer->start();
+}
+
+void TestWatchlet::handleDeactivated()
+{
+	_timer->stop();
+	qDebug() << "test watchlet deactivated";
 }

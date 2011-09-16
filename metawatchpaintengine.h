@@ -21,6 +21,8 @@ public:
 	void updateState(const QPaintEngineState &state);
 
 protected:
+	bool fillsEntireImage(const QRect& rect);
+
 	MetaWatch* _watch;
 	QRect _imageRect;
 	bool _isBrushBlack;
