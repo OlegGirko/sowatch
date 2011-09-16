@@ -19,9 +19,9 @@ Rectangle {
 			RotationAnimation on angle {
 				loops: Animation.Infinite
 				running: watch.active
-				duration: 6000
+				duration: 10000
 				from: 0
-				to: 180
+				to: 360
 			}
 		}
 	}
