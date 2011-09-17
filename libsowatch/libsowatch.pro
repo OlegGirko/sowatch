@@ -17,16 +17,10 @@ SOURCES += \
     watchsimulator.cpp \
     watchserver.cpp \
     watchpaintengine.cpp \
-    watchmanager.cpp \
     watchlet.cpp \
     watch.cpp \
     testwatchlet.cpp \
     testdeclarativewatchlet.cpp \
-    metawatchsimulatorform.cpp \
-    metawatchsimulator.cpp \
-    metawatchpaintengine.cpp \
-    metawatch.cpp \
-    main.cpp \
     graphicswatchlet.cpp \
     declarativewatchwrapper.cpp \
     declarativewatchlet.cpp
@@ -35,16 +29,11 @@ HEADERS +=\
     watchsimulator.h \
     watchserver.h \
     watchpaintengine.h \
-    watchmanager.h \
     watchlet.h \
     watch.h \
     testwatchlet.h \
     testdeclarativewatchlet.h \
     sowatch.h \
-    metawatchsimulatorform.h \
-    metawatchsimulator.h \
-    metawatchpaintengine.h \
-    metawatch.h \
     graphicswatchlet.h \
     declarativewatchwrapper.h \
     declarativewatchlet.h \
@@ -52,14 +41,6 @@ HEADERS +=\
 
 FORMS += \
 	metawatchsimulatorform.ui
-
-OTHER_FILES += \
-	qtc_packaging/debian_harmattan/rules \
-	qtc_packaging/debian_harmattan/README \
-	qtc_packaging/debian_harmattan/copyright \
-	qtc_packaging/debian_harmattan/control \
-	qtc_packaging/debian_harmattan/compat \
-	qtc_packaging/debian_harmattan/changelog
 
 install_headers.files =\
 	watchsimulator.h \
@@ -75,7 +56,6 @@ install_headers.files =\
 	declarativewatchwrapper.h \
 	declarativewatchlet.h \
 	sowatch_global.h
-
 
 symbian {
     MMP_RULES += EXPORTUNFROZEN
@@ -96,5 +76,7 @@ unix:!symbian {
     }
 	INSTALLS += install_headers target
 }
+
+
 
 
