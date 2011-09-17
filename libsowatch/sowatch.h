@@ -1,6 +1,7 @@
 #ifndef SOWATCH_H
 #define SOWATCH_H
 
+#include "sowatch_global.h"
 #include "watch.h"
 #include "watchlet.h"
 #include "graphicswatchlet.h"

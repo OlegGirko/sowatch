@@ -2,6 +2,7 @@
 #define WATCHLET_H
 
 #include <QtCore/QObject>
+#include "sowatch_global.h"
 
 namespace sowatch
 {
@@ -9,7 +10,7 @@ namespace sowatch
 class Watch;
 class WatchServer;
 
-class Watchlet : public QObject
+class SOWATCH_EXPORT Watchlet : public QObject
 {
     Q_OBJECT
 	Q_PROPERTY(QString id READ id CONSTANT)
