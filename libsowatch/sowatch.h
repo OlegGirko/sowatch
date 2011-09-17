@@ -8,5 +8,6 @@
 #include "declarativewatchlet.h"
 #include "watchserver.h"
 #include "watchsimulator.h"
+#include "watchplugininterface.h"
 
 #endif // SOWATCH_H

@@ -23,7 +23,8 @@ SOURCES += \
     testdeclarativewatchlet.cpp \
     graphicswatchlet.cpp \
     declarativewatchwrapper.cpp \
-    declarativewatchlet.cpp
+    declarativewatchlet.cpp \
+    watchplugininterface.cpp
 
 HEADERS +=\
     watchsimulator.h \
@@ -37,10 +38,10 @@ HEADERS +=\
     graphicswatchlet.h \
     declarativewatchwrapper.h \
     declarativewatchlet.h \
-    sowatch_global.h
+    sowatch_global.h \
+    watchplugininterface.h
 
-FORMS += \
-	metawatchsimulatorform.ui
+FORMS +=
 
 install_headers.files =\
 	watchsimulator.h \
@@ -76,6 +77,9 @@ unix:!symbian {
     }
 	INSTALLS += install_headers target
 }
+
+
+
 
 
 
