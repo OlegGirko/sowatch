@@ -4,9 +4,10 @@
 #
 #-------------------------------------------------
 
-TARGET = metawatch
+TARGET = metawatchdriver
 TEMPLATE = lib
 # CONFIG   += plugin # Stupid Qt creator doesn't want to deploy plugins
+QT       += gui
 CONFIG   += mobility
 MOBILITY += connectivity systeminfo
 
@@ -33,10 +34,10 @@ OTHER_FILES += \
 	idle_gmail.bmp \
 	idle_call.bmp
 
-win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../libsowatch/release/ -llibsowatch
-else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../libsowatch/debug/ -llibsowatch
-else:symbian: LIBS += -llibsowatch
-else:unix: LIBS += -L$$OUT_PWD/../libsowatch/ -llibsowatch
+win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../libsowatch/release/ -lsowatch
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../libsowatch/debug/ -lsowatch
+else:symbian: LIBS += -lsowatch
+else:unix: LIBS += -L$$OUT_PWD/../libsowatch/ -lsowatch
 
 INCLUDEPATH += $$PWD/../libsowatch
 DEPENDPATH += $$PWD/../libsowatch
