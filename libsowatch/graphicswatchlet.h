@@ -1,5 +1,5 @@
-#ifndef GRAPHICSWATCHLET_H
-#define GRAPHICSWATCHLET_H
+#ifndef SOWATCH_GRAPHICSWATCHLET_H
+#define SOWATCH_GRAPHICSWATCHLET_H
 
 #include <QtGui/QGraphicsScene>
 #include <QtGui/QRegion>
@@ -29,4 +29,4 @@ protected slots:
 
 }
 
-#endif // GRAPHICSWATCHLET_H
+#endif // SOWATCH_GRAPHICSWATCHLET_H

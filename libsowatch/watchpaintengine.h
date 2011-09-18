@@ -1,5 +1,5 @@
-#ifndef WATCHPAINTENGINE_H
-#define WATCHPAINTENGINE_H
+#ifndef SOWATCH_WATCHPAINTENGINE_H
+#define SOWATCH_WATCHPAINTENGINE_H
 
 #include <QtGui/QPaintEngine>
 
@@ -56,4 +56,4 @@ protected:
 
 }
 
-#endif // WATCHPAINTENGINE_H
+#endif // SOWATCH_WATCHPAINTENGINE_H

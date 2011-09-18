@@ -1,5 +1,5 @@
-#ifndef DECLARATIVEWATCHWRAPPER_H
-#define DECLARATIVEWATCHWRAPPER_H
+#ifndef SOWATCH_DECLARATIVEWATCHWRAPPER_H
+#define SOWATCH_DECLARATIVEWATCHWRAPPER_H
 
 #include <QtDeclarative/QtDeclarative>
 
@@ -41,4 +41,4 @@ friend class DeclarativeWatchlet;
 
 QML_DECLARE_TYPE(sowatch::DeclarativeWatchWrapper)
 
-#endif // DECLARATIVEWATCHWRAPPER_H
+#endif // SOWATCH_DECLARATIVEWATCHWRAPPER_H

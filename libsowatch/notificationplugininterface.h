@@ -1,29 +1,28 @@
-#ifndef NOTIFICATIONPLUGININTERFACE_H
-#define NOTIFICATIONPLUGININTERFACE_H
+#ifndef SOWATCH_NOTIFICATIONPLUGININTERFACE_H
+#define SOWATCH_NOTIFICATIONPLUGININTERFACE_H
 
 #include <QtPlugin>
+#include <QtCore/QSettings>
+#include <QtCore/QStringList>
 #include "sowatch_global.h"
-#include "notification.h"
 
 namespace sowatch
 {
 
 class Notification;
+class NotificationProvider;
 
 class SOWATCH_EXPORT NotificationPluginInterface
 {
 public:
 	virtual ~NotificationPluginInterface();
 
-	int getCount(Notification::Type type);
-
-signals:
-	void incomingNotification(const Notification& n);
-	void unreadCountChanged(Notification::Type type);
+	virtual QStringList providers() = 0;
+	virtual NotificationProvider* getProvider(const QString& driver, QSettings& settings, QObject *parent = 0) = 0;
 };
 
 }
 
 Q_DECLARE_INTERFACE(sowatch::NotificationPluginInterface, "com.javispedro.sowatch.NotificationPluginInterface")
 
-#endif // NOTIFICATIONPLUGININTERFACE_H
+#endif // SOWATCH_NOTIFICATIONPLUGININTERFACE_H

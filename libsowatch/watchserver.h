@@ -1,17 +1,19 @@
-#ifndef WATCHSERVER_H
-#define WATCHSERVER_H
+#ifndef SOWATCH_WATCHSERVER_H
+#define SOWATCH_WATCHSERVER_H
 
 #include <QtCore/QObject>
 #include <QtCore/QMap>
+#include <QtCore/QSignalMapper>
 
 #include "sowatch_global.h"
+#include "notification.h"
 
 namespace sowatch
 {
 
 class Watch;
 class Watchlet;
-class Notification;
+class NotificationProvider;
 
 class SOWATCH_EXPORT WatchServer : public QObject
 {
@@ -23,29 +25,29 @@ public:
 
 	Watch* watch();
 
+	void addProvider(NotificationProvider* provider);
+
 	void runWatchlet(const QString& id);
 	void closeWatchlet();
-
-signals:
-
-public slots:
-	void notification(const Notification& n);
 
 protected:
 	Watch* _watch;
 	Watchlet* _currentWatchlet;
 
-	QMap<QString, Watchlet*> watchlets;
+	QMap<QString, Watchlet*> _watchlets;
+	QList<NotificationProvider*> _providers;
 
 	void registerWatchlet(Watchlet *watchlet);
 
 protected slots:
 	void watchConnected();
 	void watchDisconnected();
+	void notificationEmitted(const Notification& notification);
+	void unreadCountUpdated(Notification::Type type);
 
 friend class Watchlet;
 };
 
 }
 
-#endif // WATCHSERVER_H
+#endif // SOWATCH_WATCHSERVER_H

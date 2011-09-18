@@ -1,5 +1,5 @@
-#ifndef TESTWATCHLET_H
-#define TESTWATCHLET_H
+#ifndef SOWATCH_TESTWATCHLET_H
+#define SOWATCH_TESTWATCHLET_H
 
 #include <QtCore/QTimer>
 #include "watchlet.h"
@@ -26,4 +26,4 @@ private:
 
 }
 
-#endif // TESTWATCHLET_H
+#endif // SOWATCH_TESTWATCHLET_H

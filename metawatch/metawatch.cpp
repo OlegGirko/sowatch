@@ -85,7 +85,8 @@ MetaWatch::MetaWatch(const QBluetoothAddress& address, QObject *parent) :
 	_connectAlignedTimer(new QSystemAlignedTimer(this)),
 	_sendTimer(new QTimer(this)),
 	_currentMode(IdleMode),
-	_paintMode(IdleMode)
+	_paintMode(IdleMode),
+	_nMails(0), _nCalls(0), _nIms(0), _nSms(0)
 {
 	QImage baseImage(screenWidth, screenHeight, QImage::Format_MonoLSB);
 	baseImage.setColor(0, QColor(Qt::white).rgb());
@@ -191,8 +192,25 @@ void MetaWatch::setDateTime(const QDateTime &dateTime)
 
 void MetaWatch::updateNotificationCount(Notification::Type type, int count)
 {
-	Q_UNUSED(type);
-	Q_UNUSED(count); // TODO
+	switch (type) {
+	case Notification::MissedCallNotification:
+		_nCalls = count;
+		break;
+	case Notification::EmailNotification:
+		_nMails = count;
+		break;
+	case Notification::ImNotification:
+		_nIms = count;
+		break;
+	case Notification::SmsNotification:
+		_nSms = count;
+		break;
+	default:
+		// Ignore
+		break;
+	}
+
+	renderIdleCounts();
 }
 
 void MetaWatch::vibrate(bool on)
@@ -202,7 +220,7 @@ void MetaWatch::vibrate(bool on)
 
 void MetaWatch::showNotification(const Notification &n)
 {
-	Q_UNUSED(n); // TODO
+	qDebug() << "It's time for a notification" << n.title();
 }
 
 MetaWatch::Mode MetaWatch::currentMode() const
@@ -248,20 +266,64 @@ void MetaWatch::clear(Mode mode, bool black)
 void MetaWatch::renderIdleScreen()
 {
 	_paintMode = IdleMode;
+
+	QFont smallFont("MetaWatch Small caps 8pt", 6);
+	QImage idle_mail(QString(":/metawatch/graphics/idle_gmail.bmp"));
+	QImage idle_call(QString(":/metawatch/graphics/idle_call.bmp"));
+	QImage idle_sms(QString(":/metawatch/graphics/idle_sms.bmp"));
 	QPainter p(this);
+
 	p.fillRect(0, 0, screenWidth, screenHeight, Qt::white);
+
 	p.setPen(QPen(Qt::black, 1.0, Qt::DashLine));
-	p.drawLine(0, systemAreaHeight + 2, screenWidth, systemAreaHeight + 2);
-	p.drawLine(0, systemAreaHeight * 2 + 3, screenWidth, systemAreaHeight * 2 + 3);
-	p.setPen(Qt::black);
-	p.drawText(1, systemAreaHeight + 16, "Space Weather!");
-	QImage idle_mail(QString(":/metawatch/idle_gmail.bmp"));
-	QImage idle_call(QString(":/metawatch/idle_call.bmp"));
-	QImage idle_sms(QString(":/metawatch/idle_sms.bmp"));
-	p.drawImage(4, systemAreaHeight * 2 + 6, idle_mail);
-	p.drawImage(32 + 4, systemAreaHeight * 2 + 6, idle_call);
-	p.drawImage(32 * 2 + 4, systemAreaHeight * 2 + 6, idle_sms);
-	p.drawText(14, 93, "Too many!");
+	p.drawLine(1, systemAreaHeight + 2, screenWidth - 2, systemAreaHeight + 2);
+	p.drawLine(1, systemAreaHeight * 2 + 3, screenWidth - 2, systemAreaHeight * 2 + 3);
+
+	p.drawImage(3, systemAreaHeight * 2 + 6, idle_mail);
+	p.drawImage(32 + 3, systemAreaHeight * 2 + 6, idle_call);
+	p.drawImage(32 * 2 + 3, systemAreaHeight * 2 + 6, idle_sms);
+
+	p.end();
+	renderIdleWeather();
+	renderIdleCounts();
+	_paintMode = _currentMode;
+}
+
+void MetaWatch::renderIdleWeather()
+{
+	_paintMode = IdleMode;
+	QFont smallFont("MetaWatch Small caps 8pt", 6);
+	QImage rain(QString(":/metawatch/graphics/weather_rain.bmp"));
+	QPainter p(this);
+
+	p.setFont(smallFont);
+	p.drawText(46, systemAreaHeight + 14, "Rain");
+	p.drawImage(screenWidth - 26, systemAreaHeight + 6, rain);
+
+	_paintMode = _currentMode;
+}
+
+void MetaWatch::renderIdleCounts()
+{
+	_paintMode = IdleMode;
+	QFont medFont("MetaWatch Large caps 8pt", 6);
+	QString s;
+	QPainter p(this);
+	QTextOption opt(Qt::AlignCenter);
+	const int y = systemAreaHeight * 2 + 25;
+	const int w = 24;
+	const int h = screenHeight - (y + 1);
+	const int mails = _nMails;
+	const int calls = _nCalls;
+	const int sms = _nSms + _nIms;
+
+	qDebug() << "unread counts" << mails << calls << sms;
+
+	p.setFont(medFont);
+	p.fillRect(QRect(0, y, screenWidth, h), Qt::white);
+	p.drawText(QRect(4, y, w, h), s.sprintf("%d", mails), opt);
+	p.drawText(QRect(32 + 4, y, w, h), s.sprintf("%d", calls), opt);
+	p.drawText(QRect(32 * 2 + 4, y, w, h), s.sprintf("%d", sms), opt);
 }
 
 quint16 MetaWatch::calcCrc(const QByteArray &data, int size)

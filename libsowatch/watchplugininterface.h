@@ -1,5 +1,5 @@
-#ifndef WATCHPLUGININTERFACE_H
-#define WATCHPLUGININTERFACE_H
+#ifndef SOWATCH_WATCHPLUGININTERFACE_H
+#define SOWATCH_WATCHPLUGININTERFACE_H
 
 #include <QtPlugin>
 #include <QtCore/QSettings>
@@ -24,4 +24,4 @@ public:
 
 Q_DECLARE_INTERFACE(sowatch::WatchPluginInterface, "com.javispedro.sowatch.WatchPluginInterface")
 
-#endif // WATCHPLUGININTERFACE_H
+#endif // SOWATCH_WATCHPLUGININTERFACE_H

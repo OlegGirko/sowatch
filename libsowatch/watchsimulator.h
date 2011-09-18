@@ -1,5 +1,5 @@
-#ifndef WATCHSIMULATOR_H
-#define WATCHSIMULATOR_H
+#ifndef SOWATCH_WATCHSIMULATOR_H
+#define SOWATCH_WATCHSIMULATOR_H
 
 #include <QtGui/QImage>
 
@@ -17,4 +17,4 @@ public:
 
 }
 
-#endif // WATCHSIMULATOR_H
+#endif // SOWATCH_WATCHSIMULATOR_H

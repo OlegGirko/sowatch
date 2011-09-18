@@ -88,6 +88,8 @@ public:
 	void update(Mode mode, const QList<QRect>& rects = QList<QRect>());
 
 	void renderIdleScreen();
+	void renderIdleWeather();
+	void renderIdleCounts();
 
 protected:
 	mutable MetaWatchPaintEngine* _paintEngine;
@@ -119,6 +121,9 @@ protected:
 	Mode _currentMode;
 	Mode _paintMode;
 	quint8 _buttonState;
+
+	// Notifications: Unread count
+	uint _nMails, _nCalls, _nIms, _nSms;
 
 	static const quint8 bitRevTable[16];
 	static const quint16 crcTable[256];

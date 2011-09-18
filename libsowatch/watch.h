@@ -1,5 +1,5 @@
-#ifndef WATCH_H
-#define WATCH_H
+#ifndef SOWATCH_WATCH_H
+#define SOWATCH_WATCH_H
 
 #include <QtCore/QObject>
 #include <QtCore/QDateTime>
@@ -45,4 +45,4 @@ public slots:
 
 }
 
-#endif // WATCH_H
+#endif // SOWATCH_WATCH_H

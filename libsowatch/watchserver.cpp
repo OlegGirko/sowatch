@@ -1,6 +1,10 @@
+#include <QtCore/QDebug>
+
+#include "notificationprovider.h"
 #include "watch.h"
 #include "watchlet.h"
 #include "watchserver.h"
+
 
 using namespace sowatch;
 
@@ -16,12 +20,22 @@ Watch* WatchServer::watch()
 	return _watch;
 }
 
+void WatchServer::addProvider(NotificationProvider *provider)
+{
+	provider->setParent(this);
+
+	connect(provider, SIGNAL(notification(Notification)), SLOT(notificationEmitted(Notification)));
+	connect(provider, SIGNAL(unreadCountChanged(Notification::Type)), SLOT(unreadCountUpdated(Notification::Type)));
+
+	_providers.append(provider);
+}
+
 void WatchServer::runWatchlet(const QString& id)
 {
 	if (_currentWatchlet) {
 		closeWatchlet();
 	}
-	_currentWatchlet = watchlets[id];
+	_currentWatchlet = _watchlets[id];
 	if (_watch->isConnected()) {
 		_currentWatchlet->activate();
 	}
@@ -36,15 +50,10 @@ void WatchServer::closeWatchlet()
 	_currentWatchlet = 0;
 }
 
-void WatchServer::notification(const Notification &n)
-{
-	Q_UNUSED(n);
-}
-
 void WatchServer::registerWatchlet(Watchlet *watchlet)
 {
 	Q_ASSERT(watchlet->_server == this);
-	watchlets[watchlet->id()] = watchlet;
+	_watchlets[watchlet->id()] = watchlet;
 }
 
 void WatchServer::watchConnected()
@@ -59,4 +68,20 @@ void WatchServer::watchDisconnected()
 	if (_currentWatchlet) {
 		_currentWatchlet->deactivate();
 	}
+}
+
+void WatchServer::notificationEmitted(const Notification &notification)
+{
+	// TODO app loses button focus...
+	_watch->showNotification(notification);
+}
+
+void WatchServer::unreadCountUpdated(Notification::Type type)
+{
+	uint count = 0;
+	foreach(NotificationProvider* provider, _providers)
+	{
+		count += provider->getCount(type);
+	}
+	_watch->updateNotificationCount(type, count);
 }

@@ -1,5 +1,5 @@
-#ifndef DECLARATIVEWATCHLET_H
-#define DECLARATIVEWATCHLET_H
+#ifndef SOWATCH_DECLARATIVEWATCHLET_H
+#define SOWATCH_DECLARATIVEWATCHLET_H
 
 #include <QtDeclarative/QDeclarativeEngine>
 #include <QtDeclarative/QDeclarativeComponent>
@@ -37,4 +37,4 @@ protected:
 
 }
 
-#endif // DECLARATIVEWATCHLET_H
+#endif // SOWATCH_DECLARATIVEWATCHLET_H

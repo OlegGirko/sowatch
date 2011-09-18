@@ -1,5 +1,5 @@
-#ifndef NOTIFICATION_H
-#define NOTIFICATION_H
+#ifndef SOWATCH_NOTIFICATION_H
+#define SOWATCH_NOTIFICATION_H
 
 #include <QtCore/QString>
 #include <QtCore/QDateTime>
@@ -13,10 +13,12 @@ class SOWATCH_EXPORT Notification
 public:
 	enum Type {
 		OtherNotification = 0,
-		EmailNotification,
 		CallNotification,
+		EmailNotification,
+		MissedCallNotification,
 		SmsNotification,
 		ImNotification,
+		CalendarNotification,
 		TypeCount
 	};
 
@@ -37,4 +39,4 @@ protected:
 
 }
 
-#endif // NOTIFICATION_H
+#endif // SOWATCH_NOTIFICATION_H

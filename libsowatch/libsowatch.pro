@@ -26,7 +26,8 @@ SOURCES += \
     declarativewatchlet.cpp \
     watchplugininterface.cpp \
     notification.cpp \
-    notificationplugininterface.cpp
+    notificationplugininterface.cpp \
+    notificationprovider.cpp
 
 HEADERS +=\
     watchsimulator.h \
@@ -43,7 +44,8 @@ HEADERS +=\
     sowatch_global.h \
     watchplugininterface.h \
     notification.h \
-    notificationplugininterface.h
+    notificationplugininterface.h \
+    notificationprovider.h
 
 install_headers.files = $$HEADERS
 
@@ -66,6 +68,8 @@ unix:!symbian {
     }
 	INSTALLS += install_headers target
 }
+
+
 
 
 

@@ -4,6 +4,7 @@
 #include <QtCore/QObject>
 #include <QtCore/QList>
 #include <QtCore/QMap>
+#include <QtCore/QSettings>
 
 #include <sowatch.h>
 
@@ -18,11 +19,15 @@ public:
 
 protected:
 	QMap<QString, WatchPluginInterface*> _drivers;
-	QList<Watch*> _watches;
+	QMap<QString, NotificationPluginInterface*> _providers;
+	QList<WatchServer*> _servers;
 
 	void loadDrivers();
-	void loadWatches();
+	void loadProviders();
 	void loadWatchlets();
+
+	void initWatches();
+	void initWatch(Watch* watch, QSettings& settings);
 };
 
 }

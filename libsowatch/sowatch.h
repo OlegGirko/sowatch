@@ -2,13 +2,18 @@
 #define SOWATCH_H
 
 #include "sowatch_global.h"
+
 #include "watch.h"
-#include "watchlet.h"
-#include "graphicswatchlet.h"
-#include "declarativewatchlet.h"
-#include "notification.h"
 #include "watchserver.h"
 #include "watchsimulator.h"
 #include "watchplugininterface.h"
+
+#include "notification.h"
+#include "notificationprovider.h"
+#include "notificationplugininterface.h"
+
+#include "watchlet.h"
+#include "graphicswatchlet.h"
+#include "declarativewatchlet.h"
 
 #endif // SOWATCH_H

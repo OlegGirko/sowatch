@@ -32,7 +32,16 @@ RESOURCES += \
 OTHER_FILES += \
 	idle_sms.bmp \
 	idle_gmail.bmp \
-	idle_call.bmp
+	idle_call.bmp \
+    weather_wind.bmp \
+    weather_thunderstorm.bmp \
+    weather_sunny.bmp \
+    weather_snow.bmp \
+    weather_rain.bmp \
+    weather_cloudy.bmp \
+    metawatch_16pt_11pxl.ttf \
+    metawatch_8pt_7pxl_CAPS.ttf \
+    metawatch_8pt_5pxl_CAPS.ttf
 
 win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../libsowatch/release/ -lsowatch
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../libsowatch/debug/ -lsowatch
@@ -47,7 +56,7 @@ symbian {
     TARGET.UID3 = 0xE4DC26B0
     TARGET.CAPABILITY = 
     TARGET.EPOCALLOWDLLDATA = 1
-    addFiles.sources = metawatch.dll
+	addFiles.sources = metawatchdriver.dll
     addFiles.path = !:/sys/bin
     DEPLOYMENT += addFiles
 }
@@ -60,3 +69,4 @@ unix:!symbian {
     }
     INSTALLS += target
 }
+

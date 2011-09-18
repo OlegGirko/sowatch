@@ -1,5 +1,5 @@
-#ifndef WATCHLET_H
-#define WATCHLET_H
+#ifndef SOWATCH_WATCHLET_H
+#define SOWATCH_WATCHLET_H
 
 #include <QtCore/QObject>
 #include "sowatch_global.h"
@@ -45,4 +45,4 @@ friend class WatchServer;
 
 }
 
-#endif // WATCHLET_H
+#endif // SOWATCH_WATCHLET_H
