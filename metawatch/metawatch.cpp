@@ -178,7 +178,8 @@ void MetaWatch::setDateTime(const QDateTime &dateTime)
 	msg.data[1] = date.year() & 0xFF;
 	msg.data[2] = date.month();
 	msg.data[3] = date.day();
-	msg.data[4] = date.dayOfWeek() - 1;
+	// Qt week starts on Monday([1-7]), MW starts on Sunday([0-6]).
+	msg.data[4] = date.dayOfWeek() % 7;
 	msg.data[5] = time.hour();
 	msg.data[6] = time.minute();
 	msg.data[7] = time.second();
