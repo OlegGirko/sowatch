@@ -6,8 +6,9 @@
 
 TARGET = metawatch
 TEMPLATE = lib
+# CONFIG   += plugin # Stupid Qt creator doesn't want to deploy plugins
 CONFIG   += mobility
-MOBILITY += connectivity
+MOBILITY += connectivity systeminfo
 
 SOURCES += metawatchplugin.cpp \
     metawatchsimulatorform.cpp \
@@ -24,6 +25,22 @@ HEADERS += metawatchplugin.h \
 FORMS += \
 	metawatchsimulatorform.ui
 
+RESOURCES += \
+	uires.qrc
+
+OTHER_FILES += \
+	idle_sms.bmp \
+	idle_gmail.bmp \
+	idle_call.bmp
+
+win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../libsowatch/release/ -llibsowatch
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../libsowatch/debug/ -llibsowatch
+else:symbian: LIBS += -llibsowatch
+else:unix: LIBS += -L$$OUT_PWD/../libsowatch/ -llibsowatch
+
+INCLUDEPATH += $$PWD/../libsowatch
+DEPENDPATH += $$PWD/../libsowatch
+
 symbian {
     MMP_RULES += EXPORTUNFROZEN
     TARGET.UID3 = 0xE4DC26B0
@@ -36,18 +53,9 @@ symbian {
 
 unix:!symbian {
     maemo5 {
-        target.path = /opt/usr/lib
+		target.path = /opt/sowatch/drivers
     } else {
-        target.path = /usr/lib
+		target.path = /usr/lib/sowatch/drivers
     }
     INSTALLS += target
 }
-
-
-win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../libsowatch/release/ -llibsowatch
-else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../libsowatch/debug/ -llibsowatch
-else:symbian: LIBS += -llibsowatch
-else:unix: LIBS += -L$$OUT_PWD/../libsowatch/ -llibsowatch
-
-INCLUDEPATH += $$PWD/../libsowatch
-DEPENDPATH += $$PWD/../libsowatch

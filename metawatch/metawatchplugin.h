@@ -8,13 +8,13 @@ namespace sowatch
 
 class MetaWatchPlugin : public QObject, public WatchPluginInterface {
 	Q_OBJECT
-	Q_INTERFACES(WatchPluginInterface)
+	Q_INTERFACES(sowatch::WatchPluginInterface)
 
 public:
 	~MetaWatchPlugin();
 
 	virtual QStringList drivers();
-	virtual Watch* getWatch(const QString& driver, const QString& connId, QObject *parent = 0);
+	virtual Watch* getWatch(const QString& driver, QSettings& settings, QObject *parent = 0);
 };
 
 }

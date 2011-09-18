@@ -1,0 +1,7 @@
+<RCC>
+    <qresource prefix="/metawatch">
+        <file>idle_call.bmp</file>
+        <file>idle_gmail.bmp</file>
+        <file>idle_sms.bmp</file>
+    </qresource>
+</RCC>

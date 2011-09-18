@@ -1,6 +1,8 @@
 TEMPLATE = subdirs
-SUBDIRS = libsowatch sowsim \
-    metawatch
+SUBDIRS = libsowatch \
+	metawatch \
+	sowatchd \
+	sowsim
 
 OTHER_FILES += \
     qtc_packaging/debian_harmattan/rules \
@@ -9,6 +11,10 @@ OTHER_FILES += \
     qtc_packaging/debian_harmattan/control \
     qtc_packaging/debian_harmattan/compat \
     qtc_packaging/debian_harmattan/changelog
+
+
+
+
 
 
 

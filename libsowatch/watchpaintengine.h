@@ -11,10 +11,7 @@ class Watch;
 class WatchPaintEngine : public QPaintEngine
 {
 public:
-	WatchPaintEngine(Watch* watch, QImage* image);
-
-	bool begin(QPaintDevice *pdev);
-	bool end();
+	WatchPaintEngine(Watch* watch);
 
 	void drawEllipse(const QRectF &r);
 	void drawEllipse(const QRect &r);

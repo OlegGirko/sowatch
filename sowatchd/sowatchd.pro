@@ -1,16 +1,19 @@
 #-------------------------------------------------
 #
-# Project created by QtCreator 2011-09-16T23:52:50
+# Project created by QtCreator 2011-09-17T04:55:26
 #
 #-------------------------------------------------
 
 TEMPLATE = app
 
-TARGET = sowsim
+TARGET = sowatchd
 
-QT       += core
+QT       += core gui
+CONFIG   += console
+CONFIG   -= app_bundle
 
-SOURCES += main.cpp
+SOURCES += main.cpp \
+    daemon.cpp
 
 win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../libsowatch/release/ -llibsowatch
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../libsowatch/debug/ -llibsowatch
@@ -28,3 +31,8 @@ unix {
 	}
 	INSTALLS += target
 }
+
+HEADERS += \
+    daemon.h
+
+

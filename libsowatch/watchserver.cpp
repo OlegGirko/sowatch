@@ -36,6 +36,11 @@ void WatchServer::closeWatchlet()
 	_currentWatchlet = 0;
 }
 
+void WatchServer::notification(const Notification &n)
+{
+	Q_UNUSED(n);
+}
+
 void WatchServer::registerWatchlet(Watchlet *watchlet)
 {
 	Q_ASSERT(watchlet->_server == this);

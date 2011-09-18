@@ -12,7 +12,7 @@ class WatchSimulator : public Watch
 {
     Q_OBJECT
 public:
-	explicit WatchSimulator(const QImage& image, QObject *parent = 0);
+	explicit WatchSimulator(QObject *parent = 0);
 };
 
 }

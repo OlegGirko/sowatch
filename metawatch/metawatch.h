@@ -1,17 +1,21 @@
 #ifndef METAWATCH_H
 #define METAWATCH_H
 
-#include <QtConnectivity/QBluetoothAddress>
-#include <QtConnectivity/QBluetoothSocket>
 #include <QtCore/QQueue>
 #include <QtCore/QTimer>
+#include <QtConnectivity/QBluetoothAddress>
+#include <QtConnectivity/QBluetoothSocket>
+#include <QtSystemInfo/QSystemAlignedTimer>
 #include "watch.h"
 
 using QTM_PREPEND_NAMESPACE(QBluetoothSocket);
 using QTM_PREPEND_NAMESPACE(QBluetoothAddress);
+using QTM_PREPEND_NAMESPACE(QSystemAlignedTimer);
 
 namespace sowatch
 {
+
+class MetaWatchPaintEngine;
 
 class MetaWatch : public Watch
 {
@@ -20,17 +24,11 @@ class MetaWatch : public Watch
 
 public:
 	explicit MetaWatch(const QBluetoothAddress& address, QObject *parent = 0);
+	~MetaWatch();
 
-	QPaintEngine* paintEngine() const;
-
-	QString model() const;
-	bool isConnected() const;
-	bool busy() const;
-	void update(const QList<QRect>& rects);
-	void clear(bool white = false);
-	void vibrate(bool on);
-
-	void setDateTime(const QDateTime& dateTime);
+	static const int screenWidth = 96;
+	static const int screenHeight = 96;
+	static const int systemAreaHeight = 30;
 
 	enum MessageType {
 		NoMessage = 0,
@@ -64,11 +62,46 @@ public:
 
 	enum Mode {
 		IdleMode = 0,
-		ApplicationMode = 1
+		ApplicationMode = 1,
+		NotificationMode = 2
 	};
 
+	QPaintEngine* paintEngine() const;
+	int metric(PaintDeviceMetric metric) const;
+
+	QString model() const;
+	bool isConnected() const;
+	bool busy() const;
+
+	QDateTime dateTime();
+	void setDateTime(const QDateTime& dateTime);
+
+	void updateNotificationCount(Notification::Type type, int count);
+
+	void vibrate(bool on);
+	void showNotification(const Notification& n);
+
+	Mode currentMode() const;
+	Mode paintTargetMode() const;
+	QImage* imageFor(Mode mode);
+	void clear(Mode mode, bool black = false);
+	void update(Mode mode, const QList<QRect>& rects = QList<QRect>());
+
+	void renderIdleScreen();
+
 protected:
+	mutable MetaWatchPaintEngine* _paintEngine;
+	QImage _image[3];
+
+	QBluetoothAddress _address;
 	QBluetoothSocket* _socket;
+
+	static const int connectRetryTimesSize = 6;
+	static const int connectRetryTimes[connectRetryTimesSize];
+	short _connectRetries;
+	bool _connected;
+	QTimer* _connectTimer;
+	QSystemAlignedTimer* _connectAlignedTimer;
 
 	struct Message {
 		MessageType type;
@@ -76,15 +109,15 @@ protected:
 		QByteArray data;
 		Message(MessageType ntype = NoMessage, QByteArray ndata = QByteArray(), quint8 noptions = 0) :
 			type(ntype), options(noptions), data(ndata)
-		{
-
-		}
+		{ }
 	};
 
 	QQueue<Message> _toSend;
 	QTimer* _sendTimer;
 	Message _partialReceived;
 
+	Mode _currentMode;
+	Mode _paintMode;
 	quint8 _buttonState;
 
 	static const quint8 bitRevTable[16];
@@ -98,7 +131,8 @@ protected:
 	void updateLine(Mode mode, const QImage& image, int line);
 	void updateLines(Mode mode, const QImage& image, int lineA, int lineB);
 	void updateLines(Mode mode, const QImage& image, const QVector<bool>& lines);
-	void configureWatchMode(Mode mode, int timeout = 10, bool invert = false);
+	void configureWatchMode(Mode mode, int timeout, bool invert = false);
+	void configureIdleSystemArea(bool entireScreen);
 	void updateDisplay(Mode mode, bool copy = true);
 	void loadTemplate(Mode mode, int templ);
 
@@ -111,6 +145,7 @@ protected slots:
 	void socketData();
 	void socketError(QBluetoothSocket::SocketError error);
 	void socketState(QBluetoothSocket::SocketState error);
+	void retryConnect();
 	void timedSend();
 
 private:

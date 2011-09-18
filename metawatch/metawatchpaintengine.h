@@ -2,18 +2,20 @@
 #define METAWATCHPAINTENGINE_H
 
 #include <QtCore/QRect>
+#include "metawatch.h"
 #include "watchpaintengine.h"
 
 namespace sowatch
 {
 
-class MetaWatch;
-
 /** This WatchPaintEngine accelerates fillRects by using the MetaWatch's template command. */
 class MetaWatchPaintEngine : public WatchPaintEngine
 {
 public:
-	explicit MetaWatchPaintEngine(MetaWatch* watch, QImage* image);
+	explicit MetaWatchPaintEngine(MetaWatch* watch);
+
+	bool begin(QPaintDevice *pdev);
+	bool end();
 
 	void drawRects(const QRectF *rects, int rectCount);
 	void drawRects(const QRect *rects, int rectCount);
@@ -24,6 +26,7 @@ protected:
 	bool fillsEntireImage(const QRect& rect);
 
 	MetaWatch* _watch;
+	MetaWatch::Mode _mode;
 	QRect _imageRect;
 	bool _isBrushBlack;
 	bool _isBrushWhite;

@@ -6,29 +6,12 @@
 
 using namespace sowatch;
 
-WatchPaintEngine::WatchPaintEngine(Watch* watch, QImage* image)
+WatchPaintEngine::WatchPaintEngine(Watch* watch)
 	: QPaintEngine(QPaintEngine::AllFeatures),
 	  _watch(watch), _painter(),
 	  _hasPen(false), _hasBrush(false), _clipEnabled(false)
 {
-	Q_UNUSED(image);
-}
 
-bool WatchPaintEngine::begin(QPaintDevice *pdev)
-{
-	_damaged = QRegion();
-	_watch = static_cast<Watch*>(pdev);
-
-	return _painter.begin(&_watch->_image);
-}
-
-bool WatchPaintEngine::end()
-{
-	bool ret = _painter.end();
-	if (ret) {
-		_watch->update(_damaged.rects().toList());
-	}
-	return ret;
 }
 
 void WatchPaintEngine::damageMappedRect(const QRect &r)
@@ -47,7 +30,7 @@ void WatchPaintEngine::damageRect(const QRect &r)
 
 void WatchPaintEngine::damageRect(const QRectF &r)
 {
-	damageMappedRect(_transform.mapRect(r).toRect());
+	damageMappedRect(_transform.mapRect(r).toAlignedRect());
 }
 
 void WatchPaintEngine::damagePenStroke(const QLineF &line)
@@ -57,13 +40,16 @@ void WatchPaintEngine::damagePenStroke(const QLineF &line)
 	const qreal a = line.angle();
 	const qreal sn = sinf(a);
 	const qreal cs = cosf(a);
-	const qreal w = _penWidth = 0.0 ? 1.0 : _penWidth;
+	const qreal w = _penWidth == 0.0 ? 1.0 : _penWidth;
 	const qreal x1 = line.x1();
 	const qreal x2 = line.x2();
-	const qreal y1 = line.x1();
+	const qreal y1 = line.y1();
 	const qreal y2 = line.y2();
 
-	damageRect(QRectF(x1-(w*sn/2.0f), y1+(w*cs/2.0f), x2+(w*sn/2.0f), y2-(w*cs/2.0f)).normalized());
+	QPointF p1(x1-(w*sn/2.0f), y1+(w*cs/2.0f));
+	QPointF p2(x2+(w*sn/2.0f), y2-(w*cs/2.0f));
+	QRectF r = QRectF(p1, p2).normalized();
+	damageRect(r);
 }
 
 void WatchPaintEngine::updateClipRegion(const QRegion& region, Qt::ClipOperation op)
@@ -140,24 +126,22 @@ void WatchPaintEngine::drawPixmap(const QRectF &r, const QPixmap &pm, const QRec
 
 void WatchPaintEngine::drawPoints(const QPointF *points, int pointCount)
 {
-	const qreal penWidth = _painter.pen().widthF();
 	int i;
 	for (i = 0; i < pointCount; i++) {
 		const QPointF& p = points[i];
-		damageRect(QRect(p.x() - penWidth/2, p.y() - penWidth/2,
-						 p.x() + penWidth/2, p.y() + penWidth/2));
+		damageRect(QRectF(p.x() - _penWidth/2.0f, p.y() - _penWidth/2.0f,
+						  _penWidth, _penWidth));
 	}
 	_painter.drawPoints(points, pointCount);
 }
 
 void WatchPaintEngine::drawPoints(const QPoint *points, int pointCount)
 {
-	const qreal penWidth = _painter.pen().widthF();
 	int i;
 	for (i = 0; i < pointCount; i++) {
 		const QPoint& p = points[i];
-		damageRect(QRect(p.x() - penWidth/2, p.y() - penWidth/2,
-						 p.x() + penWidth/2, p.y() + penWidth/2));
+		damageRect(QRect(p.x() - _penWidth/2, p.y() - _penWidth/2,
+						 _penWidth, _penWidth));
 	}
 	_painter.drawPoints(points, pointCount);
 }
@@ -225,8 +209,10 @@ void WatchPaintEngine::drawRects(const QRect *rects, int rectCount)
 
 void WatchPaintEngine::drawTextItem(const QPointF &p, const QTextItem &textItem)
 {
-	const qreal height = textItem.ascent() + textItem.descent();
-	damageRect(QRect(p.x(), p.y(), p.x() + textItem.width(), p.y() + height));
+	const qreal ascent = textItem.ascent();
+	const qreal descent = textItem.descent();
+	const qreal w = textItem.width();
+	damageRect(QRect(p.x(), p.y() - ascent, w, ascent + descent));
 	_painter.drawTextItem(p, textItem);
 }
 
@@ -269,7 +255,7 @@ void WatchPaintEngine::updateState(const QPaintEngineState &state)
 	}
 	if (flags & QPaintEngine::DirtyClipPath)
 	{
-		QRegion region = state.clipPath().boundingRect().toRect();
+		QRegion region = state.clipPath().boundingRect().toAlignedRect();
 		updateClipRegion(region, state.clipOperation());
 		_painter.setClipPath(state.clipPath(), state.clipOperation());
 	}

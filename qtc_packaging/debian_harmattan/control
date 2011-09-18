@@ -9,6 +9,6 @@ Homepage: <insert the upstream URL, if relevant>
 Package: sowatch
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
-Description: <insert up to 60 chars description>
+Description: Bluetooth smartwatch manager
  <insert long description, indented with spaces>
-XSBC-Maemo-Display-Name: sowatch
+XSBC-Maemo-Display-Name: Smart Open Watch

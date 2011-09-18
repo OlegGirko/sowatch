@@ -9,7 +9,8 @@
 using namespace sowatch;
 
 MetaWatchSimulator::MetaWatchSimulator(QObject *parent) :
-	WatchSimulator(QImage(96, 96, QImage::Format_Mono), parent),
+	WatchSimulator(parent),
+	_image(96, 96, QImage::Format_Mono),
 	_screen(96, 96),
 	_form(new MetaWatchSimulatorForm),
 	_nextFrame(QTime::currentTime())

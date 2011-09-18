@@ -3,10 +3,28 @@
 
 using namespace sowatch;
 
-MetaWatchPaintEngine::MetaWatchPaintEngine(MetaWatch* watch, QImage* image) :
-	WatchPaintEngine(watch, image),	_watch(watch),
-	_imageRect(image->rect())
+MetaWatchPaintEngine::MetaWatchPaintEngine(MetaWatch* watch) :
+	WatchPaintEngine(watch), _watch(watch),
+	_imageRect(0, 0, MetaWatch::screenWidth, MetaWatch::screenHeight)
 {
+}
+
+bool MetaWatchPaintEngine::begin(QPaintDevice *pdev)
+{
+	_damaged = QRegion();
+	_watch = static_cast<MetaWatch*>(pdev);
+	_mode = _watch->paintTargetMode();
+
+	return _painter.begin(_watch->imageFor(_mode));
+}
+
+bool MetaWatchPaintEngine::end()
+{
+	bool ret = _painter.end();
+	if (ret) {
+		_watch->update(_mode, _damaged.rects().toList());
+	}
+	return ret;
 }
 
 void MetaWatchPaintEngine::drawRects(const QRectF *rects, int rectCount)
@@ -15,7 +33,7 @@ void MetaWatchPaintEngine::drawRects(const QRectF *rects, int rectCount)
 	for (i = 0; i < rectCount; i++) {
 		const QRectF& r = rects[i];
 		if (_hasBrush && fillsEntireImage(r.toRect()) && (_isBrushBlack | _isBrushWhite)) {
-			_watch->clear(_isBrushWhite);
+			_watch->clear(_mode, _isBrushBlack);
 			_damaged = QRegion();
 			continue;
 		}
@@ -38,7 +56,7 @@ void MetaWatchPaintEngine::drawRects(const QRect *rects, int rectCount)
 	for (i = 0; i < rectCount; i++) {
 		const QRect& r = rects[i];
 		if (_hasBrush && fillsEntireImage(r) && (_isBrushBlack | _isBrushWhite)) {
-			_watch->clear(_isBrushWhite);
+			_watch->clear(_mode, _isBrushBlack);
 			_damaged = QRegion();
 			continue;
 		}

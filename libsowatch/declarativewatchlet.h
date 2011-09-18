@@ -5,13 +5,14 @@
 #include <QtDeclarative/QDeclarativeComponent>
 #include <QtDeclarative/QDeclarativeItem>
 #include "graphicswatchlet.h"
+#include "sowatch_global.h"
 
 namespace sowatch
 {
 
 class DeclarativeWatchWrapper;
 
-class DeclarativeWatchlet : public GraphicsWatchlet
+class SOWATCH_EXPORT DeclarativeWatchlet : public GraphicsWatchlet
 {
     Q_OBJECT
 public:

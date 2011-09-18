@@ -22,6 +22,7 @@ public:
 	void vibrate(bool on);
 
 protected:
+	QImage _image;
 	QPixmap _screen;
 	MetaWatchSimulatorForm* _form;
 	QTime _nextFrame;

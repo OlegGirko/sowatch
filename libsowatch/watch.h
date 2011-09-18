@@ -2,8 +2,10 @@
 #define WATCH_H
 
 #include <QtCore/QObject>
+#include <QtCore/QDateTime>
 #include <QtGui/QPaintDevice>
 #include <QtGui/QImage>
+#include "notification.h"
 
 namespace sowatch
 {
@@ -13,18 +15,22 @@ class Watch : public QObject, public QPaintDevice
 	Q_OBJECT
 	Q_PROPERTY(QString model READ model)
 	Q_PROPERTY(bool connected READ isConnected)
+	Q_PROPERTY(QDateTime dateTime READ dateTime WRITE setDateTime)
+
 public:
-	explicit Watch(const QImage& image, QObject* parent = 0);
+	explicit Watch(QObject* parent = 0);
 	~Watch();
 
-	QPaintEngine* paintEngine() const;
-	int metric(PaintDeviceMetric metric) const;
-
-	Q_INVOKABLE virtual QString model() const = 0;
-	Q_INVOKABLE virtual bool isConnected() const = 0;
+	virtual QString model() const = 0;
+	virtual bool isConnected() const = 0;
 
 	/** Indicates if watch is too busy atm and we should limit frame rate. */
-	Q_INVOKABLE virtual bool busy() const = 0;
+	virtual bool busy() const = 0;
+
+	virtual QDateTime dateTime() = 0;
+	virtual void setDateTime(const QDateTime& dateTime) = 0;
+
+	virtual void updateNotificationCount(Notification::Type type, int count) = 0;
 
 signals:
 	void connected();
@@ -33,15 +39,8 @@ signals:
 	void buttonReleased(int button);
 
 public slots:
-	virtual void update(const QList<QRect>& rects) = 0;
-	virtual void update(const QRect& rect);
 	virtual void vibrate(bool on) = 0;
-
-protected:
-	QImage _image;
-	mutable QPaintEngine* _paintEngine;
-
-friend class WatchPaintEngine;
+	virtual void showNotification(const Notification& n) = 0;
 };
 
 }

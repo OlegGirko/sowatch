@@ -4,11 +4,12 @@
 #include <QtGui/QGraphicsScene>
 #include <QtGui/QRegion>
 #include "watchlet.h"
+#include "sowatch_global.h"
 
 namespace sowatch
 {
 
-class GraphicsWatchlet : public Watchlet
+class SOWATCH_EXPORT GraphicsWatchlet : public Watchlet
 {
     Q_OBJECT
 public:

@@ -4,16 +4,20 @@
 #include <QtCore/QObject>
 #include <QtCore/QMap>
 
+#include "sowatch_global.h"
+
 namespace sowatch
 {
 
 class Watch;
 class Watchlet;
+class Notification;
 
-class WatchServer : public QObject
+class SOWATCH_EXPORT WatchServer : public QObject
 {
     Q_OBJECT
-	Q_PROPERTY(Watch* watch READ watch)
+	Q_PROPERTY(Watch* watch READ watch CONSTANT)
+
 public:
 	explicit WatchServer(Watch* watch, QObject* parent = 0);
 
@@ -25,6 +29,7 @@ public:
 signals:
 
 public slots:
+	void notification(const Notification& n);
 
 protected:
 	Watch* _watch;

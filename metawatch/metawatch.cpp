@@ -9,6 +9,10 @@ QTM_USE_NAMESPACE
 
 #define SINGLE_LINE_UPDATE 0
 
+const int MetaWatch::connectRetryTimes[] = {
+	5, 10, 30, 60, 120, 300
+};
+
 const quint8 MetaWatch::bitRevTable[16] = {
 	0, 8, 4, 12, 2, 10, 6, 14, 1, 9, 5, 13, 3, 11, 7, 15
 };
@@ -71,32 +75,75 @@ const quint16 MetaWatch::crcTable[256] = {
 #endif
 
 MetaWatch::MetaWatch(const QBluetoothAddress& address, QObject *parent) :
-	Watch(QImage(96, 96, QImage::Format_MonoLSB), parent),
-	_socket(new QBluetoothSocket(QBluetoothSocket::RfcommSocket)),
-	_sendTimer(new QTimer(this))
+	Watch(parent),
+	_paintEngine(0),
+	_address(address),
+	_socket(0),
+	_connectRetries(0),
+	_connected(false),
+	_connectTimer(new QTimer(this)),
+	_connectAlignedTimer(new QSystemAlignedTimer(this)),
+	_sendTimer(new QTimer(this)),
+	_currentMode(IdleMode),
+	_paintMode(IdleMode)
 {
-	connect(_socket, SIGNAL(connected()), SLOT(socketConnected()));
-	connect(_socket, SIGNAL(disconnected()), SLOT(socketDisconnected()));
-	connect(_socket, SIGNAL(readyRead()), SLOT(socketData()));
-	connect(_socket, SIGNAL(error(QBluetoothSocket::SocketError)),
-			SLOT(socketError(QBluetoothSocket::SocketError)));
-	connect(_socket, SIGNAL(stateChanged(QBluetoothSocket::SocketState)),
-			SLOT(socketState(QBluetoothSocket::SocketState)));
+	QImage baseImage(screenWidth, screenHeight, QImage::Format_MonoLSB);
+	baseImage.setColor(0, QColor(Qt::white).rgb());
+	baseImage.setColor(1, QColor(Qt::black).rgb());
+	_image[IdleMode] = baseImage;
+	_image[ApplicationMode] = baseImage;
+	_image[NotificationMode] = baseImage;
+
+	_connectTimer->setSingleShot(true);
+	_connectAlignedTimer->setSingleShot(true);
+	connect(_connectTimer, SIGNAL(timeout()), SLOT(retryConnect()));
+	connect(_connectAlignedTimer, SIGNAL(timeout()), SLOT(retryConnect()));
 
 	_sendTimer->setInterval(30);
 	connect(_sendTimer, SIGNAL(timeout()), SLOT(timedSend()));
 
-	_socket->connectToService(address, 1, QIODevice::ReadWrite | QIODevice::Unbuffered);
+	retryConnect();
+}
+
+MetaWatch::~MetaWatch()
+{
+	delete _paintEngine;
 }
 
 QPaintEngine* MetaWatch::paintEngine() const
 {
 	if (!_paintEngine) {
-		_paintEngine = new MetaWatchPaintEngine(const_cast<MetaWatch*>(this),
-			const_cast<QImage*>(&_image));
+		_paintEngine = new MetaWatchPaintEngine(const_cast<MetaWatch*>(this));
 	}
 
 	return _paintEngine;
+}
+
+int MetaWatch::metric(PaintDeviceMetric metric) const
+{
+	switch (metric) {
+	case PdmWidth:
+		return screenWidth;
+	case PdmHeight:
+		return _currentMode == IdleMode ?
+			screenHeight - systemAreaHeight: screenHeight;
+	case PdmWidthMM:
+		return 24;
+	case PdmHeightMM:
+		return _currentMode == IdleMode ? 16 : 24;
+	case PdmNumColors:
+		return 2;
+	case PdmDepth:
+		return 1;
+	case PdmDpiX:
+	case PdmPhysicalDpiX:
+		return 100;
+	case PdmDpiY:
+	case PdmPhysicalDpiY:
+		return 100;
+	}
+
+	return -1;
 }
 
 QString MetaWatch::model() const
@@ -106,41 +153,19 @@ QString MetaWatch::model() const
 
 bool MetaWatch::isConnected() const
 {
-	return _socket->state() == QBluetoothSocket::ConnectedState;
+	return _connected;
 }
 
 bool MetaWatch::busy() const
 {
-	return _socket->state() != QBluetoothSocket::ConnectedState ||
+	return !_connected ||
+			_socket->state() != QBluetoothSocket::ConnectedState ||
 			_toSend.size() > 20;
 }
 
-void MetaWatch::update(const QList<QRect> &rects)
+QDateTime MetaWatch::dateTime()
 {
-	if (_socket->state() != QBluetoothSocket::ConnectedState) return;
-	const QRect imageRect = _image.rect();
-	QVector<bool> lines(_image.height(), false);
-
-	foreach (const QRect& rect, rects) {
-		QRect r = rect.intersect(imageRect);
-		for (int i = r.top(); i <= r.bottom(); i++) {
-			lines[i] = true;
-		}
-	}
-
-	updateLines(ApplicationMode, _image, lines);
-	updateDisplay(ApplicationMode);
-}
-
-void MetaWatch::clear(bool white)
-{qDebug() << "MWclear" << white;
-	if (_socket->state() != QBluetoothSocket::ConnectedState) return;
-	loadTemplate(ApplicationMode, white ? 1 : 0);
-}
-
-void MetaWatch::vibrate(bool on)
-{
-
+	return QDateTime::currentDateTime(); // TODO
 }
 
 void MetaWatch::setDateTime(const QDateTime &dateTime)
@@ -149,7 +174,7 @@ void MetaWatch::setDateTime(const QDateTime &dateTime)
 	const QDate& date = dateTime.date();
 	const QTime& time = dateTime.time();
 
-	msg.data[0] = date.year() & 0xF00;
+	msg.data[0] = (date.year() & 0xF00) >> 8;
 	msg.data[1] = date.year() & 0xFF;
 	msg.data[2] = date.month();
 	msg.data[3] = date.day();
@@ -161,6 +186,81 @@ void MetaWatch::setDateTime(const QDateTime &dateTime)
 	msg.data[9] = 1;
 
 	send(msg);
+}
+
+void MetaWatch::updateNotificationCount(Notification::Type type, int count)
+{
+	Q_UNUSED(type);
+	Q_UNUSED(count); // TODO
+}
+
+void MetaWatch::vibrate(bool on)
+{
+	Q_UNUSED(on); // TODO
+}
+
+void MetaWatch::showNotification(const Notification &n)
+{
+	Q_UNUSED(n); // TODO
+}
+
+MetaWatch::Mode MetaWatch::currentMode() const
+{
+	return _currentMode;
+}
+
+MetaWatch::Mode MetaWatch::paintTargetMode() const
+{
+	return _paintMode;
+}
+
+QImage* MetaWatch::imageFor(Mode mode)
+{
+	return &_image[mode];
+}
+
+void MetaWatch::update(Mode mode, const QList<QRect> &rects)
+{
+	if (!_connected) return;
+	const QRect clipRect(0, 0, screenWidth, screenHeight);
+	QVector<bool> lines(screenHeight, false);
+
+	foreach (const QRect& rect, rects) {
+		QRect r = rect.intersect(clipRect);
+		for (int i = r.top(); i <= r.bottom(); i++) {
+			lines[i] = true;
+		}
+	}
+
+	updateLines(mode, _image[mode], lines);
+	if (mode == _currentMode) {
+		updateDisplay(mode);
+	}
+}
+
+void MetaWatch::clear(Mode mode, bool black)
+{
+	if (!_connected) return;
+	loadTemplate(mode, black ? 1 : 0);
+}
+
+void MetaWatch::renderIdleScreen()
+{
+	_paintMode = IdleMode;
+	QPainter p(this);
+	p.fillRect(0, 0, screenWidth, screenHeight, Qt::white);
+	p.setPen(QPen(Qt::black, 1.0, Qt::DashLine));
+	p.drawLine(0, systemAreaHeight + 2, screenWidth, systemAreaHeight + 2);
+	p.drawLine(0, systemAreaHeight * 2 + 3, screenWidth, systemAreaHeight * 2 + 3);
+	p.setPen(Qt::black);
+	p.drawText(1, systemAreaHeight + 16, "Space Weather!");
+	QImage idle_mail(QString(":/metawatch/idle_gmail.bmp"));
+	QImage idle_call(QString(":/metawatch/idle_call.bmp"));
+	QImage idle_sms(QString(":/metawatch/idle_sms.bmp"));
+	p.drawImage(4, systemAreaHeight * 2 + 6, idle_mail);
+	p.drawImage(32 + 4, systemAreaHeight * 2 + 6, idle_call);
+	p.drawImage(32 * 2 + 4, systemAreaHeight * 2 + 6, idle_sms);
+	p.drawText(14, 93, "Too many!");
 }
 
 quint16 MetaWatch::calcCrc(const QByteArray &data, int size)
@@ -277,6 +377,13 @@ void MetaWatch::configureWatchMode(Mode mode, int timeout, bool invert)
 	send(msg);
 }
 
+void MetaWatch::configureIdleSystemArea(bool entireScreen)
+{
+	Message msg(ConfigureIdleBufferSize, QByteArray(26, 0));
+	msg.data[0] = entireScreen ? 1 : 0;
+	send(msg);
+}
+
 void MetaWatch::updateDisplay(Mode mode, bool copy)
 {
 	Message msg(UpdateDisplay, QByteArray(),
@@ -305,20 +412,54 @@ void MetaWatch::handleButtonEvent(const Message &msg)
 
 void MetaWatch::socketConnected()
 {
-	qDebug() << "connected";
-	_partialReceived.type = NoMessage;
-	_partialReceived.data.clear();
-	_buttonState = 0;
-	setDateTime(QDateTime::currentDateTime());
-	configureWatchMode(ApplicationMode);
-	emit connected();
+	if (!_connected) {
+		qDebug() << "connected";
+
+		_connected = true;
+		_connectRetries = 0;
+		_partialReceived.type = NoMessage;
+		_partialReceived.data.clear();
+		_currentMode = IdleMode;
+		_paintMode = IdleMode;
+		_buttonState = 0;
+
+		setDateTime(QDateTime::currentDateTime());
+		configureIdleSystemArea(false);
+		configureWatchMode(ApplicationMode, 240);
+		configureWatchMode(NotificationMode, 30);
+
+		renderIdleScreen();
+
+		emit connected();
+	}
 }
 
 void MetaWatch::socketDisconnected()
 {
-	_toSend.clear();
-	_sendTimer->stop();
-	emit disconnected();
+	if (_connected) {
+		qDebug() << "disconnected";
+
+		_connected = false;
+		_toSend.clear();
+		_sendTimer->stop();
+
+		emit disconnected();
+	}
+
+	int timeToNextRetry;
+	if (_connectRetries >= connectRetryTimesSize) {
+		timeToNextRetry = connectRetryTimes[connectRetryTimesSize - 1];
+	} else {
+		timeToNextRetry = connectRetryTimes[_connectRetries];
+		_connectRetries++;
+	}
+	qDebug() << "Backing off for " << timeToNextRetry << "seconds for next retry";
+	_connectAlignedTimer->start(timeToNextRetry / 2, timeToNextRetry * 2);
+	if (_connectAlignedTimer->lastError() != QSystemAlignedTimer::NoError) {
+		// I would like to know why QtM couldn't _emulate_ here using a QTimer by itself.
+		qDebug() << "Note: using plain QTimer for retry";
+		_connectTimer->start(timeToNextRetry * 1000);
+	}
 }
 
 void MetaWatch::socketData()
@@ -377,6 +518,22 @@ void MetaWatch::socketState(QBluetoothSocket::SocketState error)
 	qDebug() << "socket is in" << error;
 }
 
+void MetaWatch::retryConnect()
+{
+	delete _socket;
+	_socket = new QBluetoothSocket(QBluetoothSocket::RfcommSocket);
+
+	connect(_socket, SIGNAL(connected()), SLOT(socketConnected()));
+	connect(_socket, SIGNAL(disconnected()), SLOT(socketDisconnected()));
+	connect(_socket, SIGNAL(readyRead()), SLOT(socketData()));
+	connect(_socket, SIGNAL(error(QBluetoothSocket::SocketError)),
+			SLOT(socketError(QBluetoothSocket::SocketError)));
+	connect(_socket, SIGNAL(stateChanged(QBluetoothSocket::SocketState)),
+			SLOT(socketState(QBluetoothSocket::SocketState)));
+
+	_socket->connectToService(_address, 1, QIODevice::ReadWrite | QIODevice::Unbuffered);
+}
+
 void MetaWatch::timedSend()
 {
 	if (_toSend.count() > 0) {
@@ -392,6 +549,8 @@ void MetaWatch::realSend(const Message &msg)
 	const int msgSize = msg.data.size();
 	QByteArray data;
 	quint16 crc;
+
+	Q_ASSERT(_connected && _socket);
 
 	data.resize(msgSize + 6);
 	data[0] = 0x01;

@@ -4,8 +4,8 @@
 
 using namespace sowatch;
 
-WatchSimulator::WatchSimulator(const QImage& image, QObject* parent) :
-	Watch(image, parent)
+WatchSimulator::WatchSimulator(QObject* parent) :
+	Watch(parent)
 {
 
 }

@@ -4,12 +4,12 @@
 #
 #-------------------------------------------------
 
-QT       += gui dbus declarative
+QT       += gui declarative
 CONFIG   += mobility
-MOBILITY += connectivity
 
-TARGET = libsowatch
+TARGET   = sowatch
 TEMPLATE = lib
+VERSION  = 1.0.0
 
 DEFINES += SOWATCH_LIBRARY
 
@@ -24,7 +24,9 @@ SOURCES += \
     graphicswatchlet.cpp \
     declarativewatchwrapper.cpp \
     declarativewatchlet.cpp \
-    watchplugininterface.cpp
+    watchplugininterface.cpp \
+    notification.cpp \
+    notificationplugininterface.cpp
 
 HEADERS +=\
     watchsimulator.h \
@@ -39,24 +41,11 @@ HEADERS +=\
     declarativewatchwrapper.h \
     declarativewatchlet.h \
     sowatch_global.h \
-    watchplugininterface.h
+    watchplugininterface.h \
+    notification.h \
+    notificationplugininterface.h
 
-FORMS +=
-
-install_headers.files =\
-	watchsimulator.h \
-	watchserver.h \
-	watchpaintengine.h \
-	watchmanager.h \
-	watchlet.h \
-	watch.h \
-	testwatchlet.h \
-	testdeclarativewatchlet.h \
-	sowatch.h \
-	graphicswatchlet.h \
-	declarativewatchwrapper.h \
-	declarativewatchlet.h \
-	sowatch_global.h
+install_headers.files = $$HEADERS
 
 symbian {
     MMP_RULES += EXPORTUNFROZEN
@@ -77,6 +66,18 @@ unix:!symbian {
     }
 	INSTALLS += install_headers target
 }
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

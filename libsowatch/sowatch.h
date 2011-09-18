@@ -6,6 +6,7 @@
 #include "watchlet.h"
 #include "graphicswatchlet.h"
 #include "declarativewatchlet.h"
+#include "notification.h"
 #include "watchserver.h"
 #include "watchsimulator.h"
 #include "watchplugininterface.h"
