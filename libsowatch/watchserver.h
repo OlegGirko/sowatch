@@ -44,6 +44,8 @@ protected slots:
 	void watchDisconnected();
 	void notificationEmitted(const Notification& notification);
 	void unreadCountUpdated(Notification::Type type);
+	void incomingCall(const QString& displayText);
+	void endIncomingCall();
 
 friend class Watchlet;
 };

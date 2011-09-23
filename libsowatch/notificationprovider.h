@@ -22,6 +22,10 @@ signals:
 	void notification(const Notification& n);
 	void unreadCountChanged(Notification::Type type);
 
+	void weatherUpdate();
+
+	void incomingCall(const QString& displayName);
+	void endIncomingCall();
 };
 
 }

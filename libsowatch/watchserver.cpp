@@ -26,6 +26,8 @@ void WatchServer::addProvider(NotificationProvider *provider)
 
 	connect(provider, SIGNAL(notification(Notification)), SLOT(notificationEmitted(Notification)));
 	connect(provider, SIGNAL(unreadCountChanged(Notification::Type)), SLOT(unreadCountUpdated(Notification::Type)));
+	connect(provider, SIGNAL(incomingCall(QString)), SLOT(incomingCall(QString)));
+	connect(provider, SIGNAL(endIncomingCall()), SLOT(endIncomingCall()));
 
 	_providers.append(provider);
 }
@@ -84,4 +86,14 @@ void WatchServer::unreadCountUpdated(Notification::Type type)
 		count += provider->getCount(type);
 	}
 	_watch->updateNotificationCount(type, count);
+}
+
+void WatchServer::incomingCall(const QString &displayText)
+{
+	qDebug() << "Incoming call" << displayText;
+}
+
+void WatchServer::endIncomingCall()
+{
+	qDebug() << "End incoming call";
 }

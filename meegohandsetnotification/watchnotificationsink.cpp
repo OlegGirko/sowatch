@@ -13,10 +13,16 @@ void WatchNotificationSink::addNotification(const Notification &notification)
 {
 	const NotificationParameters& p = notification.parameters();
 	sowatch::Notification::Type type = notificationTypeFromEventType(p.value("eventType").toString());
-	uint count = p.value("count").toUInt();
+	const uint count = p.value("count").toUInt();
+	const uint notificationId = notification.notificationId();
+
+	if (_trackedNotifications.contains(notificationId)) {
+		const NotificationParameters& oldParams = _trackedNotifications[notificationId].parameters();
+		_counts[type] -= oldParams.value("count").toUInt();
+	}
 
 	_counts[type] += count;
-	_trackedNotifications[notification.notificationId()] = notification;
+	_trackedNotifications[notificationId] = notification;
 
 	emit countsChanged(type);
 
@@ -61,12 +67,17 @@ int WatchNotificationSink::getCount(sowatch::Notification::Type type)
 
 sowatch::Notification::Type WatchNotificationSink::notificationTypeFromEventType(const QString& eventType)
 {
+	qDebug() << "incoming " << eventType;
 	if (eventType == "email.arrived")
 		return sowatch::Notification::EmailNotification;
 	else if (eventType == "x-nokia.call.missed")
 		return sowatch::Notification::MissedCallNotification;
 	else if (eventType == "x-nokia.messaging.im")
 		return sowatch::Notification::ImNotification;
+	else if (eventType == "x-nokia.messaging.sms")
+		return sowatch::Notification::SmsNotification;
+	else if (eventType == "x-nokia.messaging.mms")
+		return sowatch::Notification::MmsNotification;
 	else
 		return sowatch::Notification::OtherNotification;
 }

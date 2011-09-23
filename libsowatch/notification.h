@@ -13,11 +13,11 @@ class SOWATCH_EXPORT Notification
 public:
 	enum Type {
 		OtherNotification = 0,
-		CallNotification,
-		EmailNotification,
 		MissedCallNotification,
 		SmsNotification,
+		MmsNotification,
 		ImNotification,
+		EmailNotification,
 		CalendarNotification,
 		TypeCount
 	};

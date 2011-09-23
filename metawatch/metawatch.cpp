@@ -87,7 +87,7 @@ MetaWatch::MetaWatch(const QBluetoothAddress& address, QObject *parent) :
 	_sendTimer(new QTimer(this)),
 	_currentMode(IdleMode),
 	_paintMode(IdleMode),
-	_nMails(0), _nCalls(0), _nIms(0), _nSms(0)
+	_nMails(0), _nCalls(0), _nIms(0), _nSms(0), _nMms(0)
 {
 	QImage baseImage(screenWidth, screenHeight, QImage::Format_MonoLSB);
 	baseImage.setColor(0, QColor(Qt::white).rgb());
@@ -185,8 +185,8 @@ void MetaWatch::setDateTime(const QDateTime &dateTime)
 	msg.data[5] = time.hour();
 	msg.data[6] = time.minute();
 	msg.data[7] = time.second();
-	msg.data[8] = 1;
-	msg.data[9] = 1;
+	msg.data[8] = _24hMode ? 1 : 0;
+	msg.data[9] = _dayMonthOrder ? 1 : 0;
 
 	send(msg);
 }
@@ -206,6 +206,9 @@ void MetaWatch::updateNotificationCount(Notification::Type type, int count)
 	case Notification::SmsNotification:
 		_nSms = count;
 		break;
+	case Notification::MmsNotification:
+		_nMms = count;
+		break;
 	default:
 		// Ignore
 		break;
@@ -222,6 +225,16 @@ void MetaWatch::vibrate(bool on)
 void MetaWatch::showNotification(const Notification &n)
 {
 	qDebug() << "It's time for a notification" << n.title();
+}
+
+void MetaWatch::startRinging(const QString &text)
+{
+
+}
+
+void MetaWatch::stopRinging()
+{
+
 }
 
 MetaWatch::Mode MetaWatch::currentMode() const

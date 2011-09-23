@@ -80,6 +80,8 @@ public:
 
 	void vibrate(bool on);
 	void showNotification(const Notification& n);
+	void startRinging(const QString &text);
+	void stopRinging();
 
 	Mode currentMode() const;
 	Mode paintTargetMode() const;
@@ -126,7 +128,7 @@ protected:
 	quint8 _buttonState;
 
 	// Notifications: Unread count
-	uint _nMails, _nCalls, _nIms, _nSms;
+	uint _nMails, _nCalls, _nIms, _nSms, _nMms;
 
 	static const quint8 bitRevTable[16];
 	static const quint16 crcTable[256];

@@ -41,6 +41,8 @@ signals:
 public slots:
 	virtual void vibrate(bool on) = 0;
 	virtual void showNotification(const Notification& n) = 0;
+	virtual void startRinging(const QString& text) = 0;
+	virtual void stopRinging() = 0;
 };
 
 }

@@ -4,7 +4,7 @@ SUBDIRS = libsowatch \
 	sowatchd
 
 !isEmpty(MEEGO_VERSION_MAJOR) {
-	#SUBDIRS += meegohandsetnotification
+	SUBDIRS += meegohandsetnotification ckitcallnotification
 }
 
 unix:!symbian {
@@ -24,6 +24,7 @@ OTHER_FILES += \
     qtc_packaging/debian_harmattan/compat \
 	qtc_packaging/debian_harmattan/changelog \
 	qtc_packaging/debian_harmattan/manifest.aegis
+
 
 
 

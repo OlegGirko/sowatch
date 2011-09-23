@@ -37,7 +37,7 @@ void Daemon::loadDrivers()
 				loader.unload();
 			}
 		} else {
-			qWarning() << "Invalid plugin" << file;
+			qWarning() << "Invalid plugin" << file << loader.errorString();
 			loader.unload();
 		}
 	}
@@ -67,7 +67,7 @@ void Daemon::loadProviders()
 				loader.unload();
 			}
 		} else {
-			qWarning() << "Invalid plugin" << file;
+			qWarning() << "Invalid plugin" << file << loader.errorString();
 			loader.unload();
 		}
 	}
