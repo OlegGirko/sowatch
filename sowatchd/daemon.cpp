@@ -72,7 +72,7 @@ void Daemon::loadProviders()
 		}
 	}
 
-	qDebug() << "loaded providers" << _providers;
+	qDebug() << "loaded providers" << _providers.keys();
 }
 
 void Daemon::initWatches()

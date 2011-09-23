@@ -4,7 +4,7 @@ SUBDIRS = libsowatch \
 	sowatchd
 
 !isEmpty(MEEGO_VERSION_MAJOR) {
-	SUBDIRS += meegohandsetnotification
+	#SUBDIRS += meegohandsetnotification
 }
 
 unix:!symbian {

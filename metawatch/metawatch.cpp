@@ -79,6 +79,7 @@ MetaWatch::MetaWatch(const QBluetoothAddress& address, QObject *parent) :
 	_paintEngine(0),
 	_address(address),
 	_socket(0),
+	_24hMode(true), _dayMonthOrder(true),
 	_connectRetries(0),
 	_connected(false),
 	_connectTimer(new QTimer(this)),
@@ -138,10 +139,10 @@ int MetaWatch::metric(PaintDeviceMetric metric) const
 		return 1;
 	case PdmDpiX:
 	case PdmPhysicalDpiX:
-		return 100;
+		return 96;
 	case PdmDpiY:
 	case PdmPhysicalDpiY:
-		return 100;
+		return 96;
 	}
 
 	return -1;
@@ -175,7 +176,7 @@ void MetaWatch::setDateTime(const QDateTime &dateTime)
 	const QDate& date = dateTime.date();
 	const QTime& time = dateTime.time();
 
-	msg.data[0] = (date.year() & 0xF00) >> 8;
+	msg.data[0] = (date.year() & 0xFF00) >> 8;
 	msg.data[1] = date.year() & 0xFF;
 	msg.data[2] = date.month();
 	msg.data[3] = date.day();
@@ -265,28 +266,29 @@ void MetaWatch::clear(Mode mode, bool black)
 
 void MetaWatch::renderIdleScreen()
 {
-	_paintMode = IdleMode;
-
-	QFont smallFont("MetaWatch Small caps 8pt", 6);
-	QImage idle_mail(QString(":/metawatch/graphics/idle_gmail.bmp"));
 	QImage idle_call(QString(":/metawatch/graphics/idle_call.bmp"));
 	QImage idle_sms(QString(":/metawatch/graphics/idle_sms.bmp"));
-	QPainter p(this);
+	QImage idle_mail(QString(":/metawatch/graphics/idle_gmail.bmp"));
+	QPainter p;
+
+	_paintMode = IdleMode;
+	p.begin(this);
 
 	p.fillRect(0, 0, screenWidth, screenHeight, Qt::white);
 
 	p.setPen(QPen(Qt::black, 1.0, Qt::DashLine));
 	p.drawLine(1, systemAreaHeight + 2, screenWidth - 2, systemAreaHeight + 2);
-	p.drawLine(1, systemAreaHeight * 2 + 3, screenWidth - 2, systemAreaHeight * 2 + 3);
+	p.drawLine(1, systemAreaHeight * 2 + 4, screenWidth - 2, systemAreaHeight * 2 + 4);
 
-	p.drawImage(3, systemAreaHeight * 2 + 6, idle_mail);
-	p.drawImage(32 + 3, systemAreaHeight * 2 + 6, idle_call);
-	p.drawImage(32 * 2 + 3, systemAreaHeight * 2 + 6, idle_sms);
+	p.drawImage((32 * 0) + 4, systemAreaHeight * 2 + 7, idle_call);
+	p.drawImage((32 * 1) + 4, systemAreaHeight * 2 + 7, idle_sms);
+	p.drawImage((32 * 2) + 4, systemAreaHeight * 2 + 7, idle_mail);
 
 	p.end();
+	_paintMode = _currentMode;
+
 	renderIdleWeather();
 	renderIdleCounts();
-	_paintMode = _currentMode;
 }
 
 void MetaWatch::renderIdleWeather()
@@ -297,7 +299,7 @@ void MetaWatch::renderIdleWeather()
 	QPainter p(this);
 
 	p.setFont(smallFont);
-	p.drawText(46, systemAreaHeight + 14, "Rain");
+	p.drawText(30, systemAreaHeight + 14, "No data!");
 	p.drawImage(screenWidth - 26, systemAreaHeight + 6, rain);
 
 	_paintMode = _currentMode;
@@ -306,24 +308,26 @@ void MetaWatch::renderIdleWeather()
 void MetaWatch::renderIdleCounts()
 {
 	_paintMode = IdleMode;
-	QFont medFont("MetaWatch Large caps 8pt", 6);
+	QFont f("MetaWatch Large caps 8pt");
 	QString s;
 	QPainter p(this);
 	QTextOption opt(Qt::AlignCenter);
-	const int y = systemAreaHeight * 2 + 25;
+	const int y = systemAreaHeight * 2 + 26;
 	const int w = 24;
 	const int h = screenHeight - (y + 1);
 	const int mails = _nMails;
 	const int calls = _nCalls;
 	const int sms = _nSms + _nIms;
 
-	qDebug() << "unread counts" << mails << calls << sms;
+	qDebug() << "unread counts" << calls << sms << mails;
 
-	p.setFont(medFont);
+	f.setPixelSize(8); // Seems to be the only way to get the desired size.
+
+	p.setFont(f);
 	p.fillRect(QRect(0, y, screenWidth, h), Qt::white);
-	p.drawText(QRect(4, y, w, h), s.sprintf("%d", mails), opt);
-	p.drawText(QRect(32 + 4, y, w, h), s.sprintf("%d", calls), opt);
-	p.drawText(QRect(32 * 2 + 4, y, w, h), s.sprintf("%d", sms), opt);
+	p.drawText(QRect((32 * 0) + 4, y, w, h), s.sprintf("%d", calls), opt);
+	p.drawText(QRect((32 * 1) + 4, y, w, h), s.sprintf("%d", sms), opt);
+	p.drawText(QRect((32 * 2) + 4, y, w, h), s.sprintf("%d", mails), opt);
 }
 
 quint16 MetaWatch::calcCrc(const QByteArray &data, int size)

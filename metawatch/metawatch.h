@@ -98,6 +98,9 @@ protected:
 	QBluetoothAddress _address;
 	QBluetoothSocket* _socket;
 
+	bool _24hMode : 1;
+	bool _dayMonthOrder : 1;
+
 	static const int connectRetryTimesSize = 6;
 	static const int connectRetryTimes[connectRetryTimesSize];
 	short _connectRetries;
