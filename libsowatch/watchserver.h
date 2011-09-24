@@ -1,9 +1,9 @@
 #ifndef SOWATCH_WATCHSERVER_H
 #define SOWATCH_WATCHSERVER_H
 
-#include <QtCore/QObject>
+#include <QtCore/QList>
 #include <QtCore/QMap>
-#include <QtCore/QSignalMapper>
+#include <QtCore/QQueue>
 
 #include "sowatch_global.h"
 #include "notification.h"
@@ -32,20 +32,28 @@ public:
 
 protected:
 	Watch* _watch;
-	Watchlet* _currentWatchlet;
 
 	QMap<QString, Watchlet*> _watchlets;
-	QList<NotificationProvider*> _providers;
+
+	/** Stores current notifications, classified by type. */
+	QList<Notification*> _notifications[Notification::TypeCount];
+	QQueue<Notification*> _pendingNotifications;
+
+	Watchlet* _currentWatchlet;
 
 	void registerWatchlet(Watchlet *watchlet);
+	void reactivateCurrentWatchlet();
+
+	void nextNotification();
+	uint getNotificationCount(Notification::Type type);
 
 protected slots:
 	void watchConnected();
 	void watchDisconnected();
-	void notificationEmitted(const Notification& notification);
-	void unreadCountUpdated(Notification::Type type);
-	void incomingCall(const QString& displayText);
-	void endIncomingCall();
+	void watchIdling();
+	void notificationReceived(Notification* notification);
+	void notificationChanged();
+	void notificationCleared();
 
 friend class Watchlet;
 };

@@ -21,28 +21,38 @@ public:
 	explicit Watch(QObject* parent = 0);
 	~Watch();
 
+	/** Return a string identiyfying this watch's model. */
 	virtual QString model() const = 0;
+	/** Should return true if the watch is connected. */
 	virtual bool isConnected() const = 0;
 
 	/** Indicates if watch is too busy atm and we should limit frame rate. */
 	virtual bool busy() const = 0;
 
+	/** Changes the current date/time on the watch. */
 	virtual QDateTime dateTime() = 0;
 	virtual void setDateTime(const QDateTime& dateTime) = 0;
 
+	/** Tells the watch to update the unread notifications count, if visible. */
 	virtual void updateNotificationCount(Notification::Type type, int count) = 0;
 
 signals:
+	/** The watch has been found and linked to. */
 	void connected();
+	/** The watch connection has been lost. */
 	void disconnected();
+	/** The watch has returned to the idle screen by either inactivity or notification cleared/timeout. */
+	void idling();
 	void buttonPressed(int button);
 	void buttonReleased(int button);
 
 public slots:
-	virtual void vibrate(bool on) = 0;
-	virtual void showNotification(const Notification& n) = 0;
-	virtual void startRinging(const QString& text) = 0;
-	virtual void stopRinging() = 0;
+	/** Go back to the idle screen. */
+	virtual void displayIdleScreen() = 0;
+	/** A standard notification; it's up to the watch when to stop showing it. */
+	virtual void displayNotification(Notification* n) = 0;
+	/** Enter application mode. */
+	virtual void displayApplication() = 0;
 };
 
 }

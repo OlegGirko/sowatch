@@ -3,9 +3,8 @@
 
 #include <QtCore/QMap>
 #include <sowatch.h>
-#include <notificationsystem/notification.h>
+#include "meegohandsetnotification.h"
 #include <notificationsystem/notificationsink.h>
-#include <notificationsystem/notificationparameters.h>
 
 namespace sowatch {
 	class MeegoHandsetNotificationProvider;
@@ -23,19 +22,11 @@ public:
 	void addGroup(uint groupId, const NotificationParameters &parameters);
 	void removeGroup(uint groupId);
 
-	int getCount(sowatch::Notification::Type type);
-
 signals:
-	void incomingNotification(const sowatch::Notification& notification);
-	void countsChanged(sowatch::Notification::Type type);
+	void incomingNotification(sowatch::Notification* notification);
 
 protected:
-	static const uint maxTypes = sowatch::Notification::TypeCount;
-	static sowatch::Notification::Type notificationTypeFromEventType(const QString& eventType);
-
-	sowatch::MeegoHandsetNotificationProvider* _parent;
-	QMap<uint, Notification> _trackedNotifications;
-	uint _counts[maxTypes];
+	QMap<uint, MeegoHandsetNotification*> _trackedNotifications;
 };
 
 #endif // WATCHNOTIFICATIONSINK_H

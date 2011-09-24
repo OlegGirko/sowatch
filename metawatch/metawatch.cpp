@@ -79,7 +79,7 @@ MetaWatch::MetaWatch(const QBluetoothAddress& address, QObject *parent) :
 	_paintEngine(0),
 	_address(address),
 	_socket(0),
-	_24hMode(true), _dayMonthOrder(true),
+	_24hMode(true), _dayMonthOrder(true), _notificationTimeout(10),
 	_connectRetries(0),
 	_connected(false),
 	_connectTimer(new QTimer(this)),
@@ -87,7 +87,8 @@ MetaWatch::MetaWatch(const QBluetoothAddress& address, QObject *parent) :
 	_sendTimer(new QTimer(this)),
 	_currentMode(IdleMode),
 	_paintMode(IdleMode),
-	_nMails(0), _nCalls(0), _nIms(0), _nSms(0), _nMms(0)
+	_nMails(0), _nCalls(0), _nIms(0), _nSms(0), _nMms(0),
+	_idleTimer(new QTimer(this)), _ringTimer(new QTimer(this))
 {
 	QImage baseImage(screenWidth, screenHeight, QImage::Format_MonoLSB);
 	baseImage.setColor(0, QColor(Qt::white).rgb());
@@ -101,8 +102,15 @@ MetaWatch::MetaWatch(const QBluetoothAddress& address, QObject *parent) :
 	connect(_connectTimer, SIGNAL(timeout()), SLOT(retryConnect()));
 	connect(_connectAlignedTimer, SIGNAL(timeout()), SLOT(retryConnect()));
 
-	_sendTimer->setInterval(30);
+	_sendTimer->setInterval(10);
 	connect(_sendTimer, SIGNAL(timeout()), SLOT(timedSend()));
+
+	_idleTimer->setInterval(_notificationTimeout * 1000);
+	_idleTimer->setSingleShot(true);
+	connect(_idleTimer, SIGNAL(timeout()), SIGNAL(idling()));
+
+	_ringTimer->setInterval(2000);
+	connect(_ringTimer, SIGNAL(timeout()), SLOT(timedRing()));
 
 	retryConnect();
 }
@@ -217,24 +225,92 @@ void MetaWatch::updateNotificationCount(Notification::Type type, int count)
 	renderIdleCounts();
 }
 
-void MetaWatch::vibrate(bool on)
+void MetaWatch::displayIdleScreen()
 {
-	Q_UNUSED(on); // TODO
-}
-
-void MetaWatch::showNotification(const Notification &n)
-{
-	qDebug() << "It's time for a notification" << n.title();
-}
-
-void MetaWatch::startRinging(const QString &text)
-{
+	_currentMode = IdleMode;
+	_ringTimer->stop();
+	_idleTimer->stop();
+	setVibrateMode(false, 0, 0, 0);
+	updateDisplay(IdleMode);
+	// Usually, idle screen is kept updated, so we can show it already.
+	qDebug() << "displayIdle";
 
 }
 
-void MetaWatch::stopRinging()
+void MetaWatch::displayNotification(Notification *n)
 {
+	_currentMode = NotificationMode;
+	_paintMode = NotificationMode;
+	const bool shouldRing = n->type() == Notification::CallNotification;
+	configureWatchMode(NotificationMode, shouldRing ? 60 : 10);
+	QPainter p;
+	QFont lf("MetaWatch Large 16pt", 14);
+	QFont mf("MetaWatch Large 16pt", 10);
+	QImage icon = iconForNotification(n);
+	const int x = 4;
+	const int iconY = 4;
+	const int titleY = 8 + icon.height();
+	int textFlags;
+	QString text;
 
+	qDebug() << "displayNotification" << n->title() << n->body();
+
+	p.begin(this);
+
+	p.fillRect(0, 0, screenWidth, screenHeight, Qt::white);
+	p.drawImage(x, iconY, icon);
+
+	p.setPen(Qt::black);
+	p.setFont(lf);
+	textFlags = Qt::AlignLeft | Qt::AlignTop | Qt::TextWrapAnywhere;
+	text = n->title();
+
+	QRect titleMaxRect(x, titleY, screenWidth - x*2, screenHeight - titleY);
+	QRect titleRect = p.boundingRect(titleMaxRect, textFlags, text);
+	if (titleRect.width() > titleMaxRect.width()) {
+		textFlags = Qt::AlignLeft | Qt::AlignTop | Qt::TextWrapAnywhere;
+		titleRect = p.boundingRect(titleMaxRect, textFlags, text);
+	}
+
+	qDebug() << titleMaxRect << titleRect;
+	p.drawText(titleMaxRect, textFlags, text);
+
+	p.setFont(mf);
+	textFlags = Qt::AlignLeft | Qt::AlignTop | Qt::TextWordWrap;
+	text = n->body();
+
+	int bodyY = titleRect.y() + titleRect.height();
+	if (bodyY >= screenHeight) return;
+
+	QRect bodyMaxRect(x, bodyY, titleMaxRect.width(), screenHeight - bodyY);
+	QRect bodyRect = p.boundingRect(bodyMaxRect, textFlags, text);
+	if (bodyRect.width() > bodyMaxRect.width()) {
+		textFlags = Qt::AlignLeft | Qt::AlignTop | Qt::TextWrapAnywhere;
+	}
+	qDebug() << bodyMaxRect << bodyRect;
+	p.drawText(bodyMaxRect, textFlags, text);
+
+	p.end();
+
+	if (n->type() == Notification::CallNotification) {
+		timedRing();
+		_ringTimer->start();
+		_idleTimer->stop();
+	} else {
+		_ringTimer->stop();
+		setVibrateMode(true, 500, 500, 2);
+		_idleTimer->start();
+	}
+}
+
+void MetaWatch::displayApplication()
+{
+	_currentMode = ApplicationMode;
+	_paintMode = ApplicationMode;
+	_ringTimer->stop();
+	_idleTimer->stop();
+	configureWatchMode(ApplicationMode, 250);
+	qDebug() << "displayApplication";
 }
 
 MetaWatch::Mode MetaWatch::currentMode() const
@@ -307,11 +383,11 @@ void MetaWatch::renderIdleScreen()
 void MetaWatch::renderIdleWeather()
 {
 	_paintMode = IdleMode;
-	QFont smallFont("MetaWatch Small caps 8pt", 6);
+	QFont f("MetaWatch Small caps 8pt", 6);
 	QImage rain(QString(":/metawatch/graphics/weather_rain.bmp"));
 	QPainter p(this);
 
-	p.setFont(smallFont);
+	p.setFont(f);
 	p.drawText(30, systemAreaHeight + 14, "No data!");
 	p.drawImage(screenWidth - 26, systemAreaHeight + 6, rain);
 
@@ -341,6 +417,41 @@ void MetaWatch::renderIdleCounts()
 	p.drawText(QRect((32 * 0) + 4, y, w, h), s.sprintf("%d", calls), opt);
 	p.drawText(QRect((32 * 1) + 4, y, w, h), s.sprintf("%d", sms), opt);
 	p.drawText(QRect((32 * 2) + 4, y, w, h), s.sprintf("%d", mails), opt);
+
+	_paintMode = _currentMode;
+}
+
+void MetaWatch::renderNotificationScreen()
+{
+	_paintMode = NotificationMode;
+	QPainter p(this);
+
+	p.fillRect(0, 0, screenWidth, screenHeight, Qt::white);
+
+	_paintMode = _currentMode;
+}
+
+QImage  MetaWatch::iconForNotification(const Notification *n)
+{
+	switch (n->type()) {
+	case Notification::CallNotification:
+	case Notification::MissedCallNotification:
+		return QImage(QString(":/metawatch/graphics/phone.bmp"));
+		break;
+	case Notification::SmsNotification:
+	case Notification::MmsNotification:
+	case Notification::ImNotification:
+		return QImage(QString(":/metawatch/graphics/message.bmp"));
+		break;
+	case Notification::EmailNotification:
+		return QImage(QString(":/metawatch/graphics/email.bmp"));
+		break;
+	case Notification::CalendarNotification:
+		return QImage(QString(":/metawatch/graphics/timer.bmp"));
+		break;
+	default:
+		return QImage();
+	}
 }
 
 quint16 MetaWatch::calcCrc(const QByteArray &data, int size)
@@ -392,6 +503,20 @@ void MetaWatch::handleMessage(const Message &msg)
 		qWarning() << "Unknown message of type" << msg.type << "received";
 		break;
 	}
+}
+
+void MetaWatch::setVibrateMode(bool enable, uint on, uint off, uint cycles)
+{
+	Message msg(SetVibrateMode, QByteArray(6, 0));
+
+	msg.data[0] = enable ? 1 : 0;
+	msg.data[1] = on & 0xFF;
+	msg.data[2] = on >> 8;
+	msg.data[3] = off & 0xFF;
+	msg.data[4] = off >> 8;
+	msg.data[5] = cycles;
+
+	send(msg);
 }
 
 void MetaWatch::updateLine(Mode mode, const QImage& image, int line)
@@ -479,13 +604,15 @@ void MetaWatch::loadTemplate(Mode mode, int templ)
 
 void MetaWatch::handleStatusChange(const Message &msg)
 {
-	qDebug() << "watch status changed" << msg.data.size();
+	qDebug() << "watch status changed" << msg.options << msg.data.at(0);
 }
 
 void MetaWatch::handleButtonEvent(const Message &msg)
 {
 	if (msg.data.size() < 1) return;
 	quint8 button = msg.data[0];
+
+	qDebug() << "button event" << msg.data.size() << msg.options << msg.data.at(0);
 
 	emit buttonPressed(button); // TODO This is completely broken
 }
@@ -505,10 +632,9 @@ void MetaWatch::socketConnected()
 
 		setDateTime(QDateTime::currentDateTime());
 		configureIdleSystemArea(false);
-		configureWatchMode(ApplicationMode, 240);
-		configureWatchMode(NotificationMode, 30);
 
 		renderIdleScreen();
+		renderNotificationScreen();
 
 		emit connected();
 	}
@@ -622,6 +748,11 @@ void MetaWatch::timedSend()
 	if (_toSend.count() == 0) {
 		_sendTimer->stop();
 	}
+}
+
+void MetaWatch::timedRing()
+{
+	setVibrateMode(true, 200, 200, 3);
 }
 
 void MetaWatch::realSend(const Message &msg)

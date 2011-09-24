@@ -15,17 +15,8 @@ protected:
 	explicit NotificationProvider(QObject *parent = 0);
 	virtual ~NotificationProvider();
 
-public:
-	virtual int getCount(Notification::Type type) = 0;
-
 signals:
-	void notification(const Notification& n);
-	void unreadCountChanged(Notification::Type type);
-
-	void weatherUpdate();
-
-	void incomingCall(const QString& displayName);
-	void endIncomingCall();
+	void incomingNotification(Notification* notification);
 };
 
 }

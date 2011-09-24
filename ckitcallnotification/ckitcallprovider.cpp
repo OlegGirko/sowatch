@@ -1,16 +1,16 @@
 #include <QtCore/QtDebug>
 #include <contextsubscriber/contextproperty.h>
+#include "ckitcallnotification.h"
 #include "ckitcallprovider.h"
 
 using namespace sowatch;
 
 CKitCallProvider::CKitCallProvider(QObject *parent) :
 	NotificationProvider(parent),
-	_inCall(false),
-	_activeCall(new ContextProperty("/com/nokia/CallUi/ActiveCall"))
+	_activeCall(new ContextProperty("/com/nokia/CallUi/ActiveCall")),
+	_notification(0)
 {
 	connect(_activeCall, SIGNAL(valueChanged()), SLOT(activeCallChanged()));
-	qDebug() << _activeCall->value();
 }
 
 CKitCallProvider::~CKitCallProvider()
@@ -18,23 +18,25 @@ CKitCallProvider::~CKitCallProvider()
 
 }
 
-int CKitCallProvider::getCount(Notification::Type type)
-{
-	Q_UNUSED(type);
-	return 0;
-}
-
 void CKitCallProvider::activeCallChanged()
 {
 	QVariantMap info = _activeCall->value().toMap();
 	int state = info["state"].toInt();
 	if (state == 0) {
-		// Incoming call, or update to a incoming call
-		_inCall = true;
-		emit incomingCall(info["displayName"].toString());
-	} else if (_inCall) {
-		// Call is no longer incoming
-		_inCall = false;
-		emit endIncomingCall();
+		QString displayName = info["displayName"].toString();
+		// "Incoming call"
+		if (_notification) {
+			_notification->changeDisplayName(displayName);
+		} else {
+			_notification = new CKitCallNotification(displayName, this);
+			emit incomingNotification(_notification);
+		}
+	} else {
+		// Call is either answered, dropped, missed, ..
+		if (_notification) {
+			_notification->clear();
+			_notification->deleteLater();
+			_notification = 0;
+		}
 	}
 }

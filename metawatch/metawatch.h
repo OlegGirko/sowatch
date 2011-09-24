@@ -78,10 +78,10 @@ public:
 
 	void updateNotificationCount(Notification::Type type, int count);
 
-	void vibrate(bool on);
-	void showNotification(const Notification& n);
-	void startRinging(const QString &text);
-	void stopRinging();
+	void displayIdleScreen();
+	void displayNotification(Notification *n);
+	void displayApplication();
+
 
 	Mode currentMode() const;
 	Mode paintTargetMode() const;
@@ -92,6 +92,9 @@ public:
 	void renderIdleScreen();
 	void renderIdleWeather();
 	void renderIdleCounts();
+	void renderNotificationScreen();
+
+	QImage iconForNotification(const Notification *n);
 
 protected:
 	mutable MetaWatchPaintEngine* _paintEngine;
@@ -100,8 +103,11 @@ protected:
 	QBluetoothAddress _address;
 	QBluetoothSocket* _socket;
 
+	/* Some configurable stuff. */
 	bool _24hMode : 1;
 	bool _dayMonthOrder : 1;
+
+	short _notificationTimeout;
 
 	static const int connectRetryTimesSize = 6;
 	static const int connectRetryTimes[connectRetryTimesSize];
@@ -130,6 +136,10 @@ protected:
 	// Notifications: Unread count
 	uint _nMails, _nCalls, _nIms, _nSms, _nMms;
 
+	// Notifications: timers
+	QTimer* _idleTimer;
+	QTimer* _ringTimer;
+
 	static const quint8 bitRevTable[16];
 	static const quint16 crcTable[256];
 	quint16 calcCrc(const QByteArray& data, int size);
@@ -138,6 +148,7 @@ protected:
 	void send(const Message& msg);
 	void handleMessage(const Message& msg);
 
+	void setVibrateMode(bool enable, uint on, uint off, uint cycles);
 	void updateLine(Mode mode, const QImage& image, int line);
 	void updateLines(Mode mode, const QImage& image, int lineA, int lineB);
 	void updateLines(Mode mode, const QImage& image, const QVector<bool>& lines);
@@ -157,6 +168,7 @@ protected slots:
 	void socketState(QBluetoothSocket::SocketState error);
 	void retryConnect();
 	void timedSend();
+	void timedRing();
 
 private:
 	void realSend(const Message& msg);

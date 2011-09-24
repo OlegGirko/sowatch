@@ -13,6 +13,7 @@ WatchServer::WatchServer(Watch* watch, QObject* parent) :
 {
 	connect(_watch, SIGNAL(connected()), SLOT(watchConnected()));
 	connect(_watch, SIGNAL(disconnected()), SLOT(watchDisconnected()));
+	connect(_watch, SIGNAL(idling()), SLOT(watchIdling()));
 }
 
 Watch* WatchServer::watch()
@@ -23,13 +24,8 @@ Watch* WatchServer::watch()
 void WatchServer::addProvider(NotificationProvider *provider)
 {
 	provider->setParent(this);
-
-	connect(provider, SIGNAL(notification(Notification)), SLOT(notificationEmitted(Notification)));
-	connect(provider, SIGNAL(unreadCountChanged(Notification::Type)), SLOT(unreadCountUpdated(Notification::Type)));
-	connect(provider, SIGNAL(incomingCall(QString)), SLOT(incomingCall(QString)));
-	connect(provider, SIGNAL(endIncomingCall()), SLOT(endIncomingCall()));
-
-	_providers.append(provider);
+	connect(provider, SIGNAL(incomingNotification(Notification*)), SLOT(notificationReceived(Notification*)));
+	// And that's it, really.
 }
 
 void WatchServer::runWatchlet(const QString& id)
@@ -39,7 +35,7 @@ void WatchServer::runWatchlet(const QString& id)
 	}
 	_currentWatchlet = _watchlets[id];
 	if (_watch->isConnected()) {
-		_currentWatchlet->activate();
+		reactivateCurrentWatchlet();
 	}
 }
 
@@ -58,10 +54,41 @@ void WatchServer::registerWatchlet(Watchlet *watchlet)
 	_watchlets[watchlet->id()] = watchlet;
 }
 
+void WatchServer::reactivateCurrentWatchlet()
+{
+	Q_ASSERT(_currentWatchlet != 0);
+	_watch->displayApplication();
+	_currentWatchlet->activate();
+}
+
+void WatchServer::nextNotification()
+{
+	if (!_watch->isConnected()) return;
+	if (!_pendingNotifications.empty()) {
+		Notification *n = _pendingNotifications.head();
+		_watch->displayNotification(n);
+	} else if (_currentWatchlet) {
+		reactivateCurrentWatchlet();
+	} else {
+		_watch->displayIdleScreen();
+	}
+}
+
+uint WatchServer::getNotificationCount(Notification::Type type)
+{
+	uint count = 0;
+	foreach (Notification* n, _notifications[type]) {
+		count += n->count();
+	}
+	return count;
+}
+
 void WatchServer::watchConnected()
 {
-	if (_currentWatchlet) {
-		_currentWatchlet->activate();
+	if (!_pendingNotifications.isEmpty()) {
+		nextNotification();
+	} else if (_currentWatchlet) {
+		reactivateCurrentWatchlet();
 	}
 }
 
@@ -70,30 +97,73 @@ void WatchServer::watchDisconnected()
 	if (_currentWatchlet) {
 		_currentWatchlet->deactivate();
 	}
+	_pendingNotifications.clear();
 }
 
-void WatchServer::notificationEmitted(const Notification &notification)
+void WatchServer::watchIdling()
 {
-	// TODO app loses button focus...
-	_watch->showNotification(notification);
-}
-
-void WatchServer::unreadCountUpdated(Notification::Type type)
-{
-	uint count = 0;
-	foreach(NotificationProvider* provider, _providers)
-	{
-		count += provider->getCount(type);
+	qDebug() << "Watch idling";
+	if (!_pendingNotifications.empty()) {
+		_pendingNotifications.dequeue();
+		nextNotification();
 	}
-	_watch->updateNotificationCount(type, count);
 }
 
-void WatchServer::incomingCall(const QString &displayText)
+void WatchServer::notificationReceived(Notification *notification)
 {
-	qDebug() << "Incoming call" << displayText;
+	const Notification::Type type = notification->type();
+	_notifications[type].append(notification);
+
+	connect(notification, SIGNAL(changed()), SLOT(notificationChanged()));
+	connect(notification, SIGNAL(cleared()), SLOT(notificationCleared()));
+
+	qDebug() << "notification received" << notification->title() << notification->count();
+
+	_watch->updateNotificationCount(type, getNotificationCount(type));
+	if (_pendingNotifications.isEmpty()) {
+		_pendingNotifications.enqueue(notification);
+		nextNotification();
+	} else if (type == Notification::CallNotification) {
+		// Oops, priority!!!!
+		_pendingNotifications.prepend(notification);
+		nextNotification();
+	} else {
+		_pendingNotifications.enqueue(notification);
+	}
 }
 
-void WatchServer::endIncomingCall()
+void WatchServer::notificationChanged()
 {
-	qDebug() << "End incoming call";
+	QObject *obj = sender();
+	if (obj) {
+		Notification* n = static_cast<Notification*>(obj);
+		const Notification::Type type = n->type();
+
+		qDebug() << "notification changed" << n->title() << n->count();
+
+		_watch->updateNotificationCount(type, getNotificationCount(type));
+		if (!_pendingNotifications.isEmpty() && _pendingNotifications.head() == n) {
+			nextNotification();
+		}
+	}
+}
+
+void WatchServer::notificationCleared()
+{
+	QObject *obj = sender();
+	if (obj) {
+		Notification* n = static_cast<Notification*>(obj);
+		const Notification::Type type = n->type();
+		_notifications[type].removeOne(n);
+
+		qDebug() << "notification deleted" << n->title() << n->count();
+
+		_watch->updateNotificationCount(type, getNotificationCount(type));
+		if (!_pendingNotifications.isEmpty() && _pendingNotifications.head() == n) {
+			_pendingNotifications.removeAll(n);
+			nextNotification();
+		} else {
+			_pendingNotifications.removeAll(n);
+		}
+	}
 }

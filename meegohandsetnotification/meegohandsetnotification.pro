@@ -13,12 +13,14 @@ QT       += dbus
 SOURCES += meegohandsetplugin.cpp \
     meegohandsetnotificationprovider.cpp \
     watchnotificationsink.cpp \
-    mnotificationmanagerinterface.cpp
+    mnotificationmanagerinterface.cpp \
+    meegohandsetnotification.cpp
 
 HEADERS += meegohandsetplugin.h \
     meegohandsetnotificationprovider.h \
     watchnotificationsink.h \
-    mnotificationmanagerinterface.h
+    mnotificationmanagerinterface.h \
+    meegohandsetnotification.h
 
 CONFIG += notificationsystem
 
@@ -35,6 +37,8 @@ unix:!symbian {
 	}
 	INSTALLS += target
 }
+
+
 
 
 

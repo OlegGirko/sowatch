@@ -8,6 +8,8 @@ class ContextProperty;
 namespace sowatch
 {
 
+class CKitCallNotification;
+
 class CKitCallProvider : public NotificationProvider
 {
     Q_OBJECT
@@ -15,15 +17,12 @@ public:
     explicit CKitCallProvider(QObject *parent = 0);
 	~CKitCallProvider();
 
-	int getCount(Notification::Type type);
-
 signals:
-	void incomingCall(const QString &displayName);
-	void endIncomingCall();
+	void incomingNotification(Notification *notification);
 
 protected:
-	bool _inCall;
 	ContextProperty *_activeCall;
+	CKitCallNotification *_notification;
 
 protected slots:
 	void activeCallChanged();

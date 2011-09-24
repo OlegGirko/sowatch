@@ -3,16 +3,21 @@
 
 #include <QtCore/QString>
 #include <QtCore/QDateTime>
+#include <QtGui/QImage>
 #include "sowatch_global.h"
 
 namespace sowatch
 {
 
-class SOWATCH_EXPORT Notification
+class SOWATCH_EXPORT Notification : public QObject
 {
+	Q_OBJECT
+	Q_ENUMS(Type)
+
 public:
 	enum Type {
 		OtherNotification = 0,
+		CallNotification,
 		MissedCallNotification,
 		SmsNotification,
 		MmsNotification,
@@ -22,19 +27,23 @@ public:
 		TypeCount
 	};
 
-	Notification(Type type, const QDateTime& dateTime, QString title, QString body);
-	~Notification();
+	explicit Notification(QObject *parent = 0);
+	virtual ~Notification();
 
-	inline Type type() const { return _type; }
-	inline QDateTime dateTime() const { return _dateTime; }
-	inline QString title() const { return _title; }
-	inline QString body() const { return _body; }
+	virtual Type type() const = 0;
+	virtual uint count() const = 0;
+	virtual QDateTime dateTime() const = 0;
+	virtual QString title() const = 0;
+	virtual QString body() const = 0;
+	virtual QImage image() const;
 
-protected:
-	Type _type;
-	QDateTime _dateTime;
-	QString _title;
-	QString _body;
+public slots:
+	virtual void activate() = 0;
+	virtual void clear() = 0;
+
+signals:
+	void changed();
+	void cleared();
 };
 
 }

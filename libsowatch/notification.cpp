@@ -2,12 +2,16 @@
 
 using namespace sowatch;
 
-Notification::Notification(Type type, const QDateTime& dateTime, QString title, QString body)
-	: _type(type), _dateTime(dateTime), _title(title), _body(body)
+Notification::Notification(QObject *parent)
+	: QObject(parent)
 {
 }
 
 Notification::~Notification()
 {
+}
 
+QImage Notification::image() const
+{
+	return QImage();
 }

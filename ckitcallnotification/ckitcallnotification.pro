@@ -10,10 +10,12 @@ TEMPLATE = lib
 QT       += dbus
 
 SOURCES += ckitcallplugin.cpp \
-	ckitcallprovider.cpp
+	ckitcallprovider.cpp \
+    ckitcallnotification.cpp
 
 HEADERS += ckitcallplugin.h \
-	ckitcallprovider.h
+	ckitcallprovider.h \
+    ckitcallnotification.h
 
 CONFIG += link_pkgconfig
 PKGCONFIG += contextsubscriber-1.0
@@ -31,6 +33,8 @@ unix:!symbian {
 	}
 	INSTALLS += target
 }
+
+
 
 
 
