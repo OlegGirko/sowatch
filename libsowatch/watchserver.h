@@ -19,11 +19,15 @@ class SOWATCH_EXPORT WatchServer : public QObject
 {
     Q_OBJECT
 	Q_PROPERTY(Watch* watch READ watch CONSTANT)
+	Q_PROPERTY(QString nextWatchletButton READ nextWatchletButton WRITE setNextWatchletButton)
 
 public:
 	explicit WatchServer(Watch* watch, QObject* parent = 0);
 
 	Watch* watch();
+
+	QString nextWatchletButton() const;
+	void setNextWatchletButton(const QString& value);
 
 	void addProvider(NotificationProvider* provider);
 
@@ -33,6 +37,8 @@ public:
 protected:
 	Watch* _watch;
 
+	char _nextWatchletButton;
+
 	QMap<QString, Watchlet*> _watchlets;
 
 	/** Stores current notifications, classified by type. */
@@ -40,17 +46,22 @@ protected:
 	QQueue<Notification*> _pendingNotifications;
 
 	Watchlet* _currentWatchlet;
+	char _currentWatchletIndex;
 
 	void registerWatchlet(Watchlet *watchlet);
 	void reactivateCurrentWatchlet();
+	void nextWatchlet();
 
 	void nextNotification();
 	uint getNotificationCount(Notification::Type type);
+
+	void goToIdle();
 
 protected slots:
 	void watchConnected();
 	void watchDisconnected();
 	void watchIdling();
+	void watchButtonPress(int button);
 	void notificationReceived(Notification* notification);
 	void notificationChanged();
 	void notificationCleared();

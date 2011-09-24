@@ -27,7 +27,8 @@ SOURCES += \
     watchplugininterface.cpp \
     notification.cpp \
     notificationplugininterface.cpp \
-    notificationprovider.cpp
+    notificationprovider.cpp \
+    watchletplugininterface.cpp
 
 HEADERS +=\
     watchsimulator.h \
@@ -45,7 +46,8 @@ HEADERS +=\
     watchplugininterface.h \
     notification.h \
     notificationplugininterface.h \
-    notificationprovider.h
+    notificationprovider.h \
+    watchletplugininterface.h
 
 install_headers.files = $$HEADERS
 
@@ -68,6 +70,8 @@ unix:!symbian {
     }
 	INSTALLS += install_headers target
 }
+
+
 
 
 

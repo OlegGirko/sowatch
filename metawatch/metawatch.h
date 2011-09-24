@@ -3,6 +3,7 @@
 
 #include <QtCore/QQueue>
 #include <QtCore/QTimer>
+#include <QtCore/QSettings>
 #include <QtConnectivity/QBluetoothAddress>
 #include <QtConnectivity/QBluetoothSocket>
 #include <QtSystemInfo/QSystemAlignedTimer>
@@ -20,10 +21,9 @@ class MetaWatchPaintEngine;
 class MetaWatch : public Watch
 {
     Q_OBJECT
-	Q_ENUMS(MessageType Mode)
 
 public:
-	explicit MetaWatch(const QBluetoothAddress& address, QObject *parent = 0);
+	explicit MetaWatch(const QBluetoothAddress& address, QSettings* settings = 0, QObject *parent = 0);
 	~MetaWatch();
 
 	static const int screenWidth = 96;
@@ -66,28 +66,49 @@ public:
 		NotificationMode = 2
 	};
 
+	enum Button {
+		BtnA = 0,
+		BtnB,
+		BtnC,
+		BtnD,
+		BtnE,
+		BtnF
+	};
+
+	enum ButtonPress {
+		PressOnly = 0,
+		PressAndRelease = 1,
+		HoldAndRelease = 2,
+		LongHoldAndRelease = 3
+	};
+
 	QPaintEngine* paintEngine() const;
 	int metric(PaintDeviceMetric metric) const;
 
 	QString model() const;
+	QStringList buttons() const;
 	bool isConnected() const;
 	bool busy() const;
 
 	QDateTime dateTime();
 	void setDateTime(const QDateTime& dateTime);
 
-	void updateNotificationCount(Notification::Type type, int count);
-
 	void displayIdleScreen();
 	void displayNotification(Notification *n);
 	void displayApplication();
 
+	void grabButton(int button);
+	void ungrabButton(int button);
+
+	void updateNotificationCount(Notification::Type type, int count);
 
 	Mode currentMode() const;
 	Mode paintTargetMode() const;
 	QImage* imageFor(Mode mode);
 	void clear(Mode mode, bool black = false);
 	void update(Mode mode, const QList<QRect>& rects = QList<QRect>());
+	void grabButton(Mode mode, Button button);
+	void ungrabButton(Mode mode, Button button);
 
 	void renderIdleScreen();
 	void renderIdleWeather();
@@ -97,18 +118,32 @@ public:
 	QImage iconForNotification(const Notification *n);
 
 protected:
+	// Some configurable stuff.
+	bool _24hMode : 1;
+	bool _dayMonthOrder : 1;
+	short _notificationTimeout;
+
+	// Notifications: Unread count
+	uint _nMails, _nCalls, _nIms, _nSms, _nMms;
+
+	// Notifications: timers
+	QTimer* _idleTimer;
+	QTimer* _ringTimer;
+
+	// Buttons
+	static const char watchToBtn[8];
+	static const char btnToWatch[8];
+	QStringList _buttonNames;
+
+	// Current watch state
+	Mode _currentMode;
+	Mode _paintMode;
+
+	// For QPaintDevice
 	mutable MetaWatchPaintEngine* _paintEngine;
 	QImage _image[3];
 
-	QBluetoothAddress _address;
-	QBluetoothSocket* _socket;
-
-	/* Some configurable stuff. */
-	bool _24hMode : 1;
-	bool _dayMonthOrder : 1;
-
-	short _notificationTimeout;
-
+	// Timers to retry the connection when the watch is not found.
 	static const int connectRetryTimesSize = 6;
 	static const int connectRetryTimes[connectRetryTimesSize];
 	short _connectRetries;
@@ -116,6 +151,11 @@ protected:
 	QTimer* _connectTimer;
 	QSystemAlignedTimer* _connectAlignedTimer;
 
+	// Connection stuff
+	QBluetoothAddress _address;
+	QBluetoothSocket* _socket;
+
+	// Base watch protocol stuff
 	struct Message {
 		MessageType type;
 		quint8 options;
@@ -128,17 +168,6 @@ protected:
 	QQueue<Message> _toSend;
 	QTimer* _sendTimer;
 	Message _partialReceived;
-
-	Mode _currentMode;
-	Mode _paintMode;
-	quint8 _buttonState;
-
-	// Notifications: Unread count
-	uint _nMails, _nCalls, _nIms, _nSms, _nMms;
-
-	// Notifications: timers
-	QTimer* _idleTimer;
-	QTimer* _ringTimer;
 
 	static const quint8 bitRevTable[16];
 	static const quint16 crcTable[256];
@@ -156,6 +185,8 @@ protected:
 	void configureIdleSystemArea(bool entireScreen);
 	void updateDisplay(Mode mode, bool copy = true);
 	void loadTemplate(Mode mode, int templ);
+	void enableButton(Mode mode, Button button, ButtonPress press);
+	void disableButton(Mode mode, Button button, ButtonPress press);
 
 	void handleStatusChange(const Message& msg);
 	void handleButtonEvent(const Message& msg);

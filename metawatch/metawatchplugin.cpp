@@ -36,7 +36,7 @@ Watch* MetaWatchPlugin::getWatch(const QString& driver, QSettings& settings, QOb
 {
 	if (driver == "metawatch-digital") {
 		QBluetoothAddress address(settings.value("address").toString());
-		return new MetaWatch(address, parent);
+		return new MetaWatch(address, &settings, parent);
 	} else {
 		return 0;
 	}

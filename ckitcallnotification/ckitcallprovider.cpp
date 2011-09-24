@@ -21,9 +21,17 @@ CKitCallProvider::~CKitCallProvider()
 void CKitCallProvider::activeCallChanged()
 {
 	QVariantMap info = _activeCall->value().toMap();
+	qDebug() << "active call changed" << info;
+	if (!info.contains("state")) {
+		qWarning() << "broken active call context property";
+	}
 	int state = info["state"].toInt();
 	if (state == 0) {
 		QString displayName = info["displayName"].toString();
+		if (displayName.isEmpty()) {
+			// Ignore call until display name is not empty.
+			return;
+		}
 		// "Incoming call"
 		if (_notification) {
 			_notification->changeDisplayName(displayName);

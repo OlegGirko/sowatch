@@ -3,6 +3,7 @@
 #include <QtCore/QSettings>
 #include <QtCore/QDir>
 #include <sowatch.h>
+#include <testwatchlet.h>
 #include "daemon.h"
 
 using namespace sowatch;
@@ -108,6 +109,9 @@ void Daemon::initWatch(Watch* watch, QSettings& settings)
 	WatchServer* server = new WatchServer(watch, this);
 	_servers.append(server);
 
+	// Configure the server
+	server->setNextWatchletButton(settings.value("nextWatchletButton").toString());
+
 	// Initialize providers
 	size = settings.beginReadArray("notifications");
 	for (int i = 0; i < size; i++) {
@@ -120,25 +124,40 @@ void Daemon::initWatch(Watch* watch, QSettings& settings)
 		}
 	}
 
+	// Initialize test watchlets
+	new TestWatchlet(server);
+
 	settings.endArray();
 }
 
 void Daemon::loadWatchlets()
 {
-#if 0
 	QDir dir(SOWATCH_WATCHLETS_DIR);
 	foreach (QString file, dir.entryList(QDir::Files)) {
+#if defined(Q_OS_UNIX)
+		// Temporary workaround for QtC deploy plugin issues
+		if (!file.endsWith(".so")) continue;
+#endif
 		QPluginLoader loader(dir.absoluteFilePath(file));
 		QObject *pluginObj = loader.instance();
 		if (pluginObj) {
-			WatchPluginInterface *plugin = qobject_cast<WatchPluginInterface*>(pluginObj);
+#if 0
+			WatchletPluginInterface *plugin = qobject_cast<WatchletPluginInterface*>(pluginObj);
 			if (plugin) {
-				QStringList drivers = plugin->drivers();
-				foreach (const QString& driver, drivers) {
-					_drivers[driver] = plugin;
+				QStringList providers = plugin->providers();
+				foreach (const QString& provider, providers) {
+					_providers[provider] = plugin;
 				}
+			} else {
+				qWarning() << "Invalid plugin" << file;
+				loader.unload();
 			}
+#endif
+		} else {
+			qWarning() << "Invalid plugin" << file << loader.errorString();
+			loader.unload();
 		}
 	}
-#endif
+
+	qDebug() << "loaded watchlets";
 }

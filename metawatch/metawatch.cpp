@@ -9,6 +9,13 @@ QTM_USE_NAMESPACE
 
 #define SINGLE_LINE_UPDATE 0
 
+const char MetaWatch::watchToBtn[8] = {
+	0, 1, 2, 3, -1, 4, 5, -1
+};
+const char MetaWatch::btnToWatch[8] = {
+	0, 1, 2, 3, 5, 6, -1, -1
+};
+
 const int MetaWatch::connectRetryTimes[] = {
 	5, 10, 30, 60, 120, 300
 };
@@ -74,21 +81,17 @@ const quint16 MetaWatch::crcTable[256] = {
 	}
 #endif
 
-MetaWatch::MetaWatch(const QBluetoothAddress& address, QObject *parent) :
+MetaWatch::MetaWatch(const QBluetoothAddress& address, QSettings* settings, QObject* parent) :
 	Watch(parent),
+	_nMails(0), _nCalls(0), _nIms(0), _nSms(0), _nMms(0),
+	_idleTimer(new QTimer(this)), _ringTimer(new QTimer(this)),
+	_currentMode(IdleMode),	_paintMode(IdleMode),
 	_paintEngine(0),
-	_address(address),
-	_socket(0),
-	_24hMode(true), _dayMonthOrder(true), _notificationTimeout(10),
-	_connectRetries(0),
-	_connected(false),
+	_connectRetries(0),	_connected(false),
 	_connectTimer(new QTimer(this)),
 	_connectAlignedTimer(new QSystemAlignedTimer(this)),
-	_sendTimer(new QTimer(this)),
-	_currentMode(IdleMode),
-	_paintMode(IdleMode),
-	_nMails(0), _nCalls(0), _nIms(0), _nSms(0), _nMms(0),
-	_idleTimer(new QTimer(this)), _ringTimer(new QTimer(this))
+	_address(address), _socket(0),
+	_sendTimer(new QTimer(this))
 {
 	QImage baseImage(screenWidth, screenHeight, QImage::Format_MonoLSB);
 	baseImage.setColor(0, QColor(Qt::white).rgb());
@@ -97,13 +100,13 @@ MetaWatch::MetaWatch(const QBluetoothAddress& address, QObject *parent) :
 	_image[ApplicationMode] = baseImage;
 	_image[NotificationMode] = baseImage;
 
-	_connectTimer->setSingleShot(true);
-	_connectAlignedTimer->setSingleShot(true);
-	connect(_connectTimer, SIGNAL(timeout()), SLOT(retryConnect()));
-	connect(_connectAlignedTimer, SIGNAL(timeout()), SLOT(retryConnect()));
+	_buttonNames << "A" << "B" << "C" << "D" << "E" << "F";
 
-	_sendTimer->setInterval(10);
-	connect(_sendTimer, SIGNAL(timeout()), SLOT(timedSend()));
+	if (settings) {
+		_24hMode = settings->value("24hMode", false).toBool();
+		_dayMonthOrder = settings->value("DayMonthOrder", false).toBool();
+		_notificationTimeout = settings->value("NotificationTimeout", 10).toInt();
+	}
 
 	_idleTimer->setInterval(_notificationTimeout * 1000);
 	_idleTimer->setSingleShot(true);
@@ -111,6 +114,14 @@ MetaWatch::MetaWatch(const QBluetoothAddress& address, QObject *parent) :
 
 	_ringTimer->setInterval(2000);
 	connect(_ringTimer, SIGNAL(timeout()), SLOT(timedRing()));
+
+	_connectTimer->setSingleShot(true);
+	_connectAlignedTimer->setSingleShot(true);
+	connect(_connectTimer, SIGNAL(timeout()), SLOT(retryConnect()));
+	connect(_connectAlignedTimer, SIGNAL(timeout()), SLOT(retryConnect()));
+
+	_sendTimer->setInterval(10);
+	connect(_sendTimer, SIGNAL(timeout()), SLOT(timedSend()));
 
 	retryConnect();
 }
@@ -161,6 +172,11 @@ QString MetaWatch::model() const
 	return "metawatch-digital";
 }
 
+QStringList MetaWatch::buttons() const
+{
+	return _buttonNames;
+}
+
 bool MetaWatch::isConnected() const
 {
 	return _connected;
@@ -199,32 +215,6 @@ void MetaWatch::setDateTime(const QDateTime &dateTime)
 	send(msg);
 }
 
-void MetaWatch::updateNotificationCount(Notification::Type type, int count)
-{
-	switch (type) {
-	case Notification::MissedCallNotification:
-		_nCalls = count;
-		break;
-	case Notification::EmailNotification:
-		_nMails = count;
-		break;
-	case Notification::ImNotification:
-		_nIms = count;
-		break;
-	case Notification::SmsNotification:
-		_nSms = count;
-		break;
-	case Notification::MmsNotification:
-		_nMms = count;
-		break;
-	default:
-		// Ignore
-		break;
-	}
-
-	renderIdleCounts();
-}
-
 void MetaWatch::displayIdleScreen()
 {
 	_currentMode = IdleMode;
@@ -234,7 +224,6 @@ void MetaWatch::displayIdleScreen()
 	updateDisplay(IdleMode);
 	// Usually, idle screen is kept updated, so we can show it already.
 	qDebug() << "displayIdle";
-
 }
 
 void MetaWatch::displayNotification(Notification *n)
@@ -313,6 +302,42 @@ void MetaWatch::displayApplication()
 	qDebug() << "displayApplication";
 }
 
+void MetaWatch::grabButton(int button)
+{
+	grabButton(_currentMode, (Button) button);
+}
+
+void MetaWatch::ungrabButton(int button)
+{
+	ungrabButton(_currentMode, (Button) button);
+}
+
+void MetaWatch::updateNotificationCount(Notification::Type type, int count)
+{
+	switch (type) {
+	case Notification::MissedCallNotification:
+		_nCalls = count;
+		break;
+	case Notification::EmailNotification:
+		_nMails = count;
+		break;
+	case Notification::ImNotification:
+		_nIms = count;
+		break;
+	case Notification::SmsNotification:
+		_nSms = count;
+		break;
+	case Notification::MmsNotification:
+		_nMms = count;
+		break;
+	default:
+		// Ignore
+		break;
+	}
+
+	renderIdleCounts();
+}
+
 MetaWatch::Mode MetaWatch::currentMode() const
 {
 	return _currentMode;
@@ -351,6 +376,18 @@ void MetaWatch::clear(Mode mode, bool black)
 {
 	if (!_connected) return;
 	loadTemplate(mode, black ? 1 : 0);
+}
+
+void MetaWatch::grabButton(Mode mode, Button button)
+{
+	enableButton(mode, button, PressOnly);
+	enableButton(mode, button, PressAndRelease);
+}
+
+void MetaWatch::ungrabButton(Mode mode, Button button)
+{
+	disableButton(mode, button, PressOnly);
+	disableButton(mode, button, PressAndRelease);
 }
 
 void MetaWatch::renderIdleScreen()
@@ -602,19 +639,66 @@ void MetaWatch::loadTemplate(Mode mode, int templ)
 	send(msg);
 }
 
+void MetaWatch::enableButton(Mode mode, Button button, ButtonPress press)
+{
+	Message msg(EnableButton, QByteArray(5, 0));
+
+	Q_ASSERT(button >= 0 && button < 8);
+
+	msg.data[0] = mode;
+	msg.data[1] = btnToWatch[button];
+	msg.data[2] = press;
+	msg.data[3] = ButtonEvent;
+	msg.data[4] = 0x80 | ((press << 4) & 0x30) | (button & 0xF);
+
+	send(msg);
+}
+
+void MetaWatch::disableButton(Mode mode, Button button, ButtonPress press)
+{
+	Message msg(DisableButton, QByteArray(3, 0));
+
+	Q_ASSERT(button >= 0 && button < 8);
+
+	msg.data[0] = mode;
+	msg.data[1] = btnToWatch[button];
+	msg.data[2] = press;
+
+	send(msg);
+}
+
 void MetaWatch::handleStatusChange(const Message &msg)
 {
-	qDebug() << "watch status changed" << msg.options << msg.data.at(0);
+	QString s;
+	qDebug() << "watch status changed" << s.sprintf("0x%hx", msg.options) << s.sprintf("0x%hx", msg.data.at(0));
 }
 
 void MetaWatch::handleButtonEvent(const Message &msg)
 {
-	if (msg.data.size() < 1) return;
-	quint8 button = msg.data[0];
+	if (!(msg.options & 0x80)) {
+		// We didn't configure this button, reject.
+		return;
+	}
 
-	qDebug() << "button event" << msg.data.size() << msg.options << msg.data.at(0);
+	quint8 watchBtn = msg.options & 0xF;
+	ButtonPress press = (ButtonPress) ((msg.options & 0x30) >> 4);
+	int button = -1;
 
-	emit buttonPressed(button); // TODO This is completely broken
+	if (watchBtn < 8) {
+		button = watchToBtn[watchBtn];
+	}
+	if (button == -1) {
+		qWarning() << "Unknown watch button" << watchBtn;
+		return;
+	}
+
+	qDebug() << "button event" << button << press;
+
+	if (press == PressOnly) {
+		emit buttonPressed(button);
+	} else if (press == PressAndRelease) {
+		emit buttonReleased(button);
+	}
 }
 
 void MetaWatch::socketConnected()
@@ -628,10 +712,22 @@ void MetaWatch::socketConnected()
 		_partialReceived.data.clear();
 		_currentMode = IdleMode;
 		_paintMode = IdleMode;
-		_buttonState = 0;
 
 		setDateTime(QDateTime::currentDateTime());
 		configureIdleSystemArea(false);
+
+		grabButton(ApplicationMode, BtnA);
+		grabButton(ApplicationMode, BtnB);
+		grabButton(ApplicationMode, BtnC);
+		grabButton(ApplicationMode, BtnD);
+		grabButton(ApplicationMode, BtnE);
+		grabButton(ApplicationMode, BtnF);
+		grabButton(NotificationMode, BtnA);
+		grabButton(NotificationMode, BtnB);
+		grabButton(NotificationMode, BtnC);
+		grabButton(NotificationMode, BtnD);
+		grabButton(NotificationMode, BtnE);
+		grabButton(NotificationMode, BtnF);
 
 		renderIdleScreen();
 		renderNotificationScreen();
@@ -673,12 +769,14 @@ void MetaWatch::socketData()
 	qint64 dataRead;
 
 	if (_partialReceived.type == 0) {
+		/* Still not received even the packet type */
+		/* Receive the full header, 4 bytes. */
 		if (_socket->bytesAvailable() < 4) return; /* Wait for more. */
 		char header[4];
 
 		dataRead = _socket->read(header, 4);
 		if (dataRead < 4 || header[0] != 0x01) {
-			qWarning() << "TODO: Resync/Handle Garbage";
+			qWarning() << "TODO: Resync / Handle Garbage";
 			return;
 		}
 
@@ -686,6 +784,8 @@ void MetaWatch::socketData()
 		_partialReceived.data.resize(header[1] - 6);
 		_partialReceived.options = header[3];
 	}
+
+	/* Got the header; now, try to get the complete packet. */
 	if (_socket->bytesAvailable() < _partialReceived.data.size() + 2) {
 		return; /* Wait for more. */
 	}

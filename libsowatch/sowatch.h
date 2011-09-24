@@ -15,5 +15,6 @@
 #include "watchlet.h"
 #include "graphicswatchlet.h"
 #include "declarativewatchlet.h"
+#include "watchletplugininterface.h"
 
 #endif // SOWATCH_H
