@@ -2,6 +2,7 @@
 #define SOWATCH_DECLARATIVEWATCHLET_H
 
 #include <QtDeclarative/QDeclarativeEngine>
+#include <QtDeclarative/QDeclarativeContext>
 #include <QtDeclarative/QDeclarativeComponent>
 #include <QtDeclarative/QDeclarativeItem>
 #include "graphicswatchlet.h"
@@ -19,6 +20,9 @@ public:
 	explicit DeclarativeWatchlet(WatchServer* server, const QString& id);
 
 	void setSource(const QUrl& url);
+
+	QDeclarativeEngine* engine();
+	QDeclarativeContext* rootContext();
 
 protected slots:
 	void handleComponentStatus(QDeclarativeComponent::Status status);

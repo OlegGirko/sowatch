@@ -33,6 +33,7 @@ public:
 	virtual Type type() const = 0;
 	virtual uint count() const = 0;
 	virtual QDateTime dateTime() const = 0;
+	virtual QString displayTime() const;
 	virtual QString title() const = 0;
 	virtual QString body() const = 0;
 	virtual QImage image() const;

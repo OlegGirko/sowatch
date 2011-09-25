@@ -37,7 +37,8 @@ public:
 protected:
 	Watch* _watch;
 
-	char _nextWatchletButton;
+	int _nextWatchletButton;
+	int _oldNotificationThreshold;
 
 	QMap<QString, Watchlet*> _watchlets;
 
@@ -46,7 +47,7 @@ protected:
 	QQueue<Notification*> _pendingNotifications;
 
 	Watchlet* _currentWatchlet;
-	char _currentWatchletIndex;
+	unsigned char _currentWatchletIndex;
 
 	void registerWatchlet(Watchlet *watchlet);
 	void reactivateCurrentWatchlet();

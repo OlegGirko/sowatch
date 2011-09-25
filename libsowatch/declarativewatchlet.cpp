@@ -54,6 +54,16 @@ void DeclarativeWatchlet::setSource(const QUrl &url)
 	}
 }
 
+QDeclarativeEngine* DeclarativeWatchlet::engine()
+{
+	return _engine;
+}
+
+QDeclarativeContext* DeclarativeWatchlet::rootContext()
+{
+	return _engine->rootContext();
+}
+
 void DeclarativeWatchlet::activate()
 {
 	Watchlet::activate();

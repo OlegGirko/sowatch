@@ -3,7 +3,6 @@
 #include <QtCore/QSettings>
 #include <QtCore/QDir>
 #include <sowatch.h>
-#include <testwatchlet.h>
 #include "daemon.h"
 
 using namespace sowatch;
@@ -13,6 +12,7 @@ Daemon::Daemon(QObject *parent) :
 {
 	loadDrivers();
 	loadProviders();
+	loadWatchlets();
 	initWatches();
 }
 
@@ -121,12 +121,25 @@ void Daemon::initWatch(Watch* watch, QSettings& settings)
 		if (plugin) {
 			NotificationProvider *provider = plugin->getProvider(id, settings, server);
 			server->addProvider(provider);
+		} else {
+			qWarning() << "Unknown notification provider" << id;
 		}
 	}
+	settings.endArray();
 
-	// Initialize test watchlets
-	new TestWatchlet(server);
-
+	// Initialize watchlets
+	size = settings.beginReadArray("watchlets");
+	for (int i = 0; i < size; i++) {
+		settings.setArrayIndex(i);
+		QString id = settings.value("id").toString().toLower();
+		WatchletPluginInterface *plugin = _watchlets[id];
+		if (plugin) {
+			plugin->getWatchlet(id, settings, server);
+			// Watchlets are associated to server via parent-child relationship.
+		} else {
+			qWarning() << "Unknown watchlet" << id;
+		}
+	}
 	settings.endArray();
 }
 
@@ -141,23 +154,21 @@ void Daemon::loadWatchlets()
 		QPluginLoader loader(dir.absoluteFilePath(file));
 		QObject *pluginObj = loader.instance();
 		if (pluginObj) {
-#if 0
 			WatchletPluginInterface *plugin = qobject_cast<WatchletPluginInterface*>(pluginObj);
 			if (plugin) {
-				QStringList providers = plugin->providers();
-				foreach (const QString& provider, providers) {
-					_providers[provider] = plugin;
+				QStringList watchlets = plugin->watchlets();
+				foreach (const QString& watchlet, watchlets) {
+					_watchlets[watchlet] = plugin;
 				}
 			} else {
 				qWarning() << "Invalid plugin" << file;
 				loader.unload();
 			}
-#endif
 		} else {
 			qWarning() << "Invalid plugin" << file << loader.errorString();
 			loader.unload();
 		}
 	}
 
-	qDebug() << "loaded watchlets";
+	qDebug() << "loaded watchlets" << _watchlets.keys();
 }

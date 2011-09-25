@@ -20,6 +20,7 @@ public:
 protected:
 	QMap<QString, WatchPluginInterface*> _drivers;
 	QMap<QString, NotificationPluginInterface*> _providers;
+	QMap<QString, WatchletPluginInterface*> _watchlets;
 	QList<WatchServer*> _servers;
 
 	void loadDrivers();

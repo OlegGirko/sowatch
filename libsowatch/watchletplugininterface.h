@@ -18,7 +18,7 @@ public:
 	virtual ~WatchletPluginInterface();
 
 	virtual QStringList watchlets() = 0;
-	virtual Watchlet* getProvider(const QString& id, QSettings& settings, WatchServer *server) = 0;
+	virtual Watchlet* getWatchlet(const QString& id, QSettings& settings, WatchServer *server) = 0;
 };
 
 }

@@ -11,6 +11,7 @@ using namespace sowatch;
 WatchServer::WatchServer(Watch* watch, QObject* parent) :
 	QObject(parent), _watch(watch),
 	_nextWatchletButton(-1),
+	_oldNotificationThreshold(300),
 	_currentWatchlet(0), _currentWatchletIndex(-1)
 {
 	connect(_watch, SIGNAL(connected()), SLOT(watchConnected()));
@@ -55,7 +56,7 @@ void WatchServer::addProvider(NotificationProvider *provider)
 void WatchServer::runWatchlet(const QString& id)
 {
 	if (_currentWatchlet) {
-		closeWatchlet();
+		_currentWatchlet->deactivate();
 	}
 	qDebug() << "activating watchlet" << id;
 	_currentWatchlet = _watchlets[id];
@@ -67,11 +68,9 @@ void WatchServer::runWatchlet(const QString& id)
 void WatchServer::closeWatchlet()
 {
 	if (_currentWatchlet) {
-		if (_watch->isConnected()) {
-			_currentWatchlet->deactivate();
-		}
+		_currentWatchlet->deactivate();
 		_currentWatchlet = 0;
-		if (_pendingNotifications.empty()) {
+		if (_watch->isConnected() && _pendingNotifications.empty()) {
 			goToIdle();
 		}
 	}
@@ -94,7 +93,6 @@ void WatchServer::nextWatchlet()
 {
 	QStringList watchlets = _watchlets.keys();
 	_currentWatchletIndex++;
-	qDebug() << "next watchlet" << _currentWatchletIndex;
 	if (_currentWatchletIndex >= watchlets.size()) {
 		_currentWatchletIndex = -1;
 		closeWatchlet();
@@ -165,6 +163,7 @@ void WatchServer::watchIdling()
 void WatchServer::watchButtonPress(int button)
 {
 	if (button == _nextWatchletButton) {
+		qDebug() << "next watchlet button pressed";
 		if (_pendingNotifications.empty()) {
 			// No notifications: either app or idle mode.
 			nextWatchlet();
@@ -187,6 +186,12 @@ void WatchServer::notificationReceived(Notification *notification)
 	qDebug() << "notification received" << notification->title() << notification->count();
 
 	_watch->updateNotificationCount(type, getNotificationCount(type));
+
+	QDateTime oldThreshold = QDateTime::currentDateTime().addSecs(-_oldNotificationThreshold);
+	if (notification->dateTime() < oldThreshold) {
+		return; // Do not care about that old notifications...
+	}
+
 	if (_pendingNotifications.isEmpty()) {
 		_pendingNotifications.enqueue(notification);
 		nextNotification();
@@ -226,7 +231,8 @@ void WatchServer::notificationCleared()
 		qDebug() << "notification deleted" << n->title() << n->count();
 
 		_watch->updateNotificationCount(type, getNotificationCount(type));
-		if (!_pendingNotifications.isEmpty() && _pendingNotifications.head() == n) {
+
+		if (!_pendingNotifications.isEmpty() && _pendingNotifications.head() == n) {qDebug() << "removing top notification";
 			_pendingNotifications.removeAll(n);
 			nextNotification();
 		} else {

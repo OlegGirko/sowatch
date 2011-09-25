@@ -1,10 +1,11 @@
 TEMPLATE = subdirs
 SUBDIRS = libsowatch \
 	metawatch \
-	sowatchd
+	sowatchd \
+	sysinfowatchlet
 
 !isEmpty(MEEGO_VERSION_MAJOR) {
-	#SUBDIRS += meegohandsetnotification ckitcallnotification
+	SUBDIRS += meegohandsetnotification ckitcallnotification
 }
 
 unix:!symbian {

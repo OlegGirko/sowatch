@@ -112,7 +112,7 @@ MetaWatch::MetaWatch(const QBluetoothAddress& address, QSettings* settings, QObj
 	_idleTimer->setSingleShot(true);
 	connect(_idleTimer, SIGNAL(timeout()), SIGNAL(idling()));
 
-	_ringTimer->setInterval(2000);
+	_ringTimer->setInterval(2500);
 	connect(_ringTimer, SIGNAL(timeout()), SLOT(timedRing()));
 
 	_connectTimer->setSingleShot(true);
@@ -228,19 +228,28 @@ void MetaWatch::displayIdleScreen()
 
 void MetaWatch::displayNotification(Notification *n)
 {
+	const bool shouldRing = n->type() == Notification::CallNotification;
 	_currentMode = NotificationMode;
 	_paintMode = NotificationMode;
-	const bool shouldRing = n->type() == Notification::CallNotification;
 	configureWatchMode(NotificationMode, shouldRing ? 60 : 10);
+
 	QPainter p;
-	QFont lf("MetaWatch Large 16pt", 14);
-	QFont mf("MetaWatch Large 16pt", 10);
+	QFont sf("MetaWatch Small caps 8pt");
+	QFont lf("MetaWatch Large 16pt");
+	QFont mf("MetaWatch Large 16pt");
 	QImage icon = iconForNotification(n);
-	const int x = 4;
-	const int iconY = 4;
-	const int titleY = 8 + icon.height();
+	const int iconW = icon.width(), iconH = icon.height();
+	const int margin = 4;
+	const int x = margin;
+	const int iconY = margin;
+	const int titleY = margin*2 + iconH;
+	const int dateX = x + iconW + margin;
 	int textFlags;
 	QString text;
+
+	sf.setPixelSize(8);
+	mf.setPixelSize(16);
+	lf.setPixelSize(18);
 
 	qDebug() << "displayNotification" << n->title() << n->body();
 
@@ -250,6 +259,13 @@ void MetaWatch::displayNotification(Notification *n)
 	p.drawImage(x, iconY, icon);
 
 	p.setPen(Qt::black);
+
+	p.setFont(sf);
+	textFlags = Qt::AlignRight | Qt::AlignVCenter | Qt::TextWordWrap;
+	text = n->displayTime();
+	QRect dateRect(dateX, iconY, (screenWidth - dateX) - margin, iconH);
+	p.drawText(dateRect, textFlags, text);
+
 	p.setFont(lf);
 	textFlags = Qt::AlignLeft | Qt::AlignTop | Qt::TextWrapAnywhere;
 	text = n->title();
@@ -261,7 +277,6 @@ void MetaWatch::displayNotification(Notification *n)
 		titleRect = p.boundingRect(titleMaxRect, textFlags, text);
 	}
 
-	qDebug() << titleMaxRect << titleRect;
 	p.drawText(titleMaxRect, textFlags, text);
 
 	p.setFont(mf);
@@ -276,7 +291,7 @@ void MetaWatch::displayNotification(Notification *n)
 	if (bodyRect.width() > bodyMaxRect.width()) {
 		textFlags = Qt::AlignLeft | Qt::AlignTop | Qt::TextWrapAnywhere;
 	}
-	qDebug() << bodyMaxRect << bodyRect;
+
 	p.drawText(bodyMaxRect, textFlags, text);
 
 	p.end();
@@ -332,10 +347,13 @@ void MetaWatch::updateNotificationCount(Notification::Type type, int count)
 		break;
 	default:
 		// Ignore
+		return;
 		break;
 	}
 
-	renderIdleCounts();
+	if (isConnected()) {
+		renderIdleCounts();
+	}
 }
 
 MetaWatch::Mode MetaWatch::currentMode() const
@@ -609,6 +627,8 @@ void MetaWatch::updateLines(Mode mode, const QImage& image, const QVector<bool>&
 			}
 		}
 	}
+
+
 }
 
 void MetaWatch::configureWatchMode(Mode mode, int timeout, bool invert)
@@ -669,8 +689,7 @@ void MetaWatch::disableButton(Mode mode, Button button, ButtonPress press)
 
 void MetaWatch::handleStatusChange(const Message &msg)
 {
-	QString s;
-	qDebug() << "watch status changed" << s.sprintf("0x%hx", msg.options) << s.sprintf("0x%hx", msg.data.at(0));
+	Q_UNUSED(msg);
 }
 
 void MetaWatch::handleButtonEvent(const Message &msg)
@@ -852,7 +871,7 @@ void MetaWatch::timedSend()
 
 void MetaWatch::timedRing()
 {
-	setVibrateMode(true, 200, 200, 3);
+	setVibrateMode(true, 250, 250, 3);
 }
 
 void MetaWatch::realSend(const Message &msg)
