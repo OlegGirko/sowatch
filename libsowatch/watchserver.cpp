@@ -68,6 +68,7 @@ void WatchServer::runWatchlet(const QString& id)
 void WatchServer::closeWatchlet()
 {
 	if (_currentWatchlet) {
+		qDebug() << "deactivating watchlet" << _currentWatchlet->id();
 		_currentWatchlet->deactivate();
 		_currentWatchlet = 0;
 		if (_watch->isConnected() && _pendingNotifications.empty()) {
@@ -183,13 +184,13 @@ void WatchServer::notificationReceived(Notification *notification)
 	connect(notification, SIGNAL(changed()), SLOT(notificationChanged()));
 	connect(notification, SIGNAL(cleared()), SLOT(notificationCleared()));
 
-	qDebug() << "notification received" << notification->title() << notification->count();
+	qDebug() << "notification received" << notification->title() << "(" << notification->count() << ")";
 
 	_watch->updateNotificationCount(type, getNotificationCount(type));
 
 	QDateTime oldThreshold = QDateTime::currentDateTime().addSecs(-_oldNotificationThreshold);
 	if (notification->dateTime() < oldThreshold) {
-		return; // Do not care about that old notifications...
+		return; // Do not care about notifications that old...
 	}
 
 	if (_pendingNotifications.isEmpty()) {
@@ -211,7 +212,7 @@ void WatchServer::notificationChanged()
 		Notification* n = static_cast<Notification*>(obj);
 		const Notification::Type type = n->type();
 
-		qDebug() << "notification changed" << n->title() << n->count();
+		qDebug() << "notification changed" << n->title() << "(" << n->count() << ")";
 
 		_watch->updateNotificationCount(type, getNotificationCount(type));
 		if (!_pendingNotifications.isEmpty() && _pendingNotifications.head() == n) {
@@ -228,11 +229,12 @@ void WatchServer::notificationCleared()
 		const Notification::Type type = n->type();
 		_notifications[type].removeOne(n);
 
-		qDebug() << "notification deleted" << n->title() << n->count();
+		qDebug() << "notification deleted" << n->title() << "(" << n->count() << ")";
 
 		_watch->updateNotificationCount(type, getNotificationCount(type));
 
-		if (!_pendingNotifications.isEmpty() && _pendingNotifications.head() == n) {qDebug() << "removing top notification";
+		if (!_pendingNotifications.isEmpty() && _pendingNotifications.head() == n) {
+			qDebug() << "removing top notification";
 			_pendingNotifications.removeAll(n);
 			nextNotification();
 		} else {

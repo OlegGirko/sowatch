@@ -1,17 +1,38 @@
 #include <QtCore/QDebug>
 #include <math.h>
 
-#include "watch.h"
 #include "watchpaintengine.h"
 
 using namespace sowatch;
 
-WatchPaintEngine::WatchPaintEngine(Watch* watch)
+WatchPaintEngine::WatchPaintEngine()
 	: QPaintEngine(QPaintEngine::AllFeatures),
-	  _watch(watch), _painter(),
-	  _hasPen(false), _hasBrush(false), _clipEnabled(false)
+	  _painter()
 {
 
+}
+
+WatchPaintEngine::~WatchPaintEngine()
+{
+
+}
+
+bool WatchPaintEngine::begin(QPaintDevice *pdev)
+{
+	_damaged = QRegion();
+	_area = QRect(0, 0, pdev->width(), pdev->height());
+	_hasPen = false;
+	_penWidth = 0.0;
+	_hasBrush = false;
+	_clipEnabled = false;
+	_clipRegion = _area;
+
+	return _painter.begin(pdev);
+}
+
+bool WatchPaintEngine::end()
+{
+	return _painter.end();
 }
 
 void WatchPaintEngine::damageMappedRect(const QRect &r)
@@ -57,7 +78,7 @@ void WatchPaintEngine::updateClipRegion(const QRegion& region, Qt::ClipOperation
 	switch(op) {
 		case Qt::NoClip:
 			_clipEnabled = false;
-			_clipRegion = QRegion(0, 0, _watch->width(), _watch->height());
+			_clipRegion = _area;
 			break;
 		case Qt::ReplaceClip:
 			_clipEnabled = true;

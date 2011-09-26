@@ -66,15 +66,14 @@ QDeclarativeContext* DeclarativeWatchlet::rootContext()
 
 void DeclarativeWatchlet::activate()
 {
-	Watchlet::activate();
+	GraphicsWatchlet::activate();
 	_wrapper->activate();
-	_scene->update();
 }
 
 void DeclarativeWatchlet::deactivate()
 {
-	Watchlet::deactivate();
 	_wrapper->deactivate();
+	GraphicsWatchlet::deactivate();
 }
 
 void DeclarativeWatchlet::handleComponentStatus(QDeclarativeComponent::Status status)
@@ -90,7 +89,7 @@ void DeclarativeWatchlet::handleComponentStatus(QDeclarativeComponent::Status st
 	case QDeclarativeComponent::Ready:
 		obj = _component->create();
 		if (_component->isError()) {
-			qWarning() << "QML has instantation errors:";
+			qWarning() << "QML has errors found while creating:";
 			qWarning() <<  _component->errors();
 			return;
 		}
@@ -99,7 +98,7 @@ void DeclarativeWatchlet::handleComponentStatus(QDeclarativeComponent::Status st
 		scene()->addItem(_item);
 		break;
 	case QDeclarativeComponent::Error:
-		qWarning() << "QML has errors:";
+		qWarning() << "QML has errors found while loading:";
 		qWarning() <<  _component->errors();
 		break;
 	}

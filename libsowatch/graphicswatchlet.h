@@ -18,13 +18,14 @@ public:
 	QGraphicsScene* scene();
 	void setScene(QGraphicsScene* scene);
 
-protected:
-	QGraphicsScene* _scene;
-	QRegion _damaged;
-
 protected slots:
 	void sceneChanged(const QList<QRectF>& region);
 
+protected:
+	void activate();
+
+	QGraphicsScene* _scene;
+	QRegion _damaged;
 };
 
 }

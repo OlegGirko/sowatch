@@ -1,4 +1,5 @@
 #include <QtCore/QDebug>
+#include <QtCore/QEvent>
 #include <QtGui/QPainter>
 
 #include "watch.h"
@@ -30,18 +31,25 @@ void GraphicsWatchlet::setScene(QGraphicsScene *scene)
 
 void GraphicsWatchlet::sceneChanged(const QList<QRectF> &region)
 {
-	foreach(const QRectF& r, region)
-	{
+	foreach(const QRectF& r, region) {
 		_damaged += r.toRect();
 	}
-
 	if (!_damaged.isEmpty() && _active && !watch()->busy()) {
 		const QVector<QRect> rects = _damaged.rects();
 		QPainter p(watch());
-		foreach(const QRect& r, rects)
-		{
+
+		foreach(const QRect& r, rects) {
 			_scene->render(&p, r, r, Qt::IgnoreAspectRatio);
 		}
 		_damaged = QRegion();
 	}
+}
+
+void GraphicsWatchlet::activate()
+{
+	Watchlet::activate();
+	// We have to assume that the watch has completely forgot about everything.
+	QRect area(0, 0, watch()->width(), watch()->height());
+	_damaged += area;
+	_scene->update(area);
 }

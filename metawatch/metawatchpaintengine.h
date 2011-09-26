@@ -25,9 +25,10 @@ public:
 protected:
 	bool fillsEntireImage(const QRect& rect);
 
+	static const QRect totalAreaRect;
+
 	MetaWatch* _watch;
 	MetaWatch::Mode _mode;
-	QRect _imageRect;
 	bool _isBrushBlack;
 	bool _isBrushWhite;
 };

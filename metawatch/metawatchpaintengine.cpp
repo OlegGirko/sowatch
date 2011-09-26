@@ -3,24 +3,25 @@
 
 using namespace sowatch;
 
+const QRect MetaWatchPaintEngine::totalAreaRect(0, 0, MetaWatch::screenWidth, MetaWatch::screenHeight);
+
 MetaWatchPaintEngine::MetaWatchPaintEngine(MetaWatch* watch) :
-	WatchPaintEngine(watch), _watch(watch),
-	_imageRect(0, 0, MetaWatch::screenWidth, MetaWatch::screenHeight)
+	WatchPaintEngine(),
+	_watch(watch)
 {
 }
 
 bool MetaWatchPaintEngine::begin(QPaintDevice *pdev)
 {
-	_damaged = QRegion();
 	_watch = static_cast<MetaWatch*>(pdev);
 	_mode = _watch->paintTargetMode();
 
-	return _painter.begin(_watch->imageFor(_mode));
+	return WatchPaintEngine::begin(_watch->imageFor(_mode));
 }
 
 bool MetaWatchPaintEngine::end()
 {
-	bool ret = _painter.end();
+	bool ret = WatchPaintEngine::end();
 	if (ret) {
 		_watch->update(_mode, _damaged.rects().toList());
 	}
@@ -94,7 +95,7 @@ void MetaWatchPaintEngine::updateState(const QPaintEngineState &state)
 
 bool MetaWatchPaintEngine::fillsEntireImage(const QRect& rect)
 {
-	return rect == _imageRect &&
+	return rect == totalAreaRect &&
 			(!_clipEnabled ||
-			 (_clipRegion.numRects() == 1 && _clipRegion.rects().at(0) == _imageRect));
+			 (_clipRegion.numRects() == 1 && _clipRegion.rects().at(0) == totalAreaRect));
 }

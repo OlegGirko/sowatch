@@ -238,6 +238,11 @@ void MetaWatch::displayNotification(Notification *n)
 	QFont lf("MetaWatch Large 16pt");
 	QFont mf("MetaWatch Large 16pt");
 	QImage icon = iconForNotification(n);
+
+	sf.setPixelSize(8);
+	mf.setPixelSize(14);
+	lf.setPixelSize(16);
+
 	const int iconW = icon.width(), iconH = icon.height();
 	const int margin = 4;
 	const int x = margin;
@@ -246,10 +251,6 @@ void MetaWatch::displayNotification(Notification *n)
 	const int dateX = x + iconW + margin;
 	int textFlags;
 	QString text;
-
-	sf.setPixelSize(8);
-	mf.setPixelSize(16);
-	lf.setPixelSize(18);
 
 	qDebug() << "displayNotification" << n->title() << n->body();
 
@@ -267,7 +268,7 @@ void MetaWatch::displayNotification(Notification *n)
 	p.drawText(dateRect, textFlags, text);
 
 	p.setFont(lf);
-	textFlags = Qt::AlignLeft | Qt::AlignTop | Qt::TextWrapAnywhere;
+	textFlags = Qt::AlignLeft | Qt::AlignTop | Qt::TextWordWrap;
 	text = n->title();
 
 	QRect titleMaxRect(x, titleY, screenWidth - x*2, screenHeight - titleY);
@@ -607,6 +608,8 @@ void MetaWatch::updateLines(Mode mode, const QImage& image, const QVector<bool>&
 
 	if (lineCount == 0) return;
 
+	qDebug() << "sending" << lineCount << "rows to watch";
+
 	for (int line = 0; line < lines.size(); line++) {
 		if (lines[line]) {
 			lineCount--;
@@ -690,6 +693,7 @@ void MetaWatch::disableButton(Mode mode, Button button, ButtonPress press)
 void MetaWatch::handleStatusChange(const Message &msg)
 {
 	Q_UNUSED(msg);
+	qDebug() << "got status change message";
 }
 
 void MetaWatch::handleButtonEvent(const Message &msg)
@@ -700,7 +704,7 @@ void MetaWatch::handleButtonEvent(const Message &msg)
 	}
 
 	quint8 watchBtn = msg.options & 0xF;
-	ButtonPress press = (ButtonPress) ((msg.options & 0x30) >> 4);
+	ButtonPress press = static_cast<ButtonPress>((msg.options & 0x30) >> 4);
 	int button = -1;
 
 	if (watchBtn < 8) {
@@ -785,52 +789,58 @@ void MetaWatch::socketDisconnected()
 
 void MetaWatch::socketData()
 {
-	qint64 dataRead;
+	do {
+		qint64 dataRead;
 
-	if (_partialReceived.type == 0) {
-		/* Still not received even the packet type */
-		/* Receive the full header, 4 bytes. */
-		if (_socket->bytesAvailable() < 4) return; /* Wait for more. */
-		char header[4];
+		qDebug() << "received" << _socket->bytesAvailable() << "bytes";
 
-		dataRead = _socket->read(header, 4);
-		if (dataRead < 4 || header[0] != 0x01) {
-			qWarning() << "TODO: Resync / Handle Garbage";
+		if (_partialReceived.type == 0) {
+			/* Still not received even the packet type */
+			/* Receive the full header, 4 bytes. */
+			if (_socket->bytesAvailable() < 4) return; /* Wait for more. */
+			char header[4];
+
+			dataRead = _socket->read(header, 4);
+			if (dataRead < 4 || header[0] != 0x01) {
+				qWarning() << "TODO: Resync to start of frame";
+				return;
+			}
+
+			_partialReceived.type = static_cast<MessageType>(header[2]);
+			_partialReceived.data.resize(header[1] - 6);
+			_partialReceived.options = header[3];
+			qDebug() << "got header";
+		}
+
+		/* We have the header; now, try to get the complete packet. */
+		if (_socket->bytesAvailable() < _partialReceived.data.size() + 2) {
+			return; /* Wait for more. */
+		}
+		dataRead = _socket->read(_partialReceived.data.data(), _partialReceived.data.size());
+		if (dataRead < _partialReceived.data.size()) {
+			qWarning() << "Short read";
 			return;
 		}
 
-		_partialReceived.type = static_cast<MessageType>(header[2]);
-		_partialReceived.data.resize(header[1] - 6);
-		_partialReceived.options = header[3];
-	}
+		char tail[2];
+		dataRead = _socket->read(tail, 2);
+		if (dataRead < 2) {
+			qWarning() << "Short read";
+			return;
+		}
 
-	/* Got the header; now, try to get the complete packet. */
-	if (_socket->bytesAvailable() < _partialReceived.data.size() + 2) {
-		return; /* Wait for more. */
-	}
-	dataRead = _socket->read(_partialReceived.data.data(), _partialReceived.data.size());
-	if (dataRead < _partialReceived.data.size()) {
-		qWarning() << "Short read";
-		return;
-	}
+		quint16 realCrc = calcCrc(_partialReceived);
+		quint16 expectedCrc = tail[1] << 8 | (tail[0] & 0xFFU);
+		if (realCrc == expectedCrc) {
+			handleMessage(_partialReceived);
+		} else {
+			qWarning() << "CRC error?";
+		}
 
-	char tail[2];
-	dataRead = _socket->read(tail, 2);
-	if (dataRead < 2) {
-		qWarning() << "Short read";
-		return;
-	}
-
-	quint16 realCrc = calcCrc(_partialReceived);
-	quint16 expectedCrc = tail[1] << 8 | (tail[0] & 0xFFU);
-	if (realCrc == expectedCrc) {
-		handleMessage(_partialReceived);
-	} else {
-		qWarning() << "CRC error?";
-	}
-
-	_partialReceived.data.clear();
-	_partialReceived.type = NoMessage;
+		// Prepare for the next packet
+		_partialReceived.data.clear();
+		_partialReceived.type = NoMessage;
+	} while (_socket->bytesAvailable() > 0);
 }
 
 void MetaWatch::socketError(QBluetoothSocket::SocketError error)

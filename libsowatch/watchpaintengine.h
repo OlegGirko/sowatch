@@ -6,12 +6,14 @@
 namespace sowatch
 {
 
-class Watch;
-
 class WatchPaintEngine : public QPaintEngine
 {
 public:
-	WatchPaintEngine(Watch* watch);
+	~WatchPaintEngine();
+
+	/* You are supposed to override these two functions. */
+	bool begin(QPaintDevice *pdev);
+	bool end();
 
 	void drawEllipse(const QRectF &r);
 	void drawEllipse(const QRect &r);
@@ -33,15 +35,17 @@ public:
 	void updateState(const QPaintEngineState &state);
 
 protected:
+	WatchPaintEngine();
+
 	void damageMappedRect(const QRect& r);
 	void damageRect(const QRect& r);
 	void damageRect(const QRectF& r);
 	void damagePenStroke(const QLineF& line);
 	void updateClipRegion(const QRegion& region, Qt::ClipOperation op);
 
-	Watch* _watch;
 	QPainter _painter;
 	QRegion _damaged;
+	QRect _area;
 
 	bool _hasPen;
 	qreal _penWidth;

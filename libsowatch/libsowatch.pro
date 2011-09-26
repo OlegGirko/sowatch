@@ -20,7 +20,6 @@ SOURCES += \
     watchlet.cpp \
     watch.cpp \
     testwatchlet.cpp \
-    testdeclarativewatchlet.cpp \
     graphicswatchlet.cpp \
     declarativewatchwrapper.cpp \
     declarativewatchlet.cpp \
@@ -37,7 +36,6 @@ HEADERS +=\
     watchlet.h \
     watch.h \
     testwatchlet.h \
-    testdeclarativewatchlet.h \
     sowatch.h \
     graphicswatchlet.h \
     declarativewatchwrapper.h \
@@ -70,6 +68,8 @@ unix:!symbian {
     }
 	INSTALLS += install_headers target
 }
+
+
 
 
 
