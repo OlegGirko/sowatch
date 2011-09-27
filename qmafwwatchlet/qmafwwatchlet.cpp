@@ -5,12 +5,6 @@
 
 using namespace sowatch;
 
-class WatchletPlayer : public QObject
-{
-	Q_OBJECT
-};
-
-
 QMafwWatchlet::QMafwWatchlet(WatchServer* server) :
 	DeclarativeWatchlet(server, "com.javispedro.sowatch.qmafw"),
 	_registry(MafwRegistry::instance()),

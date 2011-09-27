@@ -2,13 +2,20 @@ Source: sowatch
 Section: user/other
 Priority: optional
 Maintainer: Javier <javier@unknown>
-Build-Depends: debhelper (>= 5), libqt4-dev, libqtm-dev
+Build-Depends: debhelper (>= 5), libqt4-dev, libqtm-dev, libqmafw0-dev,
+ libnotificationsystem-dev
 Standards-Version: 3.7.3
-Homepage: <insert the upstream URL, if relevant>
+Homepage: http://gitorious.org/sowatch
 
 Package: sowatch
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: Bluetooth smartwatch manager
- <insert long description, indented with spaces>
+ sowatch is a manager for bluetooth-enabled smartwatches, whose display
+ can be controlled by a device via a bluetooth based protocol.
+ This framework provides several features for such smartwatches:
+ - Notifications support: incoming calls, messages, etc.
+ - Watchlets: control the media player or view a map.
+ .
+ Currently, only the MetaWatch is supported.
 XSBC-Maemo-Display-Name: Smart Open Watch
