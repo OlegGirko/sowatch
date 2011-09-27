@@ -18,12 +18,13 @@ class SOWATCH_EXPORT Watchlet : public QObject
 
 public:
 	explicit Watchlet(WatchServer *server, const QString& id);
+	virtual ~Watchlet();
 
 	WatchServer* server();
 	Watch* watch();
 
 	Q_INVOKABLE QString id() const;
-	Q_INVOKABLE bool isActive() const;
+	bool isActive() const;
 
 signals:
 	void activeChanged();

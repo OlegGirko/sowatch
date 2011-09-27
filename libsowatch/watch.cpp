@@ -13,3 +13,8 @@ Watch::~Watch()
 {
 
 }
+
+void Watch::vibrate(int msecs)
+{
+	/* The default implementation does nothing. */
+}

@@ -19,7 +19,6 @@ SOURCES += \
     watchpaintengine.cpp \
     watchlet.cpp \
     watch.cpp \
-    testwatchlet.cpp \
     graphicswatchlet.cpp \
     declarativewatchwrapper.cpp \
     declarativewatchlet.cpp \
@@ -35,7 +34,6 @@ HEADERS +=\
     watchpaintengine.h \
     watchlet.h \
     watch.h \
-    testwatchlet.h \
     sowatch.h \
     graphicswatchlet.h \
     declarativewatchwrapper.h \
@@ -68,6 +66,8 @@ unix:!symbian {
     }
 	INSTALLS += install_headers target
 }
+
+
 
 
 

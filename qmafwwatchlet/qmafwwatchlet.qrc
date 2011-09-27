@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/qmafwwatchlet">
+        <file>metawatch-digital.qml</file>
+    </qresource>
+</RCC>

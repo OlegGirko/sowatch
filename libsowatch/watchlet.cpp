@@ -9,6 +9,11 @@ Watchlet::Watchlet(WatchServer *server, const QString& id) :
 	_server->registerWatchlet(this);
 }
 
+Watchlet::~Watchlet()
+{
+
+}
+
 WatchServer* Watchlet::server()
 {
 	return _server;

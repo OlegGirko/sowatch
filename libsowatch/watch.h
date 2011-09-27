@@ -14,7 +14,7 @@ namespace sowatch
 class Watch : public QObject, public QPaintDevice
 {
 	Q_OBJECT
-	Q_PROPERTY(QString model READ model)
+	Q_PROPERTY(QString model READ model CONSTANT)
 	Q_PROPERTY(bool connected READ isConnected)
 	Q_PROPERTY(QDateTime dateTime READ dateTime WRITE setDateTime)
 
@@ -38,13 +38,6 @@ public:
 	/** Sets the current date/time on the watch. */
 	virtual void setDateTime(const QDateTime& dateTime) = 0;
 
-	/** Go back to the idle screen. */
-	virtual void displayIdleScreen() = 0;
-	/** A standard notification; it's up to the watch when to stop showing it. */
-	virtual void displayNotification(Notification* n) = 0;
-	/** Enter application mode. */
-	virtual void displayApplication() = 0;
-
 	/** Grabs a button from whatever is default function is for the current mode. */
 	virtual void grabButton(int button) = 0;
 	/** Restores a button to its default function. */
@@ -52,6 +45,17 @@ public:
 
 	/** Tells the watch to update the unread notifications count, if visible. */
 	virtual void updateNotificationCount(Notification::Type type, int count) = 0;
+
+public slots:
+	/** Go back to the idle screen. */
+	virtual void displayIdleScreen() = 0;
+	/** A standard notification; it's up to the watch when to stop showing it. */
+	virtual void displayNotification(Notification* notification) = 0;
+	/** Enter application mode. */
+	virtual void displayApplication() = 0;
+
+	/** Vibrate for a while. The default implementation does nothing. */
+	virtual void vibrate(int msecs);
 
 signals:
 	/** The watch has been found and linked to. */

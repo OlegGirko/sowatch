@@ -93,14 +93,16 @@ public:
 	QDateTime dateTime();
 	void setDateTime(const QDateTime& dateTime);
 
-	void displayIdleScreen();
-	void displayNotification(Notification *n);
-	void displayApplication();
-
 	void grabButton(int button);
 	void ungrabButton(int button);
 
 	void updateNotificationCount(Notification::Type type, int count);
+
+	void displayIdleScreen();
+	void displayNotification(Notification *notification);
+	void displayApplication();
+
+	void vibrate(int msecs);
 
 	Mode currentMode() const;
 	Mode paintTargetMode() const;
@@ -121,6 +123,9 @@ protected:
 	// Some configurable stuff.
 	bool _24hMode : 1;
 	bool _dayMonthOrder : 1;
+	bool _invertedIdle : 1;
+	bool _invertedNotifications : 1;
+	bool _invertedApplications : 1;
 	short _notificationTimeout;
 
 	// Notifications: Unread count
@@ -131,7 +136,6 @@ protected:
 	QTimer* _ringTimer;
 
 	// Buttons
-	static const char watchToBtn[8];
 	static const char btnToWatch[8];
 	QStringList _buttonNames;
 
@@ -181,7 +185,7 @@ protected:
 	void updateLine(Mode mode, const QImage& image, int line);
 	void updateLines(Mode mode, const QImage& image, int lineA, int lineB);
 	void updateLines(Mode mode, const QImage& image, const QVector<bool>& lines);
-	void configureWatchMode(Mode mode, int timeout, bool invert = false);
+	void configureWatchMode(Mode mode, int timeout, bool invert);
 	void configureIdleSystemArea(bool entireScreen);
 	void updateDisplay(Mode mode, bool copy = true);
 	void loadTemplate(Mode mode, int templ);
@@ -203,6 +207,7 @@ protected slots:
 
 private:
 	void realSend(const Message& msg);
+	void realReceive(bool block);
 };
 
 }

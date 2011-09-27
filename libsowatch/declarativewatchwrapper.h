@@ -21,6 +21,9 @@ public:
 	Q_INVOKABLE QString model() const;
 	Q_INVOKABLE bool active() const;
 
+public slots:
+	void vibrate(int msecs);
+
 signals:
 	void buttonPressed(int button);
 	void buttonReleased(int button);

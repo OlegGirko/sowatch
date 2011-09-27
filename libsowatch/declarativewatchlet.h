@@ -18,18 +18,20 @@ class SOWATCH_EXPORT DeclarativeWatchlet : public GraphicsWatchlet
     Q_OBJECT
 public:
 	explicit DeclarativeWatchlet(WatchServer* server, const QString& id);
+	~DeclarativeWatchlet();
 
 	void setSource(const QUrl& url);
 
 	QDeclarativeEngine* engine();
 	QDeclarativeContext* rootContext();
-
-protected slots:
-	void handleComponentStatus(QDeclarativeComponent::Status status);
+	QDeclarativeItem* rootObject();
 
 protected:
 	void activate();
 	void deactivate();
+
+private:
+	void setRootObject(QDeclarativeItem* item);
 
 	static bool _registered;
 	QDeclarativeEngine* _engine;
@@ -37,6 +39,8 @@ protected:
 	QDeclarativeItem* _item;
 	DeclarativeWatchWrapper* _wrapper;
 
+private slots:
+	void handleComponentStatus(QDeclarativeComponent::Status status);
 };
 
 }

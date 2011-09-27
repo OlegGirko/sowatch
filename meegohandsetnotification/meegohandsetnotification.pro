@@ -1,13 +1,7 @@
-#-------------------------------------------------
-#
-# Project created by QtCreator 2011-09-18T18:48:13
-#
-#-------------------------------------------------
-
 
 TARGET = meegohandsetnotification
 TEMPLATE = lib
-# CONFIG   += plugin # Stupid Qt creator doesn't want to deploy plugins
+# CONFIG   += plugin
 QT       += dbus
 
 SOURCES += meegohandsetplugin.cpp \
@@ -25,7 +19,6 @@ HEADERS += meegohandsetplugin.h \
 CONFIG += notificationsystem
 
 unix: LIBS += -L$$OUT_PWD/../libsowatch/ -lsowatch
-
 INCLUDEPATH += $$PWD/../libsowatch
 DEPENDPATH += $$PWD/../libsowatch
 

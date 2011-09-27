@@ -20,6 +20,13 @@ bool DeclarativeWatchWrapper::active() const
 	return _active;
 }
 
+void DeclarativeWatchWrapper::vibrate(int msecs)
+{
+	if (_active) {
+		_watch->vibrate(msecs);
+	}
+}
+
 void DeclarativeWatchWrapper::activate()
 {
 	if (!_active) {
@@ -33,8 +40,7 @@ void DeclarativeWatchWrapper::activate()
 void DeclarativeWatchWrapper::deactivate()
 {
 	if (_active) {
-		disconnect(this, SIGNAL(buttonPressed(int)));
-		disconnect(this, SIGNAL(buttonReleased(int)));
+		disconnect(_watch, 0, this, 0);
 		_active = false;
 		emit activeChanged();
 	}

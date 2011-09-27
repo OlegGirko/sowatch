@@ -29,6 +29,11 @@ DeclarativeWatchlet::DeclarativeWatchlet(WatchServer* server, const QString& id)
 	_engine->rootContext()->setContextProperty("watch", _wrapper);
 }
 
+DeclarativeWatchlet::~DeclarativeWatchlet()
+{
+
+}
+
 void DeclarativeWatchlet::setSource(const QUrl &url)
 {
 	if (_item) {
@@ -64,6 +69,11 @@ QDeclarativeContext* DeclarativeWatchlet::rootContext()
 	return _engine->rootContext();
 }
 
+QDeclarativeItem* DeclarativeWatchlet::rootObject()
+{
+	return _item;
+}
+
 void DeclarativeWatchlet::activate()
 {
 	GraphicsWatchlet::activate();
@@ -74,6 +84,19 @@ void DeclarativeWatchlet::deactivate()
 {
 	_wrapper->deactivate();
 	GraphicsWatchlet::deactivate();
+}
+
+void DeclarativeWatchlet::setRootObject(QDeclarativeItem *item)
+{
+	Q_ASSERT(_item == 0); /* This function should not be called with a current object. */
+	if (!item) {
+		qWarning() << "QML root object is not a declarative item?";
+		return;
+	}
+
+	_item = item;
+	// TODO Resize _item
+	scene()->addItem(_item);
 }
 
 void DeclarativeWatchlet::handleComponentStatus(QDeclarativeComponent::Status status)
@@ -93,9 +116,7 @@ void DeclarativeWatchlet::handleComponentStatus(QDeclarativeComponent::Status st
 			qWarning() <<  _component->errors();
 			return;
 		}
-		Q_ASSERT(_item == 0);
-		_item = qobject_cast<QDeclarativeItem*>(obj);
-		scene()->addItem(_item);
+		setRootObject(qobject_cast<QDeclarativeItem*>(obj));
 		break;
 	case QDeclarativeComponent::Error:
 		qWarning() << "QML has errors found while loading:";

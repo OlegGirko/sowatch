@@ -21,6 +21,6 @@ void SysInfoWatchlet::handleActivated()
 	if (cfgs.size() > 0) {
 		rootContext()->setContextProperty("networkName", cfgs[0].name());
 	} else {
-		rootContext()->setContextProperty("networkName", "");
+		rootContext()->setContextProperty("networkName", "-");
 	}
 }

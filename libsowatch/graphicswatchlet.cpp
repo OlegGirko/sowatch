@@ -8,8 +8,15 @@
 using namespace sowatch;
 
 GraphicsWatchlet::GraphicsWatchlet(WatchServer* server, const QString& id) :
-	Watchlet(server, id), _scene(0), _damaged()
+	Watchlet(server, id), _scene(0), _frameTimer(), _damaged()
 {
+	_frameTimer.setSingleShot(true);
+	connect(&_frameTimer, SIGNAL(timeout()), SLOT(frameTimeout()));
+}
+
+GraphicsWatchlet::~GraphicsWatchlet()
+{
+
 }
 
 QGraphicsScene* GraphicsWatchlet::scene()
@@ -20,7 +27,7 @@ QGraphicsScene* GraphicsWatchlet::scene()
 void GraphicsWatchlet::setScene(QGraphicsScene *scene)
 {
 	if (_scene) {
-		disconnect(this, SLOT(sceneChanged(QList<QRectF>)));
+		disconnect(_scene, 0, this, 0);
 	}
 	_scene = scene;
 	if (_scene) {
@@ -34,15 +41,26 @@ void GraphicsWatchlet::sceneChanged(const QList<QRectF> &region)
 	foreach(const QRectF& r, region) {
 		_damaged += r.toRect();
 	}
-	if (!_damaged.isEmpty() && _active && !watch()->busy()) {
-		const QVector<QRect> rects = _damaged.rects();
-		QPainter p(watch());
-
-		foreach(const QRect& r, rects) {
-			_scene->render(&p, r, r, Qt::IgnoreAspectRatio);
-		}
-		_damaged = QRegion();
+	if (!_damaged.isEmpty()) {
+		_frameTimer.start(frameDelay);
 	}
+}
+
+void GraphicsWatchlet::frameTimeout()
+{
+	if (!_active) return; // Watchlet was ejected, do not draw.
+	if (watch()->busy()) {
+		_frameTimer.start(busyFrameDelay);
+		return;
+	}
+
+	const QVector<QRect> rects = _damaged.rects();
+	QPainter p(watch());
+
+	foreach(const QRect& r, rects) {
+		_scene->render(&p, r, r, Qt::IgnoreAspectRatio);
+	}
+	_damaged = QRegion();
 }
 
 void GraphicsWatchlet::activate()
@@ -52,4 +70,10 @@ void GraphicsWatchlet::activate()
 	QRect area(0, 0, watch()->width(), watch()->height());
 	_damaged += area;
 	_scene->update(area);
+}
+
+void GraphicsWatchlet::deactivate()
+{
+	_frameTimer.stop();
+	Watchlet::deactivate();
 }

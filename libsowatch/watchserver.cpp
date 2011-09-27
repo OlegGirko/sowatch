@@ -49,7 +49,7 @@ void WatchServer::setNextWatchletButton(const QString& value)
 void WatchServer::addProvider(NotificationProvider *provider)
 {
 	provider->setParent(this);
-	connect(provider, SIGNAL(incomingNotification(Notification*)), SLOT(notificationReceived(Notification*)));
+	connect(provider, SIGNAL(incomingNotification(Notification*)), SLOT(postNotification(Notification*)));
 	// And that's it, really.
 }
 
@@ -80,7 +80,9 @@ void WatchServer::closeWatchlet()
 void WatchServer::registerWatchlet(Watchlet *watchlet)
 {
 	Q_ASSERT(watchlet->_server == this);
-	_watchlets[watchlet->id()] = watchlet;
+	QString id = watchlet->id();
+	_watchlets[id] = watchlet;
+	_watchletIds.append(id);
 }
 
 void WatchServer::reactivateCurrentWatchlet()
@@ -92,13 +94,13 @@ void WatchServer::reactivateCurrentWatchlet()
 
 void WatchServer::nextWatchlet()
 {
-	QStringList watchlets = _watchlets.keys();
+	qDebug() << "current watchlet index" << _currentWatchletIndex;
 	_currentWatchletIndex++;
-	if (_currentWatchletIndex >= watchlets.size()) {
+	if (_currentWatchletIndex >= _watchletIds.size() || _currentWatchletIndex < 0) {
 		_currentWatchletIndex = -1;
 		closeWatchlet();
 	} else {
-		QString watchlet = watchlets.at(_currentWatchletIndex);
+		QString watchlet = _watchletIds.at(_currentWatchletIndex);
 		runWatchlet(watchlet);
 	}
 }
@@ -176,7 +178,7 @@ void WatchServer::watchButtonPress(int button)
 	}
 }
 
-void WatchServer::notificationReceived(Notification *notification)
+void WatchServer::postNotification(Notification *notification)
 {
 	const Notification::Type type = notification->type();
 	_notifications[type].append(notification);

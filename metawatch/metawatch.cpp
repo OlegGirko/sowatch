@@ -9,9 +9,6 @@ QTM_USE_NAMESPACE
 
 #define SINGLE_LINE_UPDATE 0
 
-const char MetaWatch::watchToBtn[8] = {
-	0, 1, 2, 3, -1, 4, 5, -1
-};
 const char MetaWatch::btnToWatch[8] = {
 	0, 1, 2, 3, 5, 6, -1, -1
 };
@@ -106,6 +103,9 @@ MetaWatch::MetaWatch(const QBluetoothAddress& address, QSettings* settings, QObj
 		_24hMode = settings->value("24hMode", false).toBool();
 		_dayMonthOrder = settings->value("DayMonthOrder", false).toBool();
 		_notificationTimeout = settings->value("NotificationTimeout", 10).toInt();
+		_invertedIdle = settings->value("InvertedIdleScreen", false).toBool();
+		_invertedNotifications = settings->value("InvertedNotifications", false).toBool();
+		_invertedApplications = settings->value("InvertedApplications", false).toBool();
 	}
 
 	_idleTimer->setInterval(_notificationTimeout * 1000);
@@ -215,6 +215,45 @@ void MetaWatch::setDateTime(const QDateTime &dateTime)
 	send(msg);
 }
 
+void MetaWatch::grabButton(int button)
+{
+	grabButton(_currentMode, (Button) button);
+}
+
+void MetaWatch::ungrabButton(int button)
+{
+	ungrabButton(_currentMode, (Button) button);
+}
+
+void MetaWatch::updateNotificationCount(Notification::Type type, int count)
+{
+	switch (type) {
+	case Notification::MissedCallNotification:
+		_nCalls = count;
+		break;
+	case Notification::EmailNotification:
+		_nMails = count;
+		break;
+	case Notification::ImNotification:
+		_nIms = count;
+		break;
+	case Notification::SmsNotification:
+		_nSms = count;
+		break;
+	case Notification::MmsNotification:
+		_nMms = count;
+		break;
+	default:
+		// Ignore
+		return;
+		break;
+	}
+
+	if (isConnected()) {
+		renderIdleCounts();
+	}
+}
+
 void MetaWatch::displayIdleScreen()
 {
 	_currentMode = IdleMode;
@@ -231,7 +270,7 @@ void MetaWatch::displayNotification(Notification *n)
 	const bool shouldRing = n->type() == Notification::CallNotification;
 	_currentMode = NotificationMode;
 	_paintMode = NotificationMode;
-	configureWatchMode(NotificationMode, shouldRing ? 60 : 10);
+	configureWatchMode(NotificationMode, shouldRing ? 120 : 10, _invertedNotifications);
 
 	QPainter p;
 	QFont sf("MetaWatch Small caps 8pt");
@@ -314,47 +353,13 @@ void MetaWatch::displayApplication()
 	_paintMode = ApplicationMode;
 	_ringTimer->stop();
 	_idleTimer->stop();
-	configureWatchMode(ApplicationMode, 250);
+	configureWatchMode(ApplicationMode, 250, _invertedApplications);
 	qDebug() << "displayApplication";
 }
 
-void MetaWatch::grabButton(int button)
+void MetaWatch::vibrate(int msecs)
 {
-	grabButton(_currentMode, (Button) button);
-}
-
-void MetaWatch::ungrabButton(int button)
-{
-	ungrabButton(_currentMode, (Button) button);
-}
-
-void MetaWatch::updateNotificationCount(Notification::Type type, int count)
-{
-	switch (type) {
-	case Notification::MissedCallNotification:
-		_nCalls = count;
-		break;
-	case Notification::EmailNotification:
-		_nMails = count;
-		break;
-	case Notification::ImNotification:
-		_nIms = count;
-		break;
-	case Notification::SmsNotification:
-		_nSms = count;
-		break;
-	case Notification::MmsNotification:
-		_nMms = count;
-		break;
-	default:
-		// Ignore
-		return;
-		break;
-	}
-
-	if (isConnected()) {
-		renderIdleCounts();
-	}
+	setVibrateMode(true, msecs, 0, 1);
 }
 
 MetaWatch::Mode MetaWatch::currentMode() const
@@ -703,19 +708,15 @@ void MetaWatch::handleButtonEvent(const Message &msg)
 		return;
 	}
 
-	quint8 watchBtn = msg.options & 0xF;
 	ButtonPress press = static_cast<ButtonPress>((msg.options & 0x30) >> 4);
-	int button = -1;
+	int button = msg.options & 0xF;
 
-	if (watchBtn < 8) {
-		button = watchToBtn[watchBtn];
-	}
-	if (button == -1) {
-		qWarning() << "Unknown watch button" << watchBtn;
+	if (button >= 6) {
+		qWarning() << "Unknown watch button" << button;
 		return;
 	}
 
-	qDebug() << "button event" << button << press;
+	qDebug() << "button event" << button << " (" << press << ")";
 
 	if (press == PressOnly) {
 		emit buttonPressed(button);
@@ -736,9 +737,14 @@ void MetaWatch::socketConnected()
 		_currentMode = IdleMode;
 		_paintMode = IdleMode;
 
+		// Sync watch date & time
 		setDateTime(QDateTime::currentDateTime());
+		// Configure to show watch-rendered clock in idle screen
 		configureIdleSystemArea(false);
+		// Follow inverted screen user preference
+		configureWatchMode(IdleMode, 0, _invertedIdle);
 
+		// Grab all buttons in both notification and application modes
 		grabButton(ApplicationMode, BtnA);
 		grabButton(ApplicationMode, BtnB);
 		grabButton(ApplicationMode, BtnC);
@@ -752,6 +758,7 @@ void MetaWatch::socketConnected()
 		grabButton(NotificationMode, BtnE);
 		grabButton(NotificationMode, BtnF);
 
+		// Render the idle screen from zero
 		renderIdleScreen();
 		renderNotificationScreen();
 
@@ -789,58 +796,7 @@ void MetaWatch::socketDisconnected()
 
 void MetaWatch::socketData()
 {
-	do {
-		qint64 dataRead;
-
-		qDebug() << "received" << _socket->bytesAvailable() << "bytes";
-
-		if (_partialReceived.type == 0) {
-			/* Still not received even the packet type */
-			/* Receive the full header, 4 bytes. */
-			if (_socket->bytesAvailable() < 4) return; /* Wait for more. */
-			char header[4];
-
-			dataRead = _socket->read(header, 4);
-			if (dataRead < 4 || header[0] != 0x01) {
-				qWarning() << "TODO: Resync to start of frame";
-				return;
-			}
-
-			_partialReceived.type = static_cast<MessageType>(header[2]);
-			_partialReceived.data.resize(header[1] - 6);
-			_partialReceived.options = header[3];
-			qDebug() << "got header";
-		}
-
-		/* We have the header; now, try to get the complete packet. */
-		if (_socket->bytesAvailable() < _partialReceived.data.size() + 2) {
-			return; /* Wait for more. */
-		}
-		dataRead = _socket->read(_partialReceived.data.data(), _partialReceived.data.size());
-		if (dataRead < _partialReceived.data.size()) {
-			qWarning() << "Short read";
-			return;
-		}
-
-		char tail[2];
-		dataRead = _socket->read(tail, 2);
-		if (dataRead < 2) {
-			qWarning() << "Short read";
-			return;
-		}
-
-		quint16 realCrc = calcCrc(_partialReceived);
-		quint16 expectedCrc = tail[1] << 8 | (tail[0] & 0xFFU);
-		if (realCrc == expectedCrc) {
-			handleMessage(_partialReceived);
-		} else {
-			qWarning() << "CRC error?";
-		}
-
-		// Prepare for the next packet
-		_partialReceived.data.clear();
-		_partialReceived.type = NoMessage;
-	} while (_socket->bytesAvailable() > 0);
+	realReceive(false);
 }
 
 void MetaWatch::socketError(QBluetoothSocket::SocketError error)
@@ -905,4 +861,65 @@ void MetaWatch::realSend(const Message &msg)
 	//qDebug() << "Sending" << data.toHex();
 
 	_socket->write(data);
+}
+
+void MetaWatch::realReceive(bool block)
+{
+	do {
+		qint64 dataRead;
+
+		qDebug() << "received" << _socket->bytesAvailable() << "bytes";
+
+		if (_partialReceived.type == 0) {
+			/* Still not received even the packet type */
+			/* Receive the full header, 4 bytes. */
+			if (_socket->bytesAvailable() < 4 && !block) {
+				/* Still not enough data available. */
+				return; /* Wait for more, if non blocking. */
+			}
+			char header[4];
+
+			dataRead = _socket->read(header, 4);
+			if (dataRead < 4 || header[0] != 0x01) {
+				qWarning() << "TODO: Resync to start of frame";
+				return;
+			}
+
+			_partialReceived.type = static_cast<MessageType>(header[2]);
+			_partialReceived.data.resize(header[1] - 6);
+			_partialReceived.options = header[3];
+			qDebug() << "got header";
+		}
+
+		/* We have the header; now, try to get the complete packet. */
+		if (_socket->bytesAvailable() < (_partialReceived.data.size() + 2) &&
+			!block) {
+			return; /* Wait for more. */
+		}
+		dataRead = _socket->read(_partialReceived.data.data(), _partialReceived.data.size());
+		if (dataRead < _partialReceived.data.size()) {
+			qWarning() << "Short read";
+			return;
+		}
+
+		char tail[2];
+		dataRead = _socket->read(tail, 2);
+		if (dataRead < 2) {
+			qWarning() << "Short read";
+			return;
+		}
+
+		quint16 realCrc = calcCrc(_partialReceived);
+		quint16 expectedCrc = tail[1] << 8 | (tail[0] & 0xFFU);
+		if (realCrc == expectedCrc) {
+			handleMessage(_partialReceived);
+		} else {
+			qWarning() << "CRC error?";
+		}
+
+		// Prepare for the next packet
+		_partialReceived.data.clear();
+		_partialReceived.type = NoMessage;
+	} while (_socket->bytesAvailable() > 0 && !block);
+	// Loop until there are no more messages, or we are blocking and have received one.
 }

@@ -2,6 +2,7 @@
 #define SOWATCH_WATCHSERVER_H
 
 #include <QtCore/QList>
+#include <QtCore/QStringList>
 #include <QtCore/QMap>
 #include <QtCore/QQueue>
 
@@ -31,39 +32,49 @@ public:
 
 	void addProvider(NotificationProvider* provider);
 
+public slots:
+	void postNotification(Notification *notification);
 	void runWatchlet(const QString& id);
 	void closeWatchlet();
+	void nextWatchlet();
 
-protected:
+private:
 	Watch* _watch;
 
+	/** The watch button that causes next watchlet to be run. */
 	int _nextWatchletButton;
+	/** The amount of seconds that have to pass for a notification to be considered "outdated" and not shown. */
 	int _oldNotificationThreshold;
 
+	/** A list of watchlets in order, for use by nextWatchlet() */
+	QStringList _watchletIds;
+	/** Actual Watchlet child objects by id. */
 	QMap<QString, Watchlet*> _watchlets;
 
-	/** Stores current notifications, classified by type. */
+	/** Stores current live notifications, classified by type. */
 	QList<Notification*> _notifications[Notification::TypeCount];
+	/** A list of notifications that are yet to be shown to the user. */
 	QQueue<Notification*> _pendingNotifications;
 
+	/** Current watchlet. */
 	Watchlet* _currentWatchlet;
-	unsigned char _currentWatchletIndex;
+	/** The current watchlet index if any, for use by nextWatchlet() */
+	int _currentWatchletIndex;
 
 	void registerWatchlet(Watchlet *watchlet);
 	void reactivateCurrentWatchlet();
-	void nextWatchlet();
 
 	void nextNotification();
 	uint getNotificationCount(Notification::Type type);
 
 	void goToIdle();
 
-protected slots:
+private slots:
 	void watchConnected();
 	void watchDisconnected();
 	void watchIdling();
 	void watchButtonPress(int button);
-	void notificationReceived(Notification* notification);
+
 	void notificationChanged();
 	void notificationCleared();
 
