@@ -244,8 +244,7 @@ void MetaWatch::updateNotificationCount(Notification::Type type, int count)
 		_nMms = count;
 		break;
 	default:
-		// Ignore
-		return;
+		return; // Since this notification won't show up in idle screen, we do not redraw.
 		break;
 	}
 
