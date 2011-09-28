@@ -11,11 +11,11 @@ Package: sowatch
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: Bluetooth smartwatch manager
- sowatch is a manager for bluetooth-enabled smartwatches, whose display
+ Sowatch is a manager for bluetooth-enabled smartwatches, whose display
  can be controlled by a device via a bluetooth based protocol.
  This framework provides several features for such smartwatches:
  - Notifications support: incoming calls, messages, etc.
  - Watchlets: control the media player or view a map.
  .
  Currently, only the MetaWatch is supported.
-XSBC-Maemo-Display-Name: Smart Open Watch
+XSBC-Maemo-Display-Name: Sowatch

@@ -1,0 +1,15 @@
+Source: sowatch
+Section: user/hidden
+Priority: optional
+Maintainer: Javier <javier@unknown>
+Build-Depends: debhelper (>= 5), libqt4-dev
+Standards-Version: 3.7.3
+Homepage: <insert the upstream URL, if relevant>
+
+Package: sowatch
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Bluetooth smartwatch manager
+ <insert long description, indented with spaces>
+XB-Maemo-Display-Name: Sowatch
+XB-Maemo-Icon-26: 
