@@ -10,7 +10,7 @@ Rectangle {
 		anchors.fill: parent
 		fillMode: Image.PreserveAspectFit
 		smooth: true
-		source: player.imageUrl
+		source: player.mediaArt
 	}
 
 	Rectangle {

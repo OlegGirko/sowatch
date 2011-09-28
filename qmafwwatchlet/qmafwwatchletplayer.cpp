@@ -18,7 +18,9 @@ QMafwWatchletPlayer::QMafwWatchletPlayer(QMafwWatchlet* watchlet) :
 	_state(MafwRenderer::Stopped),
 	_title(tr("No media")),
 	_album(),
-	_imageUrl()
+	_artist(),
+	_rendererArt(),
+	_mediaArt()
 {
 	Q_ASSERT(watchlet);
 }
@@ -38,9 +40,9 @@ QString QMafwWatchletPlayer::artist() const
 	return _artist;
 }
 
-QUrl QMafwWatchletPlayer::imageUrl() const
+QUrl QMafwWatchletPlayer::mediaArt() const
 {
-	return _imageUrl;
+	return _mediaArt;
 }
 
 void QMafwWatchletPlayer::activate()
@@ -120,10 +122,15 @@ void QMafwWatchletPlayer::setRenderer(MafwRenderer * renderer)
 	_renderer = renderer;
 	reconnect();
 	if (!_renderer && _active) {
-		_imageUrl.clear();
 		_title = tr("No media");
-		emit imageUrlChanged();
 		emit titleChanged();
+		_album.clear();
+		emit albumChanged();
+		_artist.clear();
+		emit artistChanged();
+		_rendererArt.clear();
+		_mediaArt.clear();
+		emit mediaArtChanged();
 	}
 }
 
@@ -167,7 +174,7 @@ QString QMafwWatchletPlayer::mediaArtPath() const
 	QByteArray first_hash = QCryptographicHash::hash(artist.toUtf8(), QCryptographicHash::Md5).toHex();
 	QByteArray second_hash = QCryptographicHash::hash(album.toUtf8(), QCryptographicHash::Md5).toHex();
 	QString file = QString("album-%1-%2.jpeg").arg(first_hash.constData()).arg(second_hash.constData());
-	qDebug() << "testing" << file;
+	qDebug() << "checking for albumart in" << file;
 	if (dir.exists(file)) {
 		return dir.absoluteFilePath(file);
 	}
@@ -175,7 +182,7 @@ QString QMafwWatchletPlayer::mediaArtPath() const
 	artist = " ";
 	first_hash = QCryptographicHash::hash(artist.toUtf8(), QCryptographicHash::Md5).toHex();
 	file = QString("album-%1-%2.jpeg").arg(first_hash.constData()).arg(second_hash.constData());
-	qDebug() << "testing" << file;
+	qDebug() << "checking for albumart in" << file;
 	if (dir.exists(file)) {
 		return dir.absoluteFilePath(file);
 	}
@@ -183,24 +190,57 @@ QString QMafwWatchletPlayer::mediaArtPath() const
 	return QString();
 }
 
+void QMafwWatchletPlayer::updateMediaArt()
+{
+	QUrl newArt;
+
+	if (!_rendererArt.isEmpty()) {
+		newArt = QUrl::fromLocalFile(_rendererArt);
+	} else {
+		QString path = mediaArtPath();
+		if (!path.isEmpty()) {
+			newArt = QUrl::fromLocalFile(path);
+		}
+	}
+
+	if (newArt != _mediaArt) {
+		_mediaArt = newArt;
+		emit mediaArtChanged();
+	}
+}
+
 void QMafwWatchletPlayer::handleChangedMetadata(const QString &s, const QList<QVariant> &l)
 {
-	if (l.isEmpty()) return;
 	if (s == MAFW_METADATA_KEY_TITLE) {
-		_title = l[0].toString();
+		if (!l.isEmpty()) {
+			_title = l[0].toString();
+		} else {
+			_title.clear();
+		}
 		emit titleChanged();
 	} else if (s == MAFW_METADATA_KEY_ALBUM) {
-		_album = l[0].toString();
+		if (!l.isEmpty()) {
+			_album = l[0].toString();
+		} else {
+			_album.clear();
+		}
 		emit albumChanged();
-		_imageUrl = QUrl::fromLocalFile(mediaArtPath());
-		qDebug() << "got image url (album)" << _album << _imageUrl;
-		emit imageUrlChanged();
+		updateMediaArt();
 	} else if (s == MAFW_METADATA_KEY_ARTIST) {
-		_artist = l[0].toString();
+		if (!l.isEmpty()) {
+			_artist = l[0].toString();
+		} else {
+			_artist.clear();
+		}
 		emit artistChanged();
-		_imageUrl = QUrl::fromLocalFile(mediaArtPath());
-		qDebug() << "got image url (artist)" << _album << _imageUrl;
-		emit imageUrlChanged();
+		updateMediaArt();
+	} else if (s == MAFW_METADATA_KEY_RENDERER_ART_URI) {
+		if (!l.isEmpty()) {
+			_rendererArt = l[0].toString();
+		} else {
+			_rendererArt.clear();
+		}
+		updateMediaArt();
 	}
 }
 
@@ -214,6 +254,8 @@ void QMafwWatchletPlayer::handleMediaInfo(const MafwMediaInfo &info)
 	const QMap<QString, QList<QVariant> > & data = info.metaData();
 	handleChangedMetadata(MAFW_METADATA_KEY_TITLE, data[MAFW_METADATA_KEY_TITLE]);
 	handleChangedMetadata(MAFW_METADATA_KEY_ALBUM, data[MAFW_METADATA_KEY_ALBUM]);
+	handleChangedMetadata(MAFW_METADATA_KEY_ARTIST, data[MAFW_METADATA_KEY_ARTIST]);
+	handleChangedMetadata(MAFW_METADATA_KEY_RENDERER_ART_URI, data[MAFW_METADATA_KEY_RENDERER_ART_URI]);
 }
 
 void QMafwWatchletPlayer::doVolumeUp(const QString& name, const QVariant& value)
