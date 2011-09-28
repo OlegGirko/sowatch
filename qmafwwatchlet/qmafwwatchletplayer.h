@@ -16,7 +16,7 @@ class QMafwWatchlet;
 
 class QMafwWatchletPlayer : public QObject
 {
-    Q_OBJECT
+	Q_OBJECT
 	Q_PROPERTY(QString title READ title NOTIFY titleChanged)
 	Q_PROPERTY(QString album READ album NOTIFY albumChanged)
 	Q_PROPERTY(QString artist READ artist NOTIFY artistChanged)
@@ -72,6 +72,7 @@ private slots:
 	void handleChangedMetadata(const QString& s, const QList<QVariant>& l);
 	void handleChangedState(MafwRenderer::State state);
 	void handleMediaInfo(const MafwMediaInfo& info);
+	void handleStatusResults(const QString& playlistId, uint playbackIndex, int playbackState);
 	void doVolumeUp(const QString& name, const QVariant& value);
 	void doVolumeDown(const QString& name, const QVariant& value);
 

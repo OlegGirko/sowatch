@@ -20,8 +20,8 @@ public:
 	QGraphicsScene* scene();
 	void setScene(QGraphicsScene* scene);
 
-	static const int frameDelay = 20;
-	static const int busyFrameDelay = 40;
+	static const int frameDelay = 25;
+	static const int busyFrameDelay = 50;
 
 protected:
 	void activate();
@@ -35,7 +35,6 @@ private slots:
 	void frameTimeout();
 
 private:
-
 	QRegion _damaged;
 };
 

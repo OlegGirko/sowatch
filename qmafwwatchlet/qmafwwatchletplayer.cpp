@@ -137,7 +137,8 @@ void QMafwWatchletPlayer::reconnect()
 			this, SLOT(handleChangedMetadata(const QString&, const QList<QVariant>&)));
 		connect(_renderer, SIGNAL(stateChanged(MafwRenderer::State)),
 				this, SLOT(handleChangedState(MafwRenderer::State)));
-		 _renderer->getCurrentMediaInfo(this, SLOT(handleMediaInfo(MafwMediaInfo)));
+		_renderer->getStatus(this, SLOT(handleStatusResults(QString,uint,int)));
+		_renderer->getCurrentMediaInfo(this, SLOT(handleMediaInfo(MafwMediaInfo)));
 	} else if (_renderer) {
 		disconnect(_renderer, 0, this, 0);
 	}
@@ -263,6 +264,13 @@ void QMafwWatchletPlayer::handleMediaInfo(const MafwMediaInfo &info)
 	handleChangedMetadata(MAFW_METADATA_KEY_ALBUM, data[MAFW_METADATA_KEY_ALBUM]);
 	handleChangedMetadata(MAFW_METADATA_KEY_ARTIST, data[MAFW_METADATA_KEY_ARTIST]);
 	handleChangedMetadata(MAFW_METADATA_KEY_RENDERER_ART_URI, data[MAFW_METADATA_KEY_RENDERER_ART_URI]);
+}
+
+void QMafwWatchletPlayer::handleStatusResults(const QString &playlistId, uint playbackIndex, int playbackState)
+{
+	Q_UNUSED(playlistId);
+	Q_UNUSED(playbackIndex);
+	_state = static_cast<MafwRenderer::State>(playbackState);
 }
 
 void QMafwWatchletPlayer::doVolumeUp(const QString& name, const QVariant& value)

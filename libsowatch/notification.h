@@ -13,6 +13,12 @@ class SOWATCH_EXPORT Notification : public QObject
 {
 	Q_OBJECT
 	Q_ENUMS(Type)
+	Q_PROPERTY(Type type READ type)
+	Q_PROPERTY(uint count READ count)
+	Q_PROPERTY(QDateTime dateTime READ dateTime)
+	Q_PROPERTY(QString title READ title)
+	Q_PROPERTY(QString body READ body)
+	Q_PROPERTY(QImage image READ image)
 
 public:
 	enum Type {
