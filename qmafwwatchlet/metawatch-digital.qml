@@ -22,7 +22,7 @@ Rectangle {
 
 		Text {
 			anchors.fill: parent
-			text: player.title
+			text: player.title.length > 0 ? player.title : qsTr("No media");
 			color: "black"
 		}
 	}

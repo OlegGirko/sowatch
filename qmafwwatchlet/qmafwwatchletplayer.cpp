@@ -16,7 +16,7 @@ QMafwWatchletPlayer::QMafwWatchletPlayer(QMafwWatchlet* watchlet) :
 	_active(false),
 	_renderer(0),
 	_state(MafwRenderer::Stopped),
-	_title(tr("No media")),
+	_title(),
 	_album(),
 	_artist(),
 	_rendererArt(),
@@ -90,7 +90,6 @@ void QMafwWatchletPlayer::stop()
 void QMafwWatchletPlayer::next()
 {
 	if (!_renderer) return;
-	qDebug() << "next";
 	_renderer->next();
 }
 
@@ -118,25 +117,22 @@ void QMafwWatchletPlayer::setRenderer(MafwRenderer * renderer)
 {
 	if (_renderer && _active) {
 		disconnect(_renderer, 0, this, 0);
+		_title.clear();
+		_album.clear();
+		_artist.clear();
+		handleMediaChange();
+		emit titleChanged();
+		updateMediaArt();
 	}
 	_renderer = renderer;
 	reconnect();
-	if (!_renderer && _active) {
-		_title = tr("No media");
-		emit titleChanged();
-		_album.clear();
-		emit albumChanged();
-		_artist.clear();
-		emit artistChanged();
-		_rendererArt.clear();
-		_mediaArt.clear();
-		emit mediaArtChanged();
-	}
 }
 
 void QMafwWatchletPlayer::reconnect()
 {
 	if (_renderer && _active) {
+		connect(_renderer, SIGNAL(mediaChanged(int, const MafwContent&)),
+			this, SLOT(handleMediaChange()));
 		connect(_renderer, SIGNAL(metadataChanged(const QString&, const QList<QVariant>&)),
 			this, SLOT(handleChangedMetadata(const QString&, const QList<QVariant>&)));
 		connect(_renderer, SIGNAL(stateChanged(MafwRenderer::State)),
@@ -155,6 +151,11 @@ QString QMafwWatchletPlayer::stripAlbumArtComponent(const QString& component)
 	static QRegExp stripB("^[()_{}[]!@#$^&*+=|\\\\/\"'?<>~`\\s\\t]*");
 	static QRegExp stripE("[()_{}[]!@#$^&*+=|\\\\/\"'?<>~`\\s\\t]*$");
 	QString s(component);
+
+	if (s.isEmpty()) {
+		return QString(" ");
+	}
+
 	s = s.replace(rsb, "");
 	s = s.replace(rfb, "");
 	s = s.replace(rrb, "");
@@ -162,8 +163,8 @@ QString QMafwWatchletPlayer::stripAlbumArtComponent(const QString& component)
 	s = s.replace(stripE, "");
 	s = s.replace("  ", " ");
 	s = s.replace("\t", " ");
-	s = s.toLower();
-	return s;
+
+	return s.toLower();
 }
 
 QString QMafwWatchletPlayer::mediaArtPath() const
@@ -207,6 +208,12 @@ void QMafwWatchletPlayer::updateMediaArt()
 		_mediaArt = newArt;
 		emit mediaArtChanged();
 	}
+}
+
+void QMafwWatchletPlayer::handleMediaChange()
+{
+	// Sometimes qmafw does not send the renderer-art metadata, so we assume it's been cleared here.
+	_rendererArt.clear();
 }
 
 void QMafwWatchletPlayer::handleChangedMetadata(const QString &s, const QList<QVariant> &l)

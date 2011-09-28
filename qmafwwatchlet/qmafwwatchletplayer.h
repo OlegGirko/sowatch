@@ -68,6 +68,7 @@ private:
 	void updateMediaArt();
 
 private slots:
+	void handleMediaChange();
 	void handleChangedMetadata(const QString& s, const QList<QVariant>& l);
 	void handleChangedState(MafwRenderer::State state);
 	void handleMediaInfo(const MafwMediaInfo& info);
