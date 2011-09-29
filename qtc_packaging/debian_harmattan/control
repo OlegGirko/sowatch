@@ -3,7 +3,7 @@ Section: user/other
 Priority: optional
 Maintainer: Javier <javier@unknown>
 Build-Depends: debhelper (>= 5), libqt4-dev, libqtm-dev, libqmafw0-dev,
- libnotificationsystem-dev
+ libqmafw-shared0-dev, libnotificationsystem-dev
 Standards-Version: 3.7.3
 Homepage: http://gitorious.org/sowatch
 
