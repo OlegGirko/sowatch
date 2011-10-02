@@ -39,14 +39,19 @@ void CKitCallNotification::activate()
 	// TODO Actually do something
 }
 
-void CKitCallNotification::clear()
+void CKitCallNotification::dismiss()
 {
 	// TODO Actually reject the call
-	emit cleared();
 }
 
 void CKitCallNotification::changeDisplayName(const QString &displayName)
 {
 	_displayName = displayName;
+	emit titleChanged();
 	emit changed();
+}
+
+void CKitCallNotification::remove()
+{
+	emit dismissed();
 }

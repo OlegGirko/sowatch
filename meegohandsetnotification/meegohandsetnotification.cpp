@@ -48,14 +48,35 @@ void MeegoHandsetNotification::activate()
 	// TODO Actually do something
 }
 
-void MeegoHandsetNotification::clear()
+void MeegoHandsetNotification::dismiss()
 {
-	// TODO Actually clear...
-	emit cleared();
+	// TODO Actually dismiss
 }
 
 void MeegoHandsetNotification::changeTo(const ::Notification &notification)
 {
+	uint oldCount = count();
+	QDateTime oldDateTime = dateTime();
+	QString oldTitle = title();
+	QString oldBody = body();
 	_n = notification;
+	if (oldCount != count()) {
+		emit countChanged();
+	}
+	if (oldDateTime != dateTime()) {
+		emit dateTimeChanged();
+		emit displayTimeChanged();
+	}
+	if (oldTitle != title()) {
+		emit titleChanged();
+	}
+	if (oldBody != body()) {
+		emit bodyChanged();
+	}
 	emit changed();
+}
+
+void MeegoHandsetNotification::remove()
+{
+	emit dismissed();
 }

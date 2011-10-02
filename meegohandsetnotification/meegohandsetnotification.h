@@ -19,14 +19,11 @@ public:
 	QString title() const;
 	QString body() const;
 	void activate();
-	void clear();
-
-signals:
-	void changed();
-	void cleared();
+	void dismiss();
 
 protected:
 	void changeTo(const ::Notification& notification);
+	void remove();
 
 protected:
 	::Notification _n;

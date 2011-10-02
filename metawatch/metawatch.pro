@@ -69,4 +69,3 @@ unix:!symbian {
     }
     INSTALLS += target
 }
-

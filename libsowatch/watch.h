@@ -7,11 +7,12 @@
 #include <QtGui/QPaintDevice>
 #include <QtGui/QImage>
 #include "notification.h"
+#include "sowatch_global.h"
 
 namespace sowatch
 {
 
-class Watch : public QObject, public QPaintDevice
+class SOWATCH_EXPORT Watch : public QObject, public QPaintDevice
 {
 	Q_OBJECT
 	Q_PROPERTY(QString model READ model CONSTANT)

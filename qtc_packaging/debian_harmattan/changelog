@@ -1,6 +1,8 @@
 sowatch (0.2.1) unstable; urgency=low
 
   * Fixing build dependencies.
+  * Adding autosyncing of time every 24 hours.
+  * Adding a new active notifications list watchlet.
 
  -- Javier S. Pedro <maemo@javispedro.com>  Fri, 30 Sep 2011 01:06:09 +0200
 

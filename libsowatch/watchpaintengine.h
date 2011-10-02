@@ -2,11 +2,12 @@
 #define SOWATCH_WATCHPAINTENGINE_H
 
 #include <QtGui/QPaintEngine>
+#include "sowatch_global.h"
 
 namespace sowatch
 {
 
-class WatchPaintEngine : public QPaintEngine
+class SOWATCH_EXPORT WatchPaintEngine : public QPaintEngine
 {
 public:
 	~WatchPaintEngine();

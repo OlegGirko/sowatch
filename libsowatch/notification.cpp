@@ -15,7 +15,7 @@ QString Notification::displayTime() const
 {
 	QDateTime dt = dateTime();
 	int secsDiff = dt.secsTo(QDateTime::currentDateTime());
-	if (secsDiff < 1) {
+	if (secsDiff < 20) {
 		return "";
 	} else if (secsDiff < 60) {
 		return tr("%n second(s) ago", "", secsDiff);

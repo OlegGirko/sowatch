@@ -3,11 +3,12 @@
 
 #include <QtCore/QObject>
 #include "notification.h"
+#include "sowatch_global.h"
 
 namespace sowatch
 {
 
-class NotificationProvider : public QObject
+class SOWATCH_EXPORT NotificationProvider : public QObject
 {
     Q_OBJECT
 

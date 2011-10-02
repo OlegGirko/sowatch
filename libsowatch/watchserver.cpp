@@ -12,12 +12,17 @@ WatchServer::WatchServer(Watch* watch, QObject* parent) :
 	QObject(parent), _watch(watch),
 	_nextWatchletButton(-1),
 	_oldNotificationThreshold(300),
-	_currentWatchlet(0), _currentWatchletIndex(-1)
+	_currentWatchlet(0), _currentWatchletIndex(-1),
+	_syncTimeTimer(new QTimer(this))
 {
 	connect(_watch, SIGNAL(connected()), SLOT(watchConnected()));
 	connect(_watch, SIGNAL(disconnected()), SLOT(watchDisconnected()));
 	connect(_watch, SIGNAL(idling()), SLOT(watchIdling()));
 	connect(_watch, SIGNAL(buttonPressed(int)), SLOT(watchButtonPress(int)));
+	connect(_syncTimeTimer, SIGNAL(timeout()), SLOT(syncTime()));
+
+	_syncTimeTimer->setSingleShot(true);
+	_syncTimeTimer->setInterval(24 * 3600 * 1000); // Once a day
 }
 
 Watch* WatchServer::watch()
@@ -51,6 +56,17 @@ void WatchServer::addProvider(NotificationProvider *provider)
 	provider->setParent(this);
 	connect(provider, SIGNAL(incomingNotification(Notification*)), SLOT(postNotification(Notification*)));
 	// And that's it, really.
+}
+
+QList<Notification*> WatchServer::liveNotifications()
+{
+	QList<Notification*> notifications;
+
+	for (int i = 0; i < Notification::TypeCount; i++) {
+		notifications.append(_notifications[i]);
+	}
+
+	return notifications;
 }
 
 void WatchServer::runWatchlet(const QString& id)
@@ -105,16 +121,12 @@ void WatchServer::nextWatchlet()
 	}
 }
 
-void WatchServer::nextNotification()
+void WatchServer::syncTime()
 {
-	if (!_watch->isConnected()) return;
-	if (!_pendingNotifications.empty()) {
-		Notification *n = _pendingNotifications.head();
-		_watch->displayNotification(n);
-	} else if (_currentWatchlet) {
-		reactivateCurrentWatchlet();
-	} else {
-		goToIdle();
+	if (_watch->isConnected()) {
+		qDebug() << "syncing watch time";
+		_watch->setDateTime(QDateTime::currentDateTime());
+		_syncTimeTimer->start();
 	}
 }
 
@@ -137,6 +149,7 @@ void WatchServer::goToIdle()
 
 void WatchServer::watchConnected()
 {
+	syncTime();
 	if (!_pendingNotifications.isEmpty()) {
 		nextNotification();
 	} else if (_currentWatchlet) {
@@ -148,6 +161,7 @@ void WatchServer::watchConnected()
 
 void WatchServer::watchDisconnected()
 {
+	_syncTimeTimer->stop();
 	if (_currentWatchlet) {
 		_currentWatchlet->deactivate();
 	}
@@ -184,7 +198,7 @@ void WatchServer::postNotification(Notification *notification)
 	_notifications[type].append(notification);
 
 	connect(notification, SIGNAL(changed()), SLOT(notificationChanged()));
-	connect(notification, SIGNAL(cleared()), SLOT(notificationCleared()));
+	connect(notification, SIGNAL(dismissed()), SLOT(notificationDismissed()));
 
 	qDebug() << "notification received" << notification->title() << "(" << notification->count() << ")";
 
@@ -207,6 +221,19 @@ void WatchServer::postNotification(Notification *notification)
 	}
 }
 
+void WatchServer::nextNotification()
+{
+	if (!_watch->isConnected()) return;
+	if (!_pendingNotifications.empty()) {
+		Notification *n = _pendingNotifications.head();
+		_watch->displayNotification(n);
+	} else if (_currentWatchlet) {
+		reactivateCurrentWatchlet();
+	} else {
+		goToIdle();
+	}
+}
+
 void WatchServer::notificationChanged()
 {
 	QObject *obj = sender();
@@ -223,7 +250,7 @@ void WatchServer::notificationChanged()
 	}
 }
 
-void WatchServer::notificationCleared()
+void WatchServer::notificationDismissed()
 {
 	QObject *obj = sender();
 	if (obj) {
@@ -231,7 +258,7 @@ void WatchServer::notificationCleared()
 		const Notification::Type type = n->type();
 		_notifications[type].removeOne(n);
 
-		qDebug() << "notification deleted" << n->title() << "(" << n->count() << ")";
+		qDebug() << "notification dismissed" << n->title() << "(" << n->count() << ")";
 
 		_watch->updateNotificationCount(type, getNotificationCount(type));
 

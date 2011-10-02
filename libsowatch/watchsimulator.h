@@ -1,14 +1,13 @@
 #ifndef SOWATCH_WATCHSIMULATOR_H
 #define SOWATCH_WATCHSIMULATOR_H
 
-#include <QtGui/QImage>
-
 #include "watch.h"
+#include "sowatch_global.h"
 
 namespace sowatch
 {
 
-class WatchSimulator : public Watch
+class SOWATCH_EXPORT WatchSimulator : public Watch
 {
     Q_OBJECT
 public:

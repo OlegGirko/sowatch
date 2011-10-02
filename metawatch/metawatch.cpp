@@ -102,7 +102,7 @@ MetaWatch::MetaWatch(const QBluetoothAddress& address, QSettings* settings, QObj
 	if (settings) {
 		_24hMode = settings->value("24hMode", false).toBool();
 		_dayMonthOrder = settings->value("DayMonthOrder", false).toBool();
-		_notificationTimeout = settings->value("NotificationTimeout", 10).toInt();
+		_notificationTimeout = settings->value("NotificationTimeout", 15).toInt();
 		_invertedIdle = settings->value("InvertedIdleScreen", false).toBool();
 		_invertedNotifications = settings->value("InvertedNotifications", false).toBool();
 		_invertedApplications = settings->value("InvertedApplications", false).toBool();

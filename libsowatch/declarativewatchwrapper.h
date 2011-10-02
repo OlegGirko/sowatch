@@ -2,24 +2,30 @@
 #define SOWATCH_DECLARATIVEWATCHWRAPPER_H
 
 #include <QtDeclarative/QtDeclarative>
+#include "sowatch_global.h"
 
 namespace sowatch
 {
 
+class WatchServer;
 class Watch;
 class DeclarativeWatchlet;
+class Notification;
 
-class DeclarativeWatchWrapper : public QObject
+class SOWATCH_EXPORT DeclarativeWatchWrapper : public QObject
 {
     Q_OBJECT
 	Q_PROPERTY(QString model READ model CONSTANT)
 	Q_PROPERTY(bool active READ active NOTIFY activeChanged)
+	Q_PROPERTY(QList<QObject*> notifications READ notifications NOTIFY notificationsChanged)
 
 public:
-	explicit DeclarativeWatchWrapper(Watch *watch, QObject *parent = 0);
+	explicit DeclarativeWatchWrapper(WatchServer *server, Watch *watch, QObject *parent = 0);
 
-	Q_INVOKABLE QString model() const;
-	Q_INVOKABLE bool active() const;
+	QString model() const;
+	bool active() const;
+
+	QList<QObject*> notifications() const;
 
 public slots:
 	void vibrate(int msecs);
@@ -29,8 +35,10 @@ signals:
 	void buttonReleased(int button);
 
 	void activeChanged();
+	void notificationsChanged();
 
-protected:
+private:
+	WatchServer *_server;
 	Watch* _watch;
 	bool _active;
 

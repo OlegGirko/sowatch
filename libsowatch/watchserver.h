@@ -5,6 +5,7 @@
 #include <QtCore/QStringList>
 #include <QtCore/QMap>
 #include <QtCore/QQueue>
+#include <QtCore/QTimer>
 
 #include "sowatch_global.h"
 #include "notification.h"
@@ -32,11 +33,18 @@ public:
 
 	void addProvider(NotificationProvider* provider);
 
+	/** Get a list of all current live notifications. */
+	QList<Notification*> liveNotifications();
+
 public slots:
 	void postNotification(Notification *notification);
+	void nextNotification();
+
 	void runWatchlet(const QString& id);
 	void closeWatchlet();
 	void nextWatchlet();
+
+	void syncTime();
 
 private:
 	Watch* _watch;
@@ -61,10 +69,12 @@ private:
 	/** The current watchlet index if any, for use by nextWatchlet() */
 	int _currentWatchletIndex;
 
+	/** Used for periodic time syncing. */
+	QTimer* _syncTimeTimer;
+
 	void registerWatchlet(Watchlet *watchlet);
 	void reactivateCurrentWatchlet();
 
-	void nextNotification();
 	uint getNotificationCount(Notification::Type type);
 
 	void goToIdle();
@@ -76,7 +86,7 @@ private slots:
 	void watchButtonPress(int button);
 
 	void notificationChanged();
-	void notificationCleared();
+	void notificationDismissed();
 
 friend class Watchlet;
 };

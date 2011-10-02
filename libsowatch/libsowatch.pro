@@ -5,7 +5,6 @@
 #-------------------------------------------------
 
 QT       += gui declarative
-CONFIG   += mobility
 
 TARGET   = sowatch
 TEMPLATE = lib
@@ -66,30 +65,3 @@ unix:!symbian {
     }
 	INSTALLS += install_headers target
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

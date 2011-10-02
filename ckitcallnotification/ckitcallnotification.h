@@ -21,16 +21,13 @@ public:
 	QString body() const;
 
 	void activate();
-	void clear();
-
-signals:
-	void changed();
-	void cleared();
+	void dismiss();
 
 protected:
 	QDateTime _dateTime;
 	QString _displayName;
 	void changeDisplayName(const QString& displayName);
+	void remove();
 
 	friend class CKitCallProvider;
 };

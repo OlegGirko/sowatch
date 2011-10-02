@@ -24,7 +24,7 @@ DeclarativeWatchlet::DeclarativeWatchlet(WatchServer* server, const QString& id)
 	}
 
 	_engine = new QDeclarativeEngine(this);
-	_wrapper = new DeclarativeWatchWrapper(server->watch(), this);
+	_wrapper = new DeclarativeWatchWrapper(server, server->watch(), this);
 
 	_engine->rootContext()->setContextProperty("watch", _wrapper);
 }

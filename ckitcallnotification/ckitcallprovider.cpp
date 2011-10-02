@@ -44,7 +44,7 @@ void CKitCallProvider::activeCallChanged()
 	} else {
 		// Call has either been answered, rejected, missed, ..
 		if (_notification) {
-			_notification->clear();
+			_notification->remove();
 			_notification->deleteLater();
 			_notification = 0;
 		}

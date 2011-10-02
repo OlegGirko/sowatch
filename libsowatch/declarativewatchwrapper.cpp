@@ -1,11 +1,14 @@
 #include <QtCore/QDebug>
+#include "watchserver.h"
 #include "watch.h"
+#include "notification.h"
 #include "declarativewatchwrapper.h"
 
 using namespace sowatch;
 
-DeclarativeWatchWrapper::DeclarativeWatchWrapper(Watch* watch, QObject *parent) :
-	QObject(parent), _watch(watch), _active(false)
+DeclarativeWatchWrapper::DeclarativeWatchWrapper(WatchServer* server, Watch* watch, QObject* parent) :
+	QObject(parent), _server(server), _watch(watch),
+	_active(false)
 {
 
 }
@@ -18,6 +21,19 @@ QString DeclarativeWatchWrapper::model() const
 bool DeclarativeWatchWrapper::active() const
 {
 	return _active;
+}
+
+QList<QObject*> DeclarativeWatchWrapper::notifications() const
+{
+	// TODO: Figure a better way for this; QAbstractListModel, etc.
+	QList<Notification*> nl = _server->liveNotifications();
+	QList<QObject*> ol;
+	foreach (Notification* n, nl) {
+		QObject * o = n;
+		ol.append(o);
+	}
+	qDebug() << "notifications declarative: " << ol;
+	return ol;
 }
 
 void DeclarativeWatchWrapper::vibrate(int msecs)
@@ -34,6 +50,9 @@ void DeclarativeWatchWrapper::activate()
 		connect(_watch, SIGNAL(buttonReleased(int)), this, SIGNAL(buttonReleased(int)));
 		_active = true;
 		emit activeChanged();
+		// Since a notification currently causes the active watchlet to be deactivated,
+		// we can assume notifications only change when we are deactivated.
+		emit notificationsChanged();
 	}
 }
 
