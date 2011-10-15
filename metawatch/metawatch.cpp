@@ -90,12 +90,9 @@ MetaWatch::MetaWatch(const QBluetoothAddress& address, QSettings* settings, QObj
 	_sendTimer(new QTimer(this))
 {
 	if (settings) {
+		_notificationTimeout = settings->value("NotificationTimeout", 15).toInt();
 		_24hMode = settings->value("24hMode", false).toBool();
 		_dayMonthOrder = settings->value("DayMonthOrder", false).toBool();
-		_notificationTimeout = settings->value("NotificationTimeout", 15).toInt();
-		_invertedIdle = settings->value("InvertedIdleScreen", false).toBool();
-		_invertedNotifications = settings->value("InvertedNotifications", false).toBool();
-		_invertedApplications = settings->value("InvertedApplications", false).toBool();
 	}
 
 	_buttonNames << "A" << "B" << "C" << "D" << "E" << "F";
@@ -161,7 +158,7 @@ QDateTime MetaWatch::dateTime()
 
 void MetaWatch::setDateTime(const QDateTime &dateTime)
 {
-	Message msg(SetRealTimeClock, QByteArray(10, 0));
+	Message msg(SetRealTimeClock, QByteArray(8, 0));
 	const QDate& date = dateTime.date();
 	const QTime& time = dateTime.time();
 
@@ -174,8 +171,6 @@ void MetaWatch::setDateTime(const QDateTime &dateTime)
 	msg.data[5] = time.hour();
 	msg.data[6] = time.minute();
 	msg.data[7] = time.second();
-	msg.data[8] = _24hMode ? 1 : 0;
-	msg.data[9] = _dayMonthOrder ? 1 : 0;
 
 	send(msg);
 }
@@ -188,6 +183,13 @@ void MetaWatch::grabButton(int button)
 void MetaWatch::ungrabButton(int button)
 {
 	ungrabButton(_currentMode, (Button) button);
+}
+
+void MetaWatch::updateNotificationCount(Notification::Type type, int count)
+{
+	Q_UNUSED(type);
+	Q_UNUSED(count);
+	// Default implementation does nothing
 }
 
 void MetaWatch::displayIdleScreen()
@@ -294,10 +296,10 @@ void MetaWatch::handleMessage(const Message &msg)
 {
 	switch (msg.type) {
 	case StatusChangeEvent:
-		handleStatusChange(msg);
+		handleStatusChangeMessage(msg);
 		break;
 	case ButtonEvent:
-		handleButtonEvent(msg);
+		handleButtonEventMessage(msg);
 		break;
 	default:
 		qWarning() << "Unknown message of type" << msg.type << "received";
@@ -319,9 +321,9 @@ void MetaWatch::setVibrateMode(bool enable, uint on, uint off, uint cycles)
 	send(msg);
 }
 
-void MetaWatch::updateLine(Mode mode, const QImage& image, int line)
+void MetaWatch::updateLcdLine(Mode mode, const QImage& image, int line)
 {
-	Message msg(WriteBuffer, QByteArray(13, 0), (1 << 4) | (mode & 0xF));
+	Message msg(WriteLcdBuffer, QByteArray(13, 0), (1 << 4) | (mode & 0xF));
 	const char * scanLine = (const char *) image.constScanLine(line);
 
 	msg.data[0] = line;
@@ -330,9 +332,9 @@ void MetaWatch::updateLine(Mode mode, const QImage& image, int line)
 	send(msg);
 }
 
-void MetaWatch::updateLines(Mode mode, const QImage& image, int lineA, int lineB)
+void MetaWatch::updateLcdLines(Mode mode, const QImage& image, int lineA, int lineB)
 {
-	Message msg(WriteBuffer, QByteArray(26, 0), mode & 0xF);
+	Message msg(WriteLcdBuffer, QByteArray(26, 0), mode & 0xF);
 	const char * scanLine = (const char *) image.constScanLine(lineA);
 
 	msg.data[0] = lineA;
@@ -345,7 +347,7 @@ void MetaWatch::updateLines(Mode mode, const QImage& image, int lineA, int lineB
 	send(msg);
 }
 
-void MetaWatch::updateLines(Mode mode, const QImage& image, const QVector<bool>& lines)
+void MetaWatch::updateLcdLines(Mode mode, const QImage& image, const QVector<bool>& lines)
 {
 	int lineCount = lines.count(true);
 	int lineA = -1;
@@ -358,18 +360,18 @@ void MetaWatch::updateLines(Mode mode, const QImage& image, const QVector<bool>&
 		if (lines[line]) {
 			lineCount--;
 #if SINGLE_LINE_UPDATE
-			updateLine(mode, image, line);
+			updateLcdLine(mode, image, line);
 			continue;
 #endif
 			if (lineA >= 0) {
 				// We have a pair of lines to send.
-				updateLines(mode, image, lineA, line);
+				updateLcdLines(mode, image, lineA, line);
 				lineA = -1;
 			} else if (lineCount > 0) {
 				// Still another line to send.
 				lineA = line;
 			} else {
-				updateLine(mode, image, line);
+				updateLcdLine(mode, image, line);
 				break; // No more lines
 			}
 		}
@@ -378,31 +380,23 @@ void MetaWatch::updateLines(Mode mode, const QImage& image, const QVector<bool>&
 
 }
 
-void MetaWatch::configureWatchMode(Mode mode, int timeout, bool invert)
+void MetaWatch::configureLcdIdleSystemArea(bool entireScreen)
 {
-	Message msg(ConfigureMode, QByteArray(2, 0), mode & 0xF);
-	msg.data[0] = timeout;
-	msg.data[1] = invert ? 1 : 0;
-	send(msg);
-}
-
-void MetaWatch::configureIdleSystemArea(bool entireScreen)
-{
-	Message msg(ConfigureIdleBufferSize, QByteArray(26, 0));
+	Message msg(ConfigureLcdIdleBufferSize, QByteArray(26, 0));
 	msg.data[0] = entireScreen ? 1 : 0;
 	send(msg);
 }
 
-void MetaWatch::updateDisplay(Mode mode, bool copy)
+void MetaWatch::updateLcdDisplay(Mode mode, bool copy)
 {
-	Message msg(UpdateDisplay, QByteArray(),
+	Message msg(UpdateLcdDisplay, QByteArray(),
 				(copy ? 0x10 : 0) | (mode & 0xF));
 	send(msg);
 }
 
-void MetaWatch::loadTemplate(Mode mode, int templ)
+void MetaWatch::loadLcdTemplate(Mode mode, int templ)
 {
-	Message msg(LoadTemplate, QByteArray(1, templ), mode & 0xF);
+	Message msg(LoadLcdTemplate, QByteArray(1, templ), mode & 0xF);
 	send(msg);
 }
 
@@ -434,13 +428,13 @@ void MetaWatch::disableButton(Mode mode, Button button, ButtonPress press)
 	send(msg);
 }
 
-void MetaWatch::handleStatusChange(const Message &msg)
+void MetaWatch::handleStatusChangeMessage(const Message &msg)
 {
 	Q_UNUSED(msg);
 	qDebug() << "got status change message";
 }
 
-void MetaWatch::handleButtonEvent(const Message &msg)
+void MetaWatch::handleButtonEventMessage(const Message &msg)
 {
 	if (!(msg.options & 0x80)) {
 		// We didn't configure this button, reject.

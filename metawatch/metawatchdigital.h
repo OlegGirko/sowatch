@@ -39,7 +39,6 @@ protected:
 	void renderIdleWeather();
 	void renderIdleCounts();
 
-	void renderNotificationScreen();
 	void renderNotification(Notification *n);
 	QImage iconForNotification(const Notification *n);
 };

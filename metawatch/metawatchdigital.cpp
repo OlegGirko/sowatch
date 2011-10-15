@@ -12,8 +12,6 @@ MetaWatchDigital::MetaWatchDigital(const QBluetoothAddress& address, QSettings* 
 	_image[IdleMode] = baseImage;
 	_image[ApplicationMode] = baseImage;
 	_image[NotificationMode] = baseImage;
-
-
 }
 
 int MetaWatchDigital::metric(PaintDeviceMetric metric) const
@@ -81,14 +79,11 @@ void MetaWatchDigital::displayIdleScreen()
 	MetaWatch::displayIdleScreen();
 
 	// Usually, idle screen is kept updated, so we can flip it right away.
-	updateDisplay(IdleMode);
+	updateLcdDisplay(IdleMode);
 }
 
 void MetaWatchDigital::displayNotification(Notification *n)
 {
-	const bool isCall = n->type() == Notification::CallNotification;
-	configureWatchMode(NotificationMode, isCall ? 120 : 10, _invertedNotifications);
-
 	qDebug() << "display notification" << n->title() << n->body();
 
 	// Render the notification and display it before invoking haptic feedback
@@ -101,7 +96,7 @@ void MetaWatchDigital::displayNotification(Notification *n)
 void MetaWatchDigital::displayApplication()
 {
 	qDebug() << "entering application mode";
-	configureWatchMode(ApplicationMode, 250, _invertedApplications);
+
 	MetaWatch::displayApplication();
 }
 
@@ -118,16 +113,16 @@ void MetaWatchDigital::update(Mode mode, const QList<QRect> &rects)
 		}
 	}
 
-	updateLines(mode, _image[mode], lines);
+	updateLcdLines(mode, _image[mode], lines);
 	if (mode == _currentMode) {
-		updateDisplay(mode);
+		updateLcdDisplay(mode);
 	}
 }
 
 void MetaWatchDigital::clear(Mode mode, bool black)
 {
 	if (!_connected) return;
-	loadTemplate(mode, black ? 1 : 0);
+	loadLcdTemplate(mode, black ? 1 : 0);
 }
 
 void MetaWatchDigital::renderIdleScreen()
@@ -194,16 +189,6 @@ void MetaWatchDigital::renderIdleCounts()
 	p.drawText(QRect((32 * 0) + 4, y, w, h), s.sprintf("%d", calls), opt);
 	p.drawText(QRect((32 * 1) + 4, y, w, h), s.sprintf("%d", sms), opt);
 	p.drawText(QRect((32 * 2) + 4, y, w, h), s.sprintf("%d", mails), opt);
-
-	_paintMode = _currentMode;
-}
-
-void MetaWatchDigital::renderNotificationScreen()
-{
-	_paintMode = NotificationMode;
-	QPainter p(this);
-
-	p.fillRect(0, 0, screenWidth, screenHeight, Qt::white);
 
 	_paintMode = _currentMode;
 }
@@ -301,11 +286,8 @@ QImage MetaWatchDigital::iconForNotification(const Notification *n)
 void MetaWatchDigital::handleWatchConnected()
 {
 	// Configure to show watch-rendered clock in idle screen
-	configureIdleSystemArea(false);
-	// Follow inverted screen user preference
-	configureWatchMode(IdleMode, 0, _invertedIdle);
+	configureLcdIdleSystemArea(false);
 
-	// Render the idle screen from zero
+	// Render the idle screen assuming previous contents were lost
 	renderIdleScreen();
-	renderNotificationScreen();
 }

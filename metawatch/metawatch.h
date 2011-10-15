@@ -32,28 +32,33 @@ public:
 		GetDeviceTypeResponse = 0x02,
 		GetInformationString = 0x03,
 		GetInformationStringResponse = 0x04,
+		WriteOledBuffer = 0x10,
+		ChangeOledMode = 0x12,
+		WriteOledScrollBuffer = 0x13,
 		AdvanceWatchHands = 0x20,
 		SetVibrateMode = 0x23,
 		SetRealTimeClock = 0x26,
 		GetRealTimeClock = 0x27,
 		GetRealTimeClockResponse = 0x28,
+		NvalOperation = 0x30,
+		NvalOperationResponse = 0x31,
 		StatusChangeEvent = 0x33,
 		ButtonEvent = 0x34,
-		WriteBuffer = 0x40,
-		ConfigureMode = 0x41,
-		ConfigureIdleBufferSize = 0x42,
-		UpdateDisplay = 0x43,
-		LoadTemplate = 0x44,
+		GeneralPurposePhone = 0x35,
+		GeneralPurposeWatch = 0x36,
+		WriteLcdBuffer = 0x40,
+		ConfigureLcdIdleBufferSize = 0x42,
+		UpdateLcdDisplay = 0x43,
+		LoadLcdTemplate = 0x44,
 		EnableButton = 0x46,
 		DisableButton = 0x47,
-		ReadButtonConfiguration = 0x48,
-		ReadButtonConfigurationResponse = 0x49,
 		BatteryConfiguration = 0x53,
 		LowBatteryWarning = 0x54,
 		LowBatteryBluetoothOff = 0x55,
 		ReadBatteryVoltage = 0x56,
 		ReadBatteryVoltageResponse = 0x57,
-		Accelerometer = 0xea
+		ReadLightSensor = 0x58,
+		ReadLightSensorResponse = 0x59
 	};
 
 	enum Mode {
@@ -113,12 +118,9 @@ public:
 
 protected:
 	// Some configurable stuff.
+	short _notificationTimeout;
 	bool _24hMode : 1;
 	bool _dayMonthOrder : 1;
-	bool _invertedIdle : 1;
-	bool _invertedNotifications : 1;
-	bool _invertedApplications : 1;
-	short _notificationTimeout;
 
 	// Notifications: timers
 	QTimer* _idleTimer;
@@ -170,22 +172,22 @@ protected:
 	void send(const Message& msg);
 
 	void setVibrateMode(bool enable, uint on, uint off, uint cycles);
-	void updateLine(Mode mode, const QImage& image, int line);
-	void updateLines(Mode mode, const QImage& image, int lineA, int lineB);
-	void updateLines(Mode mode, const QImage& image, const QVector<bool>& lines);
-	void configureWatchMode(Mode mode, int timeout, bool invert);
-	void configureIdleSystemArea(bool entireScreen);
-	void updateDisplay(Mode mode, bool copy = true);
-	void loadTemplate(Mode mode, int templ);
+	void updateLcdLine(Mode mode, const QImage& image, int line);
+	void updateLcdLines(Mode mode, const QImage& image, int lineA, int lineB);
+	void updateLcdLines(Mode mode, const QImage& image, const QVector<bool>& lines);
+	void configureLcdIdleSystemArea(bool entireScreen);
+	void updateLcdDisplay(Mode mode, bool copy = true);
+	void loadLcdTemplate(Mode mode, int templ);
 	void enableButton(Mode mode, Button button, ButtonPress press);
 	void disableButton(Mode mode, Button button, ButtonPress press);
 
+	void handleMessage(const Message& msg);
+	void handleStatusChangeMessage(const Message& msg);
+	void handleButtonEventMessage(const Message& msg);
+
 	virtual void handleWatchConnected() = 0;
-	virtual void handleStatusChange(const Message& msg);
-	virtual void handleButtonEvent(const Message& msg);
 
 private slots:
-	void handleMessage(const Message& msg);
 	void socketConnected();
 	void socketDisconnected();
 	void socketData();
