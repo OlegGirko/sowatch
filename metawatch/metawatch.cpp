@@ -81,6 +81,7 @@ const quint16 MetaWatch::crcTable[256] = {
 MetaWatch::MetaWatch(const QBluetoothAddress& address, QSettings* settings, QObject* parent) :
 	Watch(parent),
 	_idleTimer(new QTimer(this)), _ringTimer(new QTimer(this)),
+	_watchTime(), _watchBattery(0), _watchBatteryAverage(0), _watchCharging(false),
 	_currentMode(IdleMode),	_paintMode(IdleMode),
 	_paintEngine(0),
 	_connectRetries(0),	_connected(false),
@@ -151,11 +152,6 @@ bool MetaWatch::busy() const
 			_toSend.size() > 20;
 }
 
-QDateTime MetaWatch::dateTime()
-{
-	return QDateTime::currentDateTime(); // TODO
-}
-
 void MetaWatch::setDateTime(const QDateTime &dateTime)
 {
 	Message msg(SetRealTimeClock, QByteArray(8, 0));
@@ -173,6 +169,44 @@ void MetaWatch::setDateTime(const QDateTime &dateTime)
 	msg.data[7] = time.second();
 
 	send(msg);
+}
+
+void MetaWatch::queryDateTime()
+{
+	Message msg(GetRealTimeClock);
+	sendIfNotQueued(msg);
+}
+
+QDateTime MetaWatch::dateTime() const
+{
+	return _watchTime;
+}
+
+void MetaWatch::queryBatteryLevel()
+{
+	Message msg(ReadBatteryVoltage);
+	sendIfNotQueued(msg);
+}
+
+int MetaWatch::batteryLevel() const
+{
+	// TODO This "estimation" is quite awful, could be way more accurate.
+	int level = (_watchBatteryAverage - 3500) / (4100-3500);
+	if (level < 0) level = 0;
+	if (level > 100) level = 100;
+
+	return level;
+}
+
+void MetaWatch::queryCharging()
+{
+	Message msg(ReadBatteryVoltage);
+	sendIfNotQueued(msg);
+}
+
+bool MetaWatch::charging() const
+{
+	return _watchCharging;
 }
 
 void MetaWatch::grabButton(int button)
@@ -292,19 +326,16 @@ void MetaWatch::send(const Message &msg)
 	}
 }
 
-void MetaWatch::handleMessage(const Message &msg)
+void MetaWatch::sendIfNotQueued(const Message& msg)
 {
-	switch (msg.type) {
-	case StatusChangeEvent:
-		handleStatusChangeMessage(msg);
-		break;
-	case ButtonEvent:
-		handleButtonEventMessage(msg);
-		break;
-	default:
-		qWarning() << "Unknown message of type" << msg.type << "received";
-		break;
+	foreach (const Message& m, _toSend) {
+		if (m.type == msg.type) {
+			return; // Already on the queue, discard message.
+		}
 	}
+
+	// Otherwise, send it as requested
+	send(msg);
 }
 
 void MetaWatch::setVibrateMode(bool enable, uint on, uint off, uint cycles)
@@ -428,6 +459,54 @@ void MetaWatch::disableButton(Mode mode, Button button, ButtonPress press)
 	send(msg);
 }
 
+void MetaWatch::handleMessage(const Message &msg)
+{
+	switch (msg.type) {
+	case GetDeviceTypeResponse:
+		handleDeviceTypeMessage(msg);
+		break;
+	case GetRealTimeClockResponse:
+		handleRealTimeClockMessage(msg);
+		break;
+	case StatusChangeEvent:
+		handleStatusChangeMessage(msg);
+		break;
+	case ButtonEvent:
+		handleButtonEventMessage(msg);
+		break;
+	case ReadBatteryVoltageResponse:
+		handleBatteryVoltageMessage(msg);
+		break;
+	default:
+		qWarning() << "Unknown message of type" << msg.type << "received";
+		break;
+	}
+}
+
+void MetaWatch::handleDeviceTypeMessage(const Message &msg)
+{
+	Q_ASSERT(msg.type == GetDeviceTypeResponse);
+	if (msg.data.size() < 1) {
+		qWarning() << "Short device type response";
+	}
+	qDebug() << "got device type" << msg.data[0];
+}
+
+void MetaWatch::handleRealTimeClockMessage(const Message &msg)
+{
+	int year = ((msg.data[1] & 0xFF) << 8) | (msg.data[0] & 0xFF);
+	int month = msg.data[2] & 0xFF;
+	int day = msg.data[3] & 0xFF;
+	QDate d(year, month, day);
+	int hour = msg.data[5] & 0xFF;
+	int minute = msg.data[6] & 0xFF;
+	int second = msg.data[7] & 0xFF;
+	QTime t(hour, minute, second);
+	_watchTime = QDateTime(d, t);
+
+	emit dateTimeChanged();
+}
+
 void MetaWatch::handleStatusChangeMessage(const Message &msg)
 {
 	Q_UNUSED(msg);
@@ -456,6 +535,25 @@ void MetaWatch::handleButtonEventMessage(const Message &msg)
 	} else if (press == PressAndRelease) {
 		emit buttonReleased(button);
 	}
+}
+
+void MetaWatch::handleBatteryVoltageMessage(const Message &msg)
+{
+	Q_ASSERT(msg.type == ReadBatteryVoltageResponse);
+	if (msg.data.size() < 6) {
+		qWarning() << "Short battery voltage response:" << msg.data.size();
+		return;
+	}
+	_watchCharging = msg.data[1];
+	_watchBattery = ((msg.data[3] & 0xFF) << 8) | (msg.data[2] & 0xFF);
+	_watchBatteryAverage = ((msg.data[5] & 0xFF) << 8) | (msg.data[4] & 0xFF);
+
+	qDebug() << "got battery voltage" << _watchBattery << "mV "
+			 << "average" << _watchBatteryAverage << "mV "
+			 << (_watchCharging ? "charging" : "discharging");
+
+	emit chargingChanged();
+	emit batteryLevelChanged();
 }
 
 void MetaWatch::socketConnected()

@@ -91,8 +91,15 @@ public:
 	bool isConnected() const;
 	bool busy() const;
 
-	QDateTime dateTime();
 	void setDateTime(const QDateTime& dateTime);
+	void queryDateTime();
+	QDateTime dateTime() const;
+
+	void queryBatteryLevel();
+	int batteryLevel() const;
+
+	void queryCharging();
+	bool charging() const;
 
 	void grabButton(int button);
 	void ungrabButton(int button);
@@ -131,11 +138,17 @@ protected:
 	QStringList _buttonNames;
 
 	// Current watch state
+	QDateTime _watchTime;
+	short _watchBattery;
+	short _watchBatteryAverage;
+	bool _watchCharging;
 	Mode _currentMode;
 	Mode _paintMode;
 
-	// For QPaintDevice
+	// Required by QPaintDevice
 	mutable MetaWatchPaintEngine* _paintEngine;
+
+	/** The shadow framebuffers for each of the watch modes */
 	QImage _image[3];
 
 	// Timers to retry the connection when the watch is not found.
@@ -169,8 +182,14 @@ protected:
 	static quint16 calcCrc(const QByteArray& data, int size);
 	static quint16 calcCrc(const Message& msg);
 
+	/** Sends a message to the watch. Does not block. */
 	void send(const Message& msg);
+	/** Sends a message to the watch if a message of the same type is not
+	 *  already queued. Does not block.
+	 */
+	void sendIfNotQueued(const Message& msg);
 
+	/* Some functions that wrap sending some watch messages. */
 	void setVibrateMode(bool enable, uint on, uint off, uint cycles);
 	void updateLcdLine(Mode mode, const QImage& image, int line);
 	void updateLcdLines(Mode mode, const QImage& image, int lineA, int lineB);
@@ -182,9 +201,13 @@ protected:
 	void disableButton(Mode mode, Button button, ButtonPress press);
 
 	void handleMessage(const Message& msg);
+	void handleDeviceTypeMessage(const Message& msg);
+	void handleRealTimeClockMessage(const Message& msg);
 	void handleStatusChangeMessage(const Message& msg);
 	void handleButtonEventMessage(const Message& msg);
+	void handleBatteryVoltageMessage(const Message& msg);
 
+	/** To be overriden; should configure a newly connected watch. */
 	virtual void handleWatchConnected() = 0;
 
 private slots:

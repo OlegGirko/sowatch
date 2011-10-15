@@ -17,7 +17,9 @@ class SOWATCH_EXPORT Watch : public QObject, public QPaintDevice
 	Q_OBJECT
 	Q_PROPERTY(QString model READ model CONSTANT)
 	Q_PROPERTY(bool connected READ isConnected)
-	Q_PROPERTY(QDateTime dateTime READ dateTime WRITE setDateTime)
+	Q_PROPERTY(QDateTime dateTime READ dateTime WRITE setDateTime NOTIFY dateTimeChanged)
+	Q_PROPERTY(int batteryLevel READ batteryLevel NOTIFY batteryLevelChanged)
+	Q_PROPERTY(bool charging READ charging NOTIFY chargingChanged)
 
 public:
 	explicit Watch(QObject* parent = 0);
@@ -34,10 +36,23 @@ public:
 	/** Indicates if watch is too busy atm and we should limit frame rate. */
 	virtual bool busy() const = 0;
 
-	/** Gets the current date/time on the watch. */
-	virtual QDateTime dateTime() = 0;
 	/** Sets the current date/time on the watch. */
 	virtual void setDateTime(const QDateTime& dateTime) = 0;
+	/** Asynchronously queries battery date/time from the watch; once the
+	 *  query is finished, dateTimeChanged() will be signaled and dateTime()
+	 *  will return the updated value. */
+	virtual void queryDateTime() = 0;
+	/** Gets the current date/time as last fetched from the watch. */
+	virtual QDateTime dateTime() const = 0;
+
+	/** Asynchronously queries battery level from the watch. */
+	virtual void queryBatteryLevel() = 0;
+	/** Gets the battery level (range [0-100]) as last read from the watch. */
+	virtual int batteryLevel() const = 0;
+
+	/** Asynchronously queries whether the watch is connected to a charger. */
+	virtual void queryCharging() = 0;
+	virtual bool charging() const = 0;
 
 	/** Grabs a button from whatever is default function is for the current mode. */
 	virtual void grabButton(int button) = 0;
@@ -65,6 +80,12 @@ signals:
 	void disconnected();
 	/** The watch has returned to the idle screen by either inactivity or notification cleared/timeout. */
 	void idling();
+	/** Emitted once the queryDateTime() operation is completed. */
+	void dateTimeChanged();
+	/** Emitted once the queryBatteryLevel() operation is completed. */
+	void batteryLevelChanged();
+	/** Emitted once the queryCharging() operation is completed. */
+	void chargingChanged();
 	/** A button has been pressed. */
 	void buttonPressed(int button);
 	/** A button has been pressed and then released. */
