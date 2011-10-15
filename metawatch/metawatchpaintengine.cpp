@@ -3,8 +3,6 @@
 
 using namespace sowatch;
 
-const QRect MetaWatchPaintEngine::totalAreaRect(0, 0, MetaWatch::screenWidth, MetaWatch::screenHeight);
-
 MetaWatchPaintEngine::MetaWatchPaintEngine(MetaWatch* watch) :
 	WatchPaintEngine(),
 	_watch(watch)
@@ -95,7 +93,7 @@ void MetaWatchPaintEngine::updateState(const QPaintEngineState &state)
 
 bool MetaWatchPaintEngine::fillsEntireImage(const QRect& rect)
 {
-	return rect == totalAreaRect &&
+	return rect == _area &&
 			(!_clipEnabled ||
-			 (_clipRegion.numRects() == 1 && _clipRegion.rects().at(0) == totalAreaRect));
+			 (_clipRegion.numRects() == 1 && _clipRegion.rects().at(0) == _area));
 }

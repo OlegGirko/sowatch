@@ -26,10 +26,6 @@ public:
 	explicit MetaWatch(const QBluetoothAddress& address, QSettings* settings = 0, QObject *parent = 0);
 	~MetaWatch();
 
-	static const int screenWidth = 96;
-	static const int screenHeight = 96;
-	static const int systemAreaHeight = 30;
-
 	enum MessageType {
 		NoMessage = 0,
 		GetDeviceType = 0x01,
@@ -83,7 +79,7 @@ public:
 	};
 
 	QPaintEngine* paintEngine() const;
-	int metric(PaintDeviceMetric metric) const;
+	int metric(PaintDeviceMetric metric) const = 0;
 
 	QString model() const;
 	QStringList buttons() const;
@@ -106,18 +102,14 @@ public:
 
 	Mode currentMode() const;
 	Mode paintTargetMode() const;
+
 	QImage* imageFor(Mode mode);
-	void clear(Mode mode, bool black = false);
-	void update(Mode mode, const QList<QRect>& rects = QList<QRect>());
+	QRect rectFor(Mode mode);
+
+	virtual void clear(Mode mode, bool black = false) = 0;
+	virtual void update(Mode mode, const QList<QRect>& rects = QList<QRect>()) = 0;
 	void grabButton(Mode mode, Button button);
 	void ungrabButton(Mode mode, Button button);
-
-	void renderIdleScreen();
-	void renderIdleWeather();
-	void renderIdleCounts();
-	void renderNotificationScreen();
-
-	QImage iconForNotification(const Notification *n);
 
 protected:
 	// Some configurable stuff.
@@ -127,9 +119,6 @@ protected:
 	bool _invertedNotifications : 1;
 	bool _invertedApplications : 1;
 	short _notificationTimeout;
-
-	// Notifications: Unread count
-	uint _nMails, _nCalls, _nIms, _nSms, _nMms;
 
 	// Notifications: timers
 	QTimer* _idleTimer;
@@ -175,11 +164,10 @@ protected:
 
 	static const quint8 bitRevTable[16];
 	static const quint16 crcTable[256];
-	quint16 calcCrc(const QByteArray& data, int size);
-	quint16 calcCrc(const Message& msg);
+	static quint16 calcCrc(const QByteArray& data, int size);
+	static quint16 calcCrc(const Message& msg);
 
 	void send(const Message& msg);
-	void handleMessage(const Message& msg);
 
 	void setVibrateMode(bool enable, uint on, uint off, uint cycles);
 	void updateLine(Mode mode, const QImage& image, int line);
@@ -192,10 +180,12 @@ protected:
 	void enableButton(Mode mode, Button button, ButtonPress press);
 	void disableButton(Mode mode, Button button, ButtonPress press);
 
-	void handleStatusChange(const Message& msg);
-	void handleButtonEvent(const Message& msg);
+	virtual void handleWatchConnected() = 0;
+	virtual void handleStatusChange(const Message& msg);
+	virtual void handleButtonEvent(const Message& msg);
 
-protected slots:
+private slots:
+	void handleMessage(const Message& msg);
 	void socketConnected();
 	void socketDisconnected();
 	void socketData();
