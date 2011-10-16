@@ -260,7 +260,8 @@ void MetaWatchDigital::renderNotification(Notification *n)
 	const int iconY = margin;
 	const int titleY = margin*2 + iconH;
 	const int dateX = x + iconW + margin;
-	int textFlags;
+	QTextOption option;
+	QRect rect, titleRect;
 	QString text;
 
 	p.begin(this);
@@ -269,40 +270,33 @@ void MetaWatchDigital::renderNotification(Notification *n)
 	p.drawImage(x, iconY, icon);
 
 	p.setPen(Qt::black);
+	option.setWrapMode(QTextOption::WrapAtWordBoundaryOrAnywhere);
+	option.setAlignment(Qt::AlignRight | Qt::AlignVCenter);
 
+	// Render "N minutes ago"
 	p.setFont(sf);
-	textFlags = Qt::AlignRight | Qt::AlignVCenter | Qt::TextWordWrap;
+	rect.setRect(dateX, iconY, (screenWidth - dateX) - margin, iconH);
 	text = n->displayTime();
-	QRect dateRect(dateX, iconY, (screenWidth - dateX) - margin, iconH);
-	p.drawText(dateRect, textFlags, text);
+	p.drawText(rect, text, option);
 
+	option.setAlignment(Qt::AlignLeft | Qt::AlignTop);
+
+	// Render title
 	p.setFont(lf);
-	textFlags = Qt::AlignLeft | Qt::AlignTop | Qt::TextWordWrap;
+	rect.setRect(x, titleY, screenWidth - x*2, screenHeight - titleY);
 	text = n->title();
+	titleRect = p.boundingRect(rect, text, option).toRect();
+	p.drawText(rect, text, option);
 
-	QRect titleMaxRect(x, titleY, screenWidth - x*2, screenHeight - titleY);
-	QRect titleRect = p.boundingRect(titleMaxRect, textFlags, text);
-	if (titleRect.width() > titleMaxRect.width()) {
-		textFlags = Qt::AlignLeft | Qt::AlignTop | Qt::TextWrapAnywhere;
-		titleRect = p.boundingRect(titleMaxRect, textFlags, text);
-	}
-
-	p.drawText(titleMaxRect, textFlags, text);
-
-	p.setFont(mf);
-	textFlags = Qt::AlignLeft | Qt::AlignTop | Qt::TextWordWrap;
-	text = n->body();
-
+	// Do not try to draw body if title was large
 	int bodyY = titleRect.y() + titleRect.height();
 	if (bodyY >= screenHeight) return;
 
-	QRect bodyMaxRect(x, bodyY, titleMaxRect.width(), screenHeight - bodyY);
-	QRect bodyRect = p.boundingRect(bodyMaxRect, textFlags, text);
-	if (bodyRect.width() > bodyMaxRect.width()) {
-		textFlags = Qt::AlignLeft | Qt::AlignTop | Qt::TextWrapAnywhere;
-	}
-
-	p.drawText(bodyMaxRect, textFlags, text);
+	// Render body
+	p.setFont(mf);
+	rect.setRect(x, bodyY, screenWidth - x*2, screenHeight - bodyY);
+	text = n->body();
+	p.drawText(rect, text, option);
 
 	p.end();
 	_paintMode = _currentMode;
