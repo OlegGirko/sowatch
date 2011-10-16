@@ -1,6 +1,7 @@
 #ifndef HARMACCUWEATHER_H
 #define HARMACCUWEATHER_H
 
+#include <QtCore/QFileSystemWatcher>
 #include <QtCore/QTimer>
 #include <QtCore/QSettings>
 #include <sowatch.h>
@@ -13,7 +14,7 @@ class HarmAccuWeather : public WeatherNotification
     Q_OBJECT
 
 public:
-	explicit HarmAccuWeather(int updateTime, QObject *parent = 0);
+	explicit HarmAccuWeather(QObject *parent = 0);
 
 	static QSettings* getAccuweatherData();
 
@@ -31,10 +32,13 @@ public:
 	void dismiss();
 
 private slots:
+	void fileChanged(const QString& path);
 	void update();
 
 private:
-	QTimer* _updateTimer;
+	QFileSystemWatcher* _watcher;
+	QTimer* _timer;
+
 	bool _metric;
 	QDateTime _lastUpdate;
 	QString _lastLocation;

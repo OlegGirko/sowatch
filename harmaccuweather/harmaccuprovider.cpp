@@ -5,11 +5,10 @@
 
 using namespace sowatch;
 
-HarmAccuProvider::HarmAccuProvider(int updateTime, QObject *parent) :
-	NotificationProvider(parent),
-	_updateTime(updateTime)
+HarmAccuProvider::HarmAccuProvider(QObject *parent) :
+	NotificationProvider(parent)
 {
-	// Give some time to send the notification
+	// Give some time to send the first notification
 	QTimer::singleShot(2000, this, SLOT(generateNotification()));
 }
 
@@ -22,8 +21,10 @@ void HarmAccuProvider::generateNotification()
 {
 	QSettings* s = HarmAccuWeather::getAccuweatherData();
 	if (s->contains("LastUpdate")) {
-		qDebug() << "generate harmaccuweather notification";
-		emit incomingNotification(new HarmAccuWeather(_updateTime, this));
+		qDebug() << "generating harmaccuweather notification";
+		emit incomingNotification(new HarmAccuWeather(this));
+	} else {
+		qWarning() << "Accuweather config file does not seem to exist";
 	}
 	delete s;
 }

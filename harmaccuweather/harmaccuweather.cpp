@@ -2,14 +2,22 @@
 
 using namespace sowatch;
 
-HarmAccuWeather::HarmAccuWeather(int updateTime, QObject *parent) :
+HarmAccuWeather::HarmAccuWeather(QObject *parent) :
 	WeatherNotification(parent),
-	_updateTimer(new QTimer(this)),
+	_watcher(new QFileSystemWatcher(this)),
+	_timer(new QTimer(this)),
 	_lastUpdate(QDateTime::fromTime_t(0))
 {
-	connect(_updateTimer, SIGNAL(timeout()), SLOT(update()));
-	_updateTimer->setInterval(updateTime * 1000);
-	_updateTimer->start();
+	// This only works on Harmattan either way, so I guess
+	// hardcoding the path is OK.
+	_watcher->addPath("/home/user/.config/AccuWeather, Inc./awxapp.conf");
+	connect(_watcher, SIGNAL(fileChanged(QString)), SLOT(fileChanged(QString)));
+
+	_timer->setInterval(2000);
+	_timer->setSingleShot(true);
+	connect(_timer, SIGNAL(timeout()), SLOT(update()));
+
+	// Perform an initial update
 	update();
 }
 
@@ -41,13 +49,17 @@ QString HarmAccuWeather::title() const
 QString HarmAccuWeather::body() const
 {
 	switch (_lastWxCode) {
+	case 2:
+		return tr("Sunny");
+	case 3:
+		return tr("Partly sunny");
 	case 33:
 		return tr("Clear");
 	case 6:
 	case 38:
 		return tr("Mostly cloudy");
 	case 35:
-		return tr("Part. cloudy");
+		return tr("Partly cloudy");
 	case 7:
 		return tr("Cloudy");
 	default:
@@ -58,6 +70,8 @@ QString HarmAccuWeather::body() const
 WeatherNotification::WeatherType HarmAccuWeather::forecast()
 {
 	switch (_lastWxCode) {
+	case 2:
+	case 3:
 	case 33:
 		return Sunny;
 	case 6:
@@ -90,18 +104,27 @@ void HarmAccuWeather::dismiss()
 	// Do nothing
 }
 
+void HarmAccuWeather::fileChanged(const QString &path)
+{
+	Q_UNUSED(path);
+	qDebug() << "accuweather config file changed";
+	_timer->start();
+}
+
 void HarmAccuWeather::update()
 {
 	QSettings* s = getAccuweatherData();
 
+	qDebug() << "reading accuweather config file";
+
 	QDateTime lastUpdate = s->value("LastUpdate").toDateTime();
 	if (lastUpdate > _lastUpdate) {
-		qDebug() << "updated weather info";
 		_lastUpdate = lastUpdate;
 		_metric = s->value("useMetric").toBool();
 		_lastTemp = s->value("LastTemp").toInt();
 		_lastLocation = s->value("LastLocation").toString();
 		_lastWxCode = s->value("LastWxCode").toInt();
+		qDebug() << "updated weather info" << _lastUpdate << _lastWxCode;
 		emit changed();
 	}
 
