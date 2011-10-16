@@ -16,14 +16,16 @@ SOURCES += metawatchplugin.cpp \
     metawatchsimulator.cpp \
     metawatchpaintengine.cpp \
     metawatch.cpp \
-    metawatchdigital.cpp
+    metawatchdigital.cpp \
+    metawatchanalog.cpp
 
 HEADERS += metawatchplugin.h \
     metawatchsimulatorform.h \
     metawatchsimulator.h \
     metawatchpaintengine.h \
     metawatch.h \
-    metawatchdigital.h
+    metawatchdigital.h \
+    metawatchanalog.h
 
 FORMS += \
 	metawatchsimulatorform.ui
@@ -71,5 +73,7 @@ unix:!symbian {
     }
     INSTALLS += target
 }
+
+
 
 

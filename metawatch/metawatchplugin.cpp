@@ -1,6 +1,7 @@
 #include <QtGui/QFontDatabase>
 #include <QtConnectivity/QBluetoothAddress>
 #include "metawatchdigital.h"
+#include "metawatchanalog.h"
 #include "metawatchsimulator.h"
 #include "metawatchplugin.h"
 
@@ -28,7 +29,7 @@ MetaWatchPlugin::~MetaWatchPlugin()
 QStringList MetaWatchPlugin::drivers()
 {
 	QStringList d;
-	d << "metawatch-digital";
+	d << "metawatch-digital" << "metawatch-analog";
 	return d;
 }
 
@@ -37,6 +38,9 @@ Watch* MetaWatchPlugin::getWatch(const QString& driver, QSettings& settings, QOb
 	if (driver == "metawatch-digital") {
 		QBluetoothAddress address(settings.value("address").toString());
 		return new MetaWatchDigital(address, &settings, parent);
+	} else if (driver == "metawatch-analog") {
+		QBluetoothAddress address(settings.value("address").toString());
+		return new MetaWatchAnalog(address, &settings, parent);
 	} else {
 		return 0;
 	}
