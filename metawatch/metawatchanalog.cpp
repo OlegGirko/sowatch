@@ -40,11 +40,14 @@ QString MetaWatchAnalog::model() const
 
 void MetaWatchAnalog::updateNotificationCount(Notification::Type type, int count)
 {
+	Q_UNUSED(type);
+	Q_UNUSED(count);
 	// Analog doesn't do anything with this
 }
 
 void MetaWatchAnalog::updateWeather(WeatherNotification *weather)
 {
+	Q_UNUSED(weather);
 	// Analog doesn't do anything with this
 }
 
@@ -75,12 +78,16 @@ void MetaWatchAnalog::displayApplication()
 void MetaWatchAnalog::update(Mode mode, const QList<QRect> &rects)
 {
 	if (!_connected) return;
+	Q_UNUSED(mode);
+	Q_UNUSED(rects);
 	// TODO
 }
 
 void MetaWatchAnalog::clear(Mode mode, bool black)
 {
 	if (!_connected) return;
+	Q_UNUSED(mode);
+	Q_UNUSED(black);
 	// TODO Still need to understand this
 }
 
