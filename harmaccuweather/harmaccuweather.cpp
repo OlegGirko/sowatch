@@ -49,36 +49,145 @@ QString HarmAccuWeather::title() const
 QString HarmAccuWeather::body() const
 {
 	switch (_lastWxCode) {
+	case 1:
 	case 2:
 		return tr("Sunny");
+
 	case 3:
-		return tr("Partly sunny");
-	case 33:
-		return tr("Clear");
+	case 4:
+	case 5:
+		return tr("Partly cloudy");
 	case 6:
-	case 38:
 		return tr("Mostly cloudy");
+	case 7:
+	case 8:
+		return tr("Cloudy");
+
+	case 11:
+		return tr("Fog");
+
+	case 12:
+		return tr("Light rain");
+	case 13:
+	case 14:
+		return tr("Light rain with sun");
+	case 18:
+	case 26:
+		return tr("Heavy rain");
+
+	case 15:
+	case 16:
+		return tr("Thunderstorm");
+	case 17:
+		return tr("Thunderstorm with sun");
+
+	case 19:
+		return tr("Light snow");
+	case 20:
+	case 21:
+		return tr("Light snow with sun");
+	case 22:
+		return tr("Heavy snow");
+	case 29:
+		return tr("Heavy rain and snow");
+
+	case 25:
+		return tr("Blizzard");
+
+	case 30:
+		return tr("Hot");
+	case 31:
+		return tr("Cold");
+	case 32:
+		return tr("Wind");
+
+
+	// Night versions
+	case 33:
+	case 34:
+		return tr("Clear");
 	case 35:
 		return tr("Partly cloudy");
-	case 7:
+	case 36:
+	case 37:
+		return tr("Mostly cloudy");
+	case 38:
 		return tr("Cloudy");
+	case 39:
+	case 40:
+		return tr("Light rain");
+	case 41:
+	case 42:
+		return tr("Thunderstorm");
+	case 43:
+		return tr("Light snow");
+	case 44:
+		return tr("Heavy snow");
+
 	default:
-		return QString("%1").arg(_lastWxCode);
+		return QString("? %1").arg(_lastWxCode);
 	}
 }
 
 WeatherNotification::WeatherType HarmAccuWeather::forecast()
 {
 	switch (_lastWxCode) {
+	case 1:
 	case 2:
 	case 3:
-	case 33:
 		return Sunny;
+
+	case 4:
+	case 5:
 	case 6:
 	case 7:
+	case 8:
+		return Cloudy;
+
+	case 11:
+		return Fog;
+
+	case 12:
+	case 13:
+	case 14:
+	case 18:
+	case 26:
+		return Rain;
+
+	case 15:
+	case 16:
+	case 17:
+		return Thunderstorm;
+
+	case 19:
+	case 20:
+	case 21:
+	case 22:
+	case 23:
+	case 24:
+	case 25:
+	case 29:
+		return Snow;
+
+	// Night versions
+	case 33:
+	case 34:
+		return Sunny;
 	case 35:
+	case 36:
+	case 37:
 	case 38:
 		return Cloudy;
+	case 39:
+	case 40:
+		return Rain;
+	case 41:
+	case 42:
+		return Thunderstorm;
+	case 43:
+	case 44:
+		return Snow;
+
 	default:
 		return UnknownWeather;
 	}

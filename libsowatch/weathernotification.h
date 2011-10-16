@@ -16,6 +16,7 @@ public:
 		UnknownWeather = 0,
 		Sunny,
 		Cloudy,
+		Fog,
 		Rain,
 		Snow,
 		Thunderstorm

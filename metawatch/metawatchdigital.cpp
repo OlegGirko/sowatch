@@ -169,18 +169,24 @@ void MetaWatchDigital::renderIdleWeather(WeatherNotification* w)
 	sf.setPixelSize(8);
 	lf.setPixelSize(16);
 
-	p.fillRect(0, systemAreaHeight + 6, screenWidth, systemAreaHeight - 12, Qt::white);
+	p.fillRect(0, systemAreaHeight + 6, screenWidth, systemAreaHeight - 6, Qt::white);
 
 	if (w) {
 		QImage icon = iconForWeather(w);
 		bool metric = w->temperatureUnits() == WeatherNotification::Celsius;
 		QString unit = QString::fromUtf8(metric ? "°C" : "°F");
-		QRect bodyRect(4, systemAreaHeight + 6, 36, systemAreaHeight - 10);
+
+		QRect bodyRect(3, systemAreaHeight + 6, 36, systemAreaHeight - 6);
+		QTextOption option;
+		option.setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+		option.setWrapMode(QTextOption::WrapAtWordBoundaryOrAnywhere);
 		p.setFont(sf);
-		p.drawText(bodyRect, Qt::AlignLeft | Qt::AlignVCenter | Qt::TextWordWrap, w->body());
+		p.drawText(bodyRect, w->body(), option);
+
 		p.drawImage(36, systemAreaHeight + 6, icon);
+
 		p.setFont(lf);
-		p.drawText(64, systemAreaHeight + 22, QString("%1 %2").arg(w->temperature()).arg(unit));
+		p.drawText(63, systemAreaHeight + 23, QString("%1 %2").arg(w->temperature()).arg(unit));
 	} else {
 		p.setFont(sf);
 		p.drawText(32, systemAreaHeight + 18, tr("No data"));
@@ -195,13 +201,14 @@ QImage MetaWatchDigital::iconForWeather(WeatherNotification *w)
 	case WeatherNotification::Sunny:
 		return QImage(QString(":/metawatch/graphics/weather_sunny.bmp"));
 	case WeatherNotification::Cloudy:
+	case WeatherNotification::Fog:
 		return QImage(QString(":/metawatch/graphics/weather_cloudy.bmp"));
 	case WeatherNotification::Rain:
 		return QImage(QString(":/metawatch/graphics/weather_rain.bmp"));
-	case WeatherNotification::Snow:
-		return QImage(QString(":/metawatch/graphics/weather_snow.bmp"));
 	case WeatherNotification::Thunderstorm:
 		return QImage(QString(":/metawatch/graphics/weather_thunderstorm.bmp"));
+	case WeatherNotification::Snow:
+		return QImage(QString(":/metawatch/graphics/weather_snow.bmp"));
 	default:
 		return QImage();
 	}
