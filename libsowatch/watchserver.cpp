@@ -5,7 +5,6 @@
 #include "watchlet.h"
 #include "watchserver.h"
 
-
 using namespace sowatch;
 
 WatchServer::WatchServer(Watch* watch, QObject* parent) :
@@ -204,6 +203,14 @@ void WatchServer::postNotification(Notification *notification)
 
 	_watch->updateNotificationCount(type, getNotificationCount(type));
 
+	if (type == Notification::WeatherNotification) {
+		// Weather notifications, we handle differently.
+		WeatherNotification* weather = static_cast<WeatherNotification*>(notification);
+		_weather = weather;
+		_watch->updateWeather(weather);
+		return; // And do not display it the usual way
+	}
+
 	QDateTime oldThreshold = QDateTime::currentDateTime().addSecs(-_oldNotificationThreshold);
 	if (notification->dateTime() < oldThreshold) {
 		return; // Do not care about notifications that old...
@@ -245,7 +252,21 @@ void WatchServer::notificationChanged()
 
 		_watch->updateNotificationCount(type, getNotificationCount(type));
 		if (!_pendingNotifications.isEmpty() && _pendingNotifications.head() == n) {
+			// This is the notification that is being currently signaled on the watch
+			// Therefore, show it again
 			nextNotification();
+		}
+		if (type == Notification::WeatherNotification) {
+			WeatherNotification* w = static_cast<WeatherNotification*>(n);
+			if (!_weather || _weather->dateTime() < w->dateTime()) {
+				// Prefer showing the most recent data
+				_weather = w;
+			}
+			if (_weather == w) {
+				// This is the weather notification we are currently displaying on the watch
+				// Therefore, update the displayed information
+				_watch->updateWeather(w);
+			}
 		}
 	}
 }
@@ -268,6 +289,12 @@ void WatchServer::notificationDismissed()
 			nextNotification();
 		} else {
 			_pendingNotifications.removeAll(n);
+		}
+		if (type == Notification::WeatherNotification) {
+			WeatherNotification* w = static_cast<WeatherNotification*>(n);
+			if (_weather == w) {
+				_weather = 0;
+			}
 		}
 	}
 }

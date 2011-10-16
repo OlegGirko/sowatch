@@ -73,6 +73,13 @@ void MetaWatchDigital::updateNotificationCount(Notification::Type type, int coun
 	}
 }
 
+void MetaWatchDigital::updateWeather(WeatherNotification *weather)
+{
+	if (isConnected()) {
+		renderIdleWeather(weather);
+	}
+}
+
 void MetaWatchDigital::displayIdleScreen()
 {
 	qDebug() << "displaying idle screen";
@@ -152,18 +159,52 @@ void MetaWatchDigital::renderIdleScreen()
 	renderIdleCounts();
 }
 
-void MetaWatchDigital::renderIdleWeather()
+void MetaWatchDigital::renderIdleWeather(WeatherNotification* w)
 {
 	_paintMode = IdleMode;
-	QFont f("MetaWatch Small caps 8pt", 6);
-	QImage rain(QString(":/metawatch/graphics/weather_rain.bmp"));
+	QFont sf("MetaWatch Small caps 8pt", 6);
+	QFont lf("MetaWatch Large 16pt");
 	QPainter p(this);
 
-	p.setFont(f);
-	p.drawText(30, systemAreaHeight + 14, "No data!");
-	p.drawImage(screenWidth - 26, systemAreaHeight + 6, rain);
+	sf.setPixelSize(8);
+	lf.setPixelSize(16);
+
+	p.fillRect(0, systemAreaHeight + 6, screenWidth, systemAreaHeight - 12, Qt::white);
+
+	if (w) {
+		QImage icon = iconForWeather(w);
+		bool metric = w->temperatureUnits() == WeatherNotification::Celsius;
+		QString unit = QString::fromUtf8(metric ? "°C" : "°F");
+		QRect bodyRect(4, systemAreaHeight + 6, 36, systemAreaHeight - 10);
+		p.setFont(sf);
+		p.drawText(bodyRect, Qt::AlignLeft | Qt::AlignVCenter | Qt::TextWordWrap, w->body());
+		p.drawImage(36, systemAreaHeight + 6, icon);
+		p.setFont(lf);
+		p.drawText(64, systemAreaHeight + 22, QString("%1 %2").arg(w->temperature()).arg(unit));
+	} else {
+		p.setFont(sf);
+		p.drawText(32, systemAreaHeight + 18, tr("No data"));
+	}
 
 	_paintMode = _currentMode;
+}
+
+QImage MetaWatchDigital::iconForWeather(WeatherNotification *w)
+{
+	switch (w->forecast()) {
+	case WeatherNotification::Sunny:
+		return QImage(QString(":/metawatch/graphics/weather_sunny.bmp"));
+	case WeatherNotification::Cloudy:
+		return QImage(QString(":/metawatch/graphics/weather_cloudy.bmp"));
+	case WeatherNotification::Rain:
+		return QImage(QString(":/metawatch/graphics/weather_rain.bmp"));
+	case WeatherNotification::Snow:
+		return QImage(QString(":/metawatch/graphics/weather_snow.bmp"));
+	case WeatherNotification::Thunderstorm:
+		return QImage(QString(":/metawatch/graphics/weather_thunderstorm.bmp"));
+	default:
+		return QImage();
+	}
 }
 
 void MetaWatchDigital::renderIdleCounts()

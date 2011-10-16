@@ -23,9 +23,11 @@ SOURCES += \
     declarativewatchlet.cpp \
     watchplugininterface.cpp \
     notification.cpp \
+	weathernotification.cpp \
     notificationplugininterface.cpp \
     notificationprovider.cpp \
-    watchletplugininterface.cpp
+    watchletplugininterface.cpp \
+	registry.cpp
 
 HEADERS +=\
     watchsimulator.h \
@@ -40,9 +42,11 @@ HEADERS +=\
     sowatch_global.h \
     watchplugininterface.h \
     notification.h \
+	weathernotification.h \
     notificationplugininterface.h \
     notificationprovider.h \
-    watchletplugininterface.h
+    watchletplugininterface.h \
+	registry.h
 
 install_headers.files = $$HEADERS
 

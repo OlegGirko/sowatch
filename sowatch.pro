@@ -6,7 +6,7 @@ SUBDIRS = libsowatch \
 	sysinfowatchlet
 
 !isEmpty(MEEGO_VERSION_MAJOR) {
-	SUBDIRS += meegohandsetnotification ckitcallnotification qmafwwatchlet qmapwatchlet
+	SUBDIRS += meegohandsetnotification ckitcallnotification harmaccuweather qmafwwatchlet qmapwatchlet
 }
 
 unix:!symbian {

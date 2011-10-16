@@ -21,6 +21,7 @@ public:
 	QString model() const;
 
 	void updateNotificationCount(Notification::Type type, int count);
+	void updateWeather(WeatherNotification *weather);
 
 	void displayIdleScreen();
 	void displayNotification(Notification *notification);
@@ -36,7 +37,8 @@ protected:
 	void handleWatchConnected();
 
 	void renderIdleScreen();
-	void renderIdleWeather();
+	void renderIdleWeather(WeatherNotification *w = 0);
+	QImage iconForWeather(WeatherNotification *w);
 	void renderIdleCounts();
 
 	void renderNotification(Notification *n);

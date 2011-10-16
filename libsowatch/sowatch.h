@@ -9,6 +9,7 @@
 #include "watchplugininterface.h"
 
 #include "notification.h"
+#include "weathernotification.h"
 #include "notificationprovider.h"
 #include "notificationplugininterface.h"
 
@@ -16,5 +17,7 @@
 #include "graphicswatchlet.h"
 #include "declarativewatchlet.h"
 #include "watchletplugininterface.h"
+
+#include "registry.h"
 
 #endif // SOWATCH_H

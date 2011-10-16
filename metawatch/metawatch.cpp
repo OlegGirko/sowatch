@@ -226,6 +226,12 @@ void MetaWatch::updateNotificationCount(Notification::Type type, int count)
 	// Default implementation does nothing
 }
 
+void MetaWatch::updateWeather(WeatherNotification *weather)
+{
+	Q_UNUSED(weather);
+	// Default implementation does nothing
+}
+
 void MetaWatch::displayIdleScreen()
 {
 	_currentMode = IdleMode;

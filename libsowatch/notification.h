@@ -32,6 +32,7 @@ public:
 		ImNotification,
 		EmailNotification,
 		CalendarNotification,
+		WeatherNotification,
 		TypeCount
 	};
 

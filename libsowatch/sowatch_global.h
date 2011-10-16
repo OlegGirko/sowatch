@@ -10,13 +10,13 @@
 #endif
 
 #if defined(Q_WS_MAEMO_5)
-#  define SOWATCH_DRIVERS_DIR "/opt/sowatch/drivers"
-#  define SOWATCH_NOTIFICATIONS_DIR "/opt/sowatch/notifications"
-#  define SOWATCH_WATCHLETS_DIR "/opt/sowatch/watchlets"
+#  define SOWATCH_PLUGINS_DIR "/opt/sowatch"
 #elif defined(Q_OS_LINUX)
-#  define SOWATCH_DRIVERS_DIR "/usr/lib/sowatch/drivers"
-#  define SOWATCH_NOTIFICATIONS_DIR "/usr/lib/sowatch/notifications"
-#  define SOWATCH_WATCHLETS_DIR "/usr/lib/sowatch/watchlets"
+#  define SOWATCH_PLUGINS_DIR "/usr/lib/sowatch"
 #endif
+
+#define SOWATCH_DRIVERS_DIR       SOWATCH_PLUGINS_DIR "/drivers"
+#define SOWATCH_NOTIFICATIONS_DIR SOWATCH_PLUGINS_DIR "/notifications"
+#define SOWATCH_WATCHLETS_DIR     SOWATCH_PLUGINS_DIR "/watchlets"
 
 #endif // SOWATCH_GLOBAL_H

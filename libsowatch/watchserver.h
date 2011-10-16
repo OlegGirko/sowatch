@@ -16,6 +16,7 @@ namespace sowatch
 class Watch;
 class Watchlet;
 class NotificationProvider;
+class WeatherNotification;
 
 class SOWATCH_EXPORT WatchServer : public QObject
 {
@@ -63,6 +64,8 @@ private:
 	QList<Notification*> _notifications[Notification::TypeCount];
 	/** A list of notifications that are yet to be shown to the user. */
 	QQueue<Notification*> _pendingNotifications;
+	/** We store a currently live weather forecast. */
+	WeatherNotification* _weather;
 
 	/** Current watchlet. */
 	Watchlet* _currentWatchlet;

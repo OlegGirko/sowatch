@@ -105,6 +105,7 @@ public:
 	void ungrabButton(int button);
 
 	void updateNotificationCount(Notification::Type type, int count);
+	void updateWeather(WeatherNotification *weather);
 
 	void displayIdleScreen();
 	void displayNotification(Notification *notification);

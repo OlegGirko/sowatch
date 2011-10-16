@@ -18,14 +18,8 @@ public:
 	explicit Daemon(QObject *parent = 0);
 
 protected:
-	QMap<QString, WatchPluginInterface*> _drivers;
-	QMap<QString, NotificationPluginInterface*> _providers;
-	QMap<QString, WatchletPluginInterface*> _watchlets;
+	Registry* _registry;
 	QList<WatchServer*> _servers;
-
-	void loadDrivers();
-	void loadProviders();
-	void loadWatchlets();
 
 	void initWatches();
 	void initWatch(Watch* watch, QSettings& settings);

@@ -7,6 +7,7 @@
 #include <QtGui/QPaintDevice>
 #include <QtGui/QImage>
 #include "notification.h"
+#include "weathernotification.h"
 #include "sowatch_global.h"
 
 namespace sowatch
@@ -61,6 +62,9 @@ public:
 
 	/** Tells the watch to update the unread notifications count, if visible. */
 	virtual void updateNotificationCount(Notification::Type type, int count) = 0;
+
+	/** Tells the watch to update the current weather forecast, if visible. */
+	virtual void updateWeather(WeatherNotification* weather) = 0;
 
 public slots:
 	/** Go back to the idle screen. */
