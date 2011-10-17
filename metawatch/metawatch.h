@@ -61,6 +61,14 @@ public:
 		ReadLightSensorResponse = 0x59
 	};
 
+	enum NvalValue {
+		ReservedNval = 0,
+		LinkKey = 0x1,
+		IdleBufferConfiguration = 0x2,
+		TimeFormat = 0x2009,
+		DateFormat = 0x200a
+	};
+
 	enum Mode {
 		IdleMode = 0,
 		ApplicationMode = 1,
@@ -174,9 +182,13 @@ protected:
 		{ }
 	};
 
+	/** The "packets to be sent" asynchronous queue **/
 	QQueue<Message> _toSend;
 	QTimer* _sendTimer;
 	Message _partialReceived;
+
+	/** Pending nvals to be written once the read operation is finished. */
+	QMap<NvalValue, int> _nvals;
 
 	static const quint8 bitRevTable[16];
 	static const quint16 crcTable[256];
@@ -189,6 +201,9 @@ protected:
 	 *  already queued. Does not block.
 	 */
 	void sendIfNotQueued(const Message& msg);
+
+	static uint nvalSize(NvalValue value);
+	void nvalWrite(NvalValue value, int data);
 
 	/* Some functions that wrap sending some watch messages. */
 	void setVibrateMode(bool enable, uint on, uint off, uint cycles);
@@ -204,6 +219,7 @@ protected:
 	void handleMessage(const Message& msg);
 	void handleDeviceTypeMessage(const Message& msg);
 	void handleRealTimeClockMessage(const Message& msg);
+	void handleNvalOperationMessage(const Message& msg);
 	void handleStatusChangeMessage(const Message& msg);
 	void handleButtonEventMessage(const Message& msg);
 	void handleBatteryVoltageMessage(const Message& msg);

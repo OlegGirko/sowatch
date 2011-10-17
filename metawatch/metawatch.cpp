@@ -344,6 +344,39 @@ void MetaWatch::sendIfNotQueued(const Message& msg)
 	send(msg);
 }
 
+uint MetaWatch::nvalSize(NvalValue value)
+{
+	switch (value) {
+	case ReservedNval:
+	case LinkKey:
+		return 0;
+	case IdleBufferConfiguration:
+		return 1;
+	case TimeFormat:
+	case DateFormat:
+		return 1;
+	}
+	return 0;
+}
+
+void MetaWatch::nvalWrite(NvalValue value, int data)
+{
+	uint id = static_cast<uint>(value);
+	int size = nvalSize(value);
+	Q_ASSERT(size > 0);
+
+	// Do a read operation first to get the current value
+	// If the current value matches what we want, avoid rewriting it to flash.
+	Message msg(NvalOperation, QByteArray(3, 0), 2);
+
+	msg.data[0] = id & 0xFF;
+	msg.data[1] = id >> 8;
+	msg.data[2] = size;
+
+	_nvals[value] = data;
+	send(msg);
+}
+
 void MetaWatch::setVibrateMode(bool enable, uint on, uint off, uint cycles)
 {
 	Message msg(SetVibrateMode, QByteArray(6, 0));
@@ -474,6 +507,9 @@ void MetaWatch::handleMessage(const Message &msg)
 	case GetRealTimeClockResponse:
 		handleRealTimeClockMessage(msg);
 		break;
+	case NvalOperationResponse:
+		handleNvalOperationMessage(msg);
+		break;
 	case StatusChangeEvent:
 		handleStatusChangeMessage(msg);
 		break;
@@ -500,7 +536,7 @@ void MetaWatch::handleDeviceTypeMessage(const Message &msg)
 
 void MetaWatch::handleRealTimeClockMessage(const Message &msg)
 {
-	int year = ((msg.data[1] & 0xFF) << 8) | (msg.data[0] & 0xFF);
+	int year = ((msg.data[0] & 0xFF) << 8) | (msg.data[1] & 0xFF);
 	int month = msg.data[2] & 0xFF;
 	int day = msg.data[3] & 0xFF;
 	QDate d(year, month, day);
@@ -510,7 +546,43 @@ void MetaWatch::handleRealTimeClockMessage(const Message &msg)
 	QTime t(hour, minute, second);
 	_watchTime = QDateTime(d, t);
 
+	qDebug() << "got time from watch" << _watchTime;
+
 	emit dateTimeChanged();
+}
+
+void MetaWatch::handleNvalOperationMessage(const Message& msg)
+{
+	Q_ASSERT(msg.type == NvalOperationResponse);
+
+	if (msg.data.size() < 2) {
+		qWarning() << "NVAL operation response too short";
+	}
+
+	uint id = ((msg.data[1] & 0xFF) << 8) | (msg.data[0] & 0xFF);
+	NvalValue value = static_cast<NvalValue>(id);
+
+	qDebug() << "nval operation response for value" << value;
+
+	switch (msg.options) {
+	case 0: // Success
+		break;
+	case 1: // Failure
+		qWarning() << "NVAL operation failed";
+		return;
+	case 0x9:
+		qWarning() << "NVAL operation failed: Identifier not found";
+		return;
+	case 0xA:
+		qWarning() << "NVAL operation failed: Operation failed";
+		return;
+	case 0xC:
+		qWarning() << "NVAL operation failed: Bad Item length";
+		return;
+	default:
+		qWarning() << "NVAL operation unknown response: " << msg.options;
+		return;
+	}
 }
 
 void MetaWatch::handleStatusChangeMessage(const Message &msg)
@@ -689,7 +761,7 @@ void MetaWatch::realSend(const Message &msg)
 	data[msgSize+4] = crc & 0xFF;
 	data[msgSize+5] = crc >> 8;
 
-	//qDebug() << "Sending" << data.toHex();
+	//qDebug() << "sending" << data.toHex();
 
 	_socket->write(data);
 }
