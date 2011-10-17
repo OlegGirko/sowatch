@@ -3,8 +3,10 @@ sowatch (0.2.1) unstable; urgency=low
   * Fixing build dependencies.
   * Adding autosyncing of time every 24 hours.
   * Adding a new active notifications list watchlet.
+  * Adding new weather notifications, as well as a new weather
+    notification provider from Accuweather.
 
- -- Javier S. Pedro <maemo@javispedro.com>  Fri, 30 Sep 2011 01:06:09 +0200
+ -- Javier S. Pedro <maemo@javispedro.com>  Mon, 17 Oct 2011 02:13:17 +0200
 
 sowatch (0.2.0) unstable; urgency=low
 

@@ -1,17 +1,6 @@
-This package was debianized by Javier <javier@unknown> on
-Sat, 17 Sep 2011 03:05:17 +0200.
-
-It was downloaded from <url://example.com>
-
-Upstream Author(s):
-
-    <put author's name and email here>
-    <likewise for another author>
-
 Copyright:
 
-    <Copyright (C) YYYY Name OfAuthor>
-    <likewise for another author>
+	Javier S. Pedro <maemo@javispedro.com>
 
 License:
 
@@ -32,9 +21,5 @@ License:
 On Debian systems, the complete text of the GNU General
 Public License can be found in `/usr/share/common-licenses/GPL'.
 
-The Debian packaging is (C) 2011, Javier <javier@unknown> and
+The Debian packaging is also (C) 2011, Javier <maemo@javispedro.com> and
 is licensed under the GPL, see above.
-
-
-# Please also look if there are files or directories which have a
-# different copyright/license attached and list them here.
