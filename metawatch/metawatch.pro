@@ -66,8 +66,9 @@ symbian {
 }
 
 unix:!symbian {
-    maemo5 {
-		target.path = /opt/sowatch/drivers
+	!isEmpty(MEEGO_VERSION_MAJOR)|maemo5 {
+		QMAKE_RPATHDIR += /opt/sowatch/lib
+		target.path = /opt/sowatch/lib/drivers
     } else {
 		target.path = /usr/lib/sowatch/drivers
     }

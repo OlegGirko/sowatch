@@ -13,7 +13,7 @@ namespace sowatch
 
 class Daemon : public QObject
 {
-    Q_OBJECT
+	Q_OBJECT
 public:
 	explicit Daemon(QObject *parent = 0);
 

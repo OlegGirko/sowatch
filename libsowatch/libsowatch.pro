@@ -29,7 +29,7 @@ SOURCES += \
     watchletplugininterface.cpp \
 	registry.cpp
 
-HEADERS +=\
+HEADERS += \
     watchsimulator.h \
     watchserver.h \
     watchpaintengine.h \
@@ -62,10 +62,10 @@ symbian {
 
 unix:!symbian {
 	install_headers.path = /usr/include/sowatch
-    maemo5 {
-		target.path = /opt/maemo/usr/lib
-    } else {
-        target.path = /usr/lib
-    }
+	!isEmpty(MEEGO_VERSION_MAJOR)|maemo5 {
+		target.path = /opt/sowatch/lib
+	} else {
+		target.path = /usr/lib
+	}
 	INSTALLS += install_headers target
 }

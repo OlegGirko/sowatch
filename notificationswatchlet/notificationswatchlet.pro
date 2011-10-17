@@ -17,8 +17,9 @@ INCLUDEPATH += $$PWD/../libsowatch
 DEPENDPATH += $$PWD/../libsowatch
 
 unix:!symbian {
-	maemo5 {
-		target.path = /opt/sowatch/watchlets
+	!isEmpty(MEEGO_VERSION_MAJOR)|maemo5 {
+		QMAKE_RPATHDIR += /opt/sowatch/lib
+		target.path = /opt/sowatch/lib/watchlets
 	} else {
 		target.path = /usr/lib/sowatch/watchlets
 	}
@@ -30,31 +31,3 @@ OTHER_FILES += \
 
 RESOURCES += \
     notificationswatchlet.qrc
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

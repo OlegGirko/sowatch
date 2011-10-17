@@ -9,11 +9,13 @@ TEMPLATE = app
 TARGET = sowatchd
 
 QT       += core gui
-CONFIG   += console
+CONFIG   += mobility
 CONFIG   -= app_bundle
+MOBILITY += serviceframework
 
 SOURCES += main.cpp \
-    daemon.cpp
+    daemon.cpp \
+    service.cpp
 
 win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../libsowatch/release/ -lsowatch
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../libsowatch/debug/ -lsowatch
@@ -24,8 +26,9 @@ INCLUDEPATH += $$PWD/../libsowatch
 DEPENDPATH += $$PWD/../libsowatch
 
 unix {
-	maemo5 {
-		target.path = /opt/sowatch
+	!isEmpty(MEEGO_VERSION_MAJOR)|maemo5 {
+		QMAKE_RPATHDIR += /opt/sowatch/lib
+		target.path = /opt/sowatch/bin
 	} else {
 		target.path = /usr/bin
 	}
@@ -33,6 +36,12 @@ unix {
 }
 
 HEADERS += \
-    daemon.h
+    daemon.h \
+    service.h \
+    global.h
 
-
+xml.path = /opt/sowatch/xml
+xml.files = service.xml
+dbus.path = /usr/share/dbus-1/services
+dbus.files = com.javispedro.sowatch.service.sowatch-service.service
+INSTALLS += xml dbus

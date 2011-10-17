@@ -16,18 +16,11 @@ INCLUDEPATH += $$PWD/../libsowatch
 DEPENDPATH += $$PWD/../libsowatch
 
 unix:!symbian {
-	maemo5 {
-		target.path = /opt/sowatch/notifications
+	!isEmpty(MEEGO_VERSION_MAJOR)|maemo5 {
+		QMAKE_RPATHDIR += /opt/sowatch/lib
+		target.path = /opt/sowatch/lib/notifications
 	} else {
 		target.path = /usr/lib/sowatch/notifications
 	}
 	INSTALLS += target
 }
-
-
-
-
-
-
-
-

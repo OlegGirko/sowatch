@@ -4,6 +4,6 @@
 		<credential name="TrackerReadAccess" />
 		<credential name="Location" />
 
-		<for path="/usr/bin/sowatchd" />
+		<for path="/opt/sowatch/bin/sowatchd" />
 	</request>
 </aegis>
