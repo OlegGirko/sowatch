@@ -31,14 +31,19 @@ public:
 	void update(Mode mode, const QList<QRect>& rects = QList<QRect>());
 
 protected:
-	// Notifications: Unread count
-	uint _nMails, _nCalls, _nIms, _nSms, _nMms;
+	// Idle screen: notifications unread count
+	ushort _nMails, _nCalls, _nIms, _nSms, _nMms;
+	// Idle screen: weather information
+	WeatherNotification::WeatherType _wForecast;
+	QString _wBody;
+	short _wTemperature;
+	bool _wMetric;
 
 	void handleWatchConnected();
 
 	void renderIdleScreen();
-	void renderIdleWeather(WeatherNotification *w = 0);
-	QImage iconForWeather(WeatherNotification *w);
+	void renderIdleWeather();
+	QImage iconForWeather(WeatherNotification::WeatherType w);
 	void renderIdleCounts();
 
 	void renderNotification(Notification *n);

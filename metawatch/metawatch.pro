@@ -31,7 +31,7 @@ FORMS += \
 	metawatchsimulatorform.ui
 
 RESOURCES += \
-	uires.qrc
+    metawatch.qrc
 
 OTHER_FILES += \
 	idle_sms.bmp \
@@ -73,7 +73,3 @@ unix:!symbian {
     }
     INSTALLS += target
 }
-
-
-
-

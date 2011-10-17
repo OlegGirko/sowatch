@@ -13,7 +13,7 @@ HarmAccuWeather::HarmAccuWeather(QObject *parent) :
 	_watcher->addPath("/home/user/.config/AccuWeather, Inc./awxapp.conf");
 	connect(_watcher, SIGNAL(fileChanged(QString)), SLOT(fileChanged(QString)));
 
-	_timer->setInterval(2000);
+	_timer->setInterval(5000);
 	_timer->setSingleShot(true);
 	connect(_timer, SIGNAL(timeout()), SLOT(update()));
 
@@ -134,11 +134,13 @@ WeatherNotification::WeatherType HarmAccuWeather::forecast()
 	switch (_lastWxCode) {
 	case 1:
 	case 2:
-	case 3:
 		return Sunny;
 
+	case 3:
 	case 4:
 	case 5:
+		return PartlyCloudy;
+
 	case 6:
 	case 7:
 	case 8:
@@ -174,6 +176,7 @@ WeatherNotification::WeatherType HarmAccuWeather::forecast()
 	case 34:
 		return Sunny;
 	case 35:
+		return PartlyCloudy;
 	case 36:
 	case 37:
 	case 38:

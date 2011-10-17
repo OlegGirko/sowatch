@@ -4,7 +4,8 @@ using namespace sowatch;
 
 MetaWatchDigital::MetaWatchDigital(const QBluetoothAddress& address, QSettings* settings, QObject *parent) :
 	MetaWatch(address, settings, parent),
-	_nMails(0), _nCalls(0), _nIms(0), _nSms(0), _nMms(0)
+	_nMails(0), _nCalls(0), _nIms(0), _nSms(0), _nMms(0),
+	_wForecast(WeatherNotification::UnknownWeather)
 {
 	QImage baseImage(screenWidth, screenHeight, QImage::Format_MonoLSB);
 	baseImage.setColor(0, QColor(Qt::white).rgb());
@@ -75,8 +76,16 @@ void MetaWatchDigital::updateNotificationCount(Notification::Type type, int coun
 
 void MetaWatchDigital::updateWeather(WeatherNotification *weather)
 {
+	if (weather) {
+		_wForecast = weather->forecast();
+		_wBody = weather->body();
+		_wTemperature = weather->temperature();
+		_wMetric = weather->temperatureUnits() == WeatherNotification::Celsius;
+	} else {
+		_wForecast = WeatherNotification::UnknownWeather;
+	}
 	if (isConnected()) {
-		renderIdleWeather(weather);
+		renderIdleWeather();
 	}
 }
 
@@ -159,7 +168,7 @@ void MetaWatchDigital::renderIdleScreen()
 	renderIdleCounts();
 }
 
-void MetaWatchDigital::renderIdleWeather(WeatherNotification* w)
+void MetaWatchDigital::renderIdleWeather()
 {
 	_paintMode = IdleMode;
 	QFont sf("MetaWatch Small caps 8pt", 6);
@@ -171,35 +180,32 @@ void MetaWatchDigital::renderIdleWeather(WeatherNotification* w)
 
 	p.fillRect(0, systemAreaHeight + 6, screenWidth, systemAreaHeight - 6, Qt::white);
 
-	if (w) {
-		QImage icon = iconForWeather(w);
-		bool metric = w->temperatureUnits() == WeatherNotification::Celsius;
-		QString unit = QString::fromUtf8(metric ? "°C" : "°F");
+	if (_wForecast != WeatherNotification::UnknownWeather) {
+		QImage icon = iconForWeather(_wForecast);
+		QString unit = QString::fromUtf8(_wMetric ? "°C" : "°F");
 
 		QRect bodyRect(3, systemAreaHeight + 6, 36, systemAreaHeight - 6);
 		QTextOption option;
 		option.setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
 		option.setWrapMode(QTextOption::WrapAtWordBoundaryOrAnywhere);
 		p.setFont(sf);
-		p.drawText(bodyRect, w->body(), option);
+		p.drawText(bodyRect, _wBody, option);
 
 		p.drawImage(36, systemAreaHeight + 6, icon);
 
 		p.setFont(lf);
-		p.drawText(63, systemAreaHeight + 23, QString("%1 %2").arg(w->temperature()).arg(unit));
-	} else {
-		p.setFont(sf);
-		p.drawText(32, systemAreaHeight + 18, tr("No data"));
+		p.drawText(63, systemAreaHeight + 23, QString("%1 %2").arg(_wTemperature).arg(unit));
 	}
 
 	_paintMode = _currentMode;
 }
 
-QImage MetaWatchDigital::iconForWeather(WeatherNotification *w)
+QImage MetaWatchDigital::iconForWeather(WeatherNotification::WeatherType w)
 {
-	switch (w->forecast()) {
+	switch (w) {
 	case WeatherNotification::Sunny:
 		return QImage(QString(":/metawatch/graphics/weather_sunny.bmp"));
+	case WeatherNotification::PartlyCloudy:
 	case WeatherNotification::Cloudy:
 	case WeatherNotification::Fog:
 		return QImage(QString(":/metawatch/graphics/weather_cloudy.bmp"));

@@ -15,6 +15,7 @@ public:
 	enum WeatherType {
 		UnknownWeather = 0,
 		Sunny,
+		PartlyCloudy,
 		Cloudy,
 		Fog,
 		Rain,
