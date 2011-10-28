@@ -1,5 +1,5 @@
 <aegis>
-	<request policy="add">
+	<request>
 		<!-- Request a few tokens for watchlets to use. -->
 		<credential name="TrackerReadAccess" />
 		<credential name="Location" />

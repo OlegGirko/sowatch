@@ -1,3 +1,10 @@
+sowatch (0.2.2) unstable; urgency=low
+
+  * Support for MetaWatch 24 mode setting using the 0.8 firmware
+    NVAL operations.
+
+ -- Javier S. Pedro <maemo@javispedro.com>  Sat, 29 Oct 2011 00:51:12 +0200
+
 sowatch (0.2.1) unstable; urgency=low
 
   * Fixing build dependencies.
