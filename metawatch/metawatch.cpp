@@ -367,7 +367,7 @@ void MetaWatch::nvalWrite(NvalValue value, int data)
 
 	// Do a read operation first to get the current value
 	// If the current value matches what we want, avoid rewriting it to flash.
-	Message msg(NvalOperation, QByteArray(3, 0), 2);
+	Message msg(NvalOperation, QByteArray(3, 0), 1);
 
 	msg.data[0] = id & 0xFF;
 	msg.data[1] = id >> 8;
@@ -566,22 +566,50 @@ void MetaWatch::handleNvalOperationMessage(const Message& msg)
 
 	switch (msg.options) {
 	case 0: // Success
-		break;
+	{
+		int got_size = msg.data.size() - 2;
+		int size = nvalSize(value);
+		if (got_size != size) {
+			qWarning() << "Unexpected NVAL size" << got_size;
+			return;
+		}
+		// Read it
+		int data;
+		switch (size) {
+		case 1:
+			data = msg.data[2];
+			break;
+		default:
+			qWarning() << "Yet to implement this nval size";
+			return;
+		}
+
+		// Check if there's a pending write for this nval.
+		if (_nvals.contains(value)) {
+			int new_data = _nvals[value];
+			qDebug() << "nval" << value << "currently =" << data << "is pending write to =" << new_data;
+			if (new_data != data) {
+				realNvalWrite(value, _nvals[value]);
+			}
+			_nvals.remove(value);
+		}
+	}
+	break;
 	case 1: // Failure
 		qWarning() << "NVAL operation failed";
-		return;
+		break;
 	case 0x9:
 		qWarning() << "NVAL operation failed: Identifier not found";
-		return;
+		break;
 	case 0xA:
 		qWarning() << "NVAL operation failed: Operation failed";
-		return;
+		break;
 	case 0xC:
 		qWarning() << "NVAL operation failed: Bad Item length";
-		return;
+		break;
 	default:
 		qWarning() << "NVAL operation unknown response: " << msg.options;
-		return;
+		break;
 	}
 }
 
@@ -645,6 +673,11 @@ void MetaWatch::socketConnected()
 		_partialReceived.data.clear();
 		_currentMode = IdleMode;
 		_paintMode = IdleMode;
+
+#if FIRMWARE_NOT_BUGGY
+		// Configure the watch according to user preferences
+		//nvalWrite(TimeFormat, _24hMode ? 1 : 0);
+#endif
 
 		// Sync watch date & time
 		setDateTime(QDateTime::currentDateTime());
@@ -741,6 +774,30 @@ void MetaWatch::timedSend()
 void MetaWatch::timedRing()
 {
 	setVibrateMode(true, 250, 250, 3);
+}
+
+void MetaWatch::realNvalWrite(NvalValue value, int data)
+{
+	int size = nvalSize(value);
+	uint id = static_cast<uint>(value);
+	Message msg(NvalOperation, QByteArray(3 + size, 0), 2);
+
+	qDebug() << "nval" << value << "will be written with" << data;
+
+	msg.data[0] = id & 0xFF;
+	msg.data[1] = id >> 8;
+	msg.data[2] = size;
+
+	switch (size) {
+	case 1:
+		msg.data[3] = data & 0xFF;
+		break;
+	default:
+		qWarning() << "NVAL size not yet handled";
+		return;
+	}
+
+	send(msg);
 }
 
 void MetaWatch::realSend(const Message &msg)

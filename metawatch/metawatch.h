@@ -238,6 +238,7 @@ private slots:
 	void timedRing();
 
 private:
+	void realNvalWrite(NvalValue value, int data);
 	void realSend(const Message& msg);
 	void realReceive(bool block);
 };
