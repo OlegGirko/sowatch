@@ -64,6 +64,8 @@ private:
 	QList<Notification*> _notifications[Notification::TypeCount];
 	/** A list of notifications that are yet to be shown to the user. */
 	QQueue<Notification*> _pendingNotifications;
+	/** Stores the count of notifications hidden between each notification object. */
+	QMap<Notification*, uint> _notificationCounts;
 	/** We store a currently live weather forecast. */
 	WeatherNotification* _weather;
 

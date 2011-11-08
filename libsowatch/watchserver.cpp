@@ -195,6 +195,7 @@ void WatchServer::postNotification(Notification *notification)
 {
 	const Notification::Type type = notification->type();
 	_notifications[type].append(notification);
+	_notificationCounts[notification] = notification->count();
 
 	connect(notification, SIGNAL(changed()), SLOT(notificationChanged()));
 	connect(notification, SIGNAL(dismissed()), SLOT(notificationDismissed()));
@@ -247,15 +248,13 @@ void WatchServer::notificationChanged()
 	if (obj) {
 		Notification* n = static_cast<Notification*>(obj);
 		const Notification::Type type = n->type();
+		const uint lastCount = _notificationCounts[n];
+		_notificationCounts[n] = n->count();
 
 		qDebug() << "notification changed" << n->title() << "(" << n->count() << ")";
 
 		_watch->updateNotificationCount(type, getNotificationCount(type));
-		if (!_pendingNotifications.isEmpty() && _pendingNotifications.head() == n) {
-			// This is the notification that is being currently signaled on the watch
-			// Therefore, show it again
-			nextNotification();
-		}
+
 		if (type == Notification::WeatherNotification) {
 			WeatherNotification* w = static_cast<WeatherNotification*>(n);
 			if (!_weather || _weather->dateTime() < w->dateTime()) {
@@ -266,6 +265,21 @@ void WatchServer::notificationChanged()
 				// This is the weather notification we are currently displaying on the watch
 				// Therefore, update the displayed information
 				_watch->updateWeather(w);
+			}
+			return; // Do not display it the usual way
+		}
+
+		if (!_pendingNotifications.isEmpty() && _pendingNotifications.head() == n) {
+			// This is the notification that is being currently signaled on the watch
+			// Therefore, show it again no matter what.
+			nextNotification();
+		} else if (n->count() > lastCount) {
+			// This notification now contains an additional "item"; redisplay it.
+			if (_pendingNotifications.isEmpty()) {
+				_pendingNotifications.enqueue(n);
+				nextNotification();
+			} else {
+				_pendingNotifications.enqueue(n);
 			}
 		}
 	}
@@ -278,6 +292,7 @@ void WatchServer::notificationDismissed()
 		Notification* n = static_cast<Notification*>(obj);
 		const Notification::Type type = n->type();
 		_notifications[type].removeOne(n);
+		_notificationCounts.remove(n);
 
 		qDebug() << "notification dismissed" << n->title() << "(" << n->count() << ")";
 
