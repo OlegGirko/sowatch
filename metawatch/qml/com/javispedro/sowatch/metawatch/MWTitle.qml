@@ -8,6 +8,7 @@ Rectangle {
 
 	Row {
 		anchors.fill: parent
+		anchors.margins: 1
 		Text {
 			id: label
 			font.bold: true

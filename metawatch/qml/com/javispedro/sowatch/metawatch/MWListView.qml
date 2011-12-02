@@ -49,7 +49,13 @@ ListView {
 			}
 			if (currentItemTop <= 0) {
 				// If the previous item now is still not visible, scroll
-				contentY -= 96/3;
+				var newContentY = contentY - 96/3;
+
+				if (newContentY < 0) {
+					contentY = 0; // Never overscroll.
+				} else {
+					contentY = newContentY;
+				}
 			}
 		}
 	}

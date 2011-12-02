@@ -682,19 +682,10 @@ void MetaWatch::socketConnected()
 		// Sync watch date & time
 		setDateTime(QDateTime::currentDateTime());
 
-		// Grab all buttons in both notification and application modes
-		grabButton(ApplicationMode, BtnA);
-		grabButton(ApplicationMode, BtnB);
-		grabButton(ApplicationMode, BtnC);
-		grabButton(ApplicationMode, BtnD);
-		grabButton(ApplicationMode, BtnE);
-		grabButton(ApplicationMode, BtnF);
+		// Grab a few buttons from Notification mode that we handle
 		grabButton(NotificationMode, BtnA);
 		grabButton(NotificationMode, BtnB);
 		grabButton(NotificationMode, BtnC);
-		grabButton(NotificationMode, BtnD);
-		grabButton(NotificationMode, BtnE);
-		grabButton(NotificationMode, BtnF);
 
 		// Call the MetaWatch Model-specific setup routines
 		handleWatchConnected();

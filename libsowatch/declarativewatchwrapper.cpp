@@ -25,15 +25,25 @@ bool DeclarativeWatchWrapper::active() const
 
 QList<QObject*> DeclarativeWatchWrapper::notifications() const
 {
-	// TODO: Figure a better way for this; QAbstractListModel, etc.
+	// TODO: Figure out a better way for this; QAbstractListModel, etc.
 	QList<Notification*> nl = _server->liveNotifications();
 	QList<QObject*> ol;
 	foreach (Notification* n, nl) {
 		QObject * o = n;
 		ol.append(o);
 	}
-	qDebug() << "notifications declarative: " << ol;
+	qDebug() << "notifications to declarative: " << ol;
 	return ol;
+}
+
+void DeclarativeWatchWrapper::useButton(int button)
+{
+	if (!_usedButtons.contains(button)) {
+		_usedButtons.insert(button);
+		if (_active) {
+			_watch->grabButton(button);
+		}
+	}
 }
 
 void DeclarativeWatchWrapper::vibrate(int msecs)
@@ -46,12 +56,22 @@ void DeclarativeWatchWrapper::vibrate(int msecs)
 void DeclarativeWatchWrapper::activate()
 {
 	if (!_active) {
+		_active = true;
+
+		// Grab all of the buttons used by this watchlet
+		foreach (int button, _usedButtons) {
+			_watch->grabButton(button);
+		}
+
+		// Forward the button signals
 		connect(_watch, SIGNAL(buttonPressed(int)), this, SIGNAL(buttonPressed(int)));
 		connect(_watch, SIGNAL(buttonReleased(int)), this, SIGNAL(buttonReleased(int)));
-		_active = true;
+
+		// Emit the active signal
 		emit activeChanged();
+
 		// Since a notification currently causes the active watchlet to be deactivated,
-		// we can assume notifications only change when we are deactivated.
+		// we can assume the notifications list only changes when we are deactivated.
 		emit notificationsChanged();
 	}
 }
@@ -59,8 +79,17 @@ void DeclarativeWatchWrapper::activate()
 void DeclarativeWatchWrapper::deactivate()
 {
 	if (_active) {
-		disconnect(_watch, 0, this, 0);
 		_active = false;
+
+		// Stop forwarding button presses
+		disconnect(_watch, 0, this, 0);
+
+		// Ungrab all the buttons used by this watchlet
+		foreach (int button, _usedButtons) {
+			_watch->ungrabButton(button);
+		}
+
+		// Emit the deactivated signal
 		emit activeChanged();
 	}
 }

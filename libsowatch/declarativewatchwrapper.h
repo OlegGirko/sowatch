@@ -28,6 +28,7 @@ public:
 	QList<QObject*> notifications() const;
 
 public slots:
+	void useButton(int button);
 	void vibrate(int msecs);
 
 signals:
@@ -41,6 +42,7 @@ private:
 	WatchServer *_server;
 	Watch* _watch;
 	bool _active;
+	QSet<int> _usedButtons;
 
 	void activate();
 	void deactivate();
