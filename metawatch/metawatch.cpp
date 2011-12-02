@@ -696,6 +696,7 @@ void MetaWatch::socketConnected()
 		grabButton(NotificationMode, BtnE);
 		grabButton(NotificationMode, BtnF);
 
+		// Call the MetaWatch Model-specific setup routines
 		handleWatchConnected();
 
 		emit connected();

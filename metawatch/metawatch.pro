@@ -31,7 +31,7 @@ FORMS += \
 	metawatchsimulatorform.ui
 
 res_files.files += res/graphics res/fonts
-qml_files.files += qml/MWListView.qml
+qml_files.files += qml/com
 
 win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../libsowatch/release/ -lsowatch
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../libsowatch/debug/ -lsowatch
@@ -56,16 +56,11 @@ unix:!symbian {
 		QMAKE_RPATHDIR += /opt/sowatch/lib
 		target.path = /opt/sowatch/lib/drivers
 		res_files.path = /opt/sowatch/share/metawatch
-		qml_files.path = /opt/sowatch/qml/metawatch
+		qml_files.path = /opt/sowatch/qml
     } else {
 		target.path = /usr/lib/sowatch/drivers
 		res_files.path = /usr/share/sowatch/metawatch
-		qml_files.path = /usr/share/sowatch/qml/metawatch
+		qml_files.path = /usr/share/sowatch/qml
     }
 	INSTALLS += target res_files qml_files
 }
-
-OTHER_FILES += \
-    qml/MWTitle.qml
-
-

@@ -17,6 +17,7 @@ else:unix: LIBS += -L$$OUT_PWD/../libsowatch/ -lsowatch
 
 INCLUDEPATH += $$PWD/../libsowatch
 DEPENDPATH += $$PWD/../libsowatch
+QML_IMPORT_PATH += $$PWD/../metawatch/qml
 
 unix:!symbian {
 	!isEmpty(MEEGO_VERSION_MAJOR)|maemo5 {

@@ -43,6 +43,3 @@ OTHER_FILES += \
 	qml/main.qml \
     sowatch_harmattan.desktop \
     sowatch.desktop
-
-
-

@@ -1,4 +1,5 @@
 import QtQuick 1.0
+import com.javispedro.sowatch.metawatch 1.0
 
 Rectangle {
 	width: 96
@@ -6,33 +7,39 @@ Rectangle {
 
 	color: "white"
 
-	ListView {
+	MWTitle {
+		id: title
+		text: qsTr("Notifications")
+		anchors.top: parent.top
+		anchors.left: parent.left
+		anchors.right: parent.right
+	}
+
+	MWListView {
 		id: notifs
-		anchors.fill: parent
+		anchors.top: title.bottom
+		anchors.left: parent.left
+		anchors.right: parent.right
+		anchors.bottom: parent.bottom
 		model: watch.notifications
-		delegate: Column {
-			width: parent.width
+		delegate: Rectangle {
+			property bool selected: ListView.isCurrentItem
+			width: notifs.width
+			height: childrenRect.height
+			color: ListView.isCurrentItem ? "black" : "white"
 			Text {
-				width: parent.width
-				text: model.modelData.title
-				wrapMode: Text.Wrap
-			}
-			Text {
-				width: parent.width
-				text: model.modelData.body
-				wrapMode: Text.Wrap
-			}
-			Rectangle {
-				width: parent.width
-				height: 1
-				color: "black"
+				width: 96
+				text: "<b>" + model.modelData.title + "</b><br>" + model.modelData.body
+				wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+				color: parent.selected ? "white" : "black"
 			}
 		}
 		visible: count > 0;
 	}
 
 	Text {
-		anchors.fill: parent
+		anchors.top: title.bottom
+		anchors.horizontalCenter: parent.horizontalCenter
 		text: qsTr("No notifications");
 		visible: notifs.count == 0;
 		wrapMode: Text.Wrap
@@ -41,22 +48,12 @@ Rectangle {
 	Connections {
 		target: watch
 		onButtonPressed : {
-			var increment = (3 * (notifs.width / 4));
-			var maxy = notifs.contentHeight - notifs.height;
-			var newy;
-
-			if (maxy < 0) maxy = 0;
-
 			switch (button) {
 			case 1:
-				newy = notifs.contentY - increment;
-				if (newy < 0) newy = 0;
-				notifs.contentY = newy;
+				notifs.scrollUp();
 				break;
 			case 2:
-				newy = notifs.contentY + increment;
-				if (newy > maxy) newy = maxy;
-				notifs.contentY = newy;
+				notifs.scrollDown();
 				break;
 			}
 		}

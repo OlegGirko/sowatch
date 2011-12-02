@@ -24,8 +24,9 @@ DeclarativeWatchlet::DeclarativeWatchlet(WatchServer* server, const QString& id)
 	}
 
 	_engine = new QDeclarativeEngine(this);
-	_wrapper = new DeclarativeWatchWrapper(server, server->watch(), this);
+	_engine->addImportPath(SOWATCH_QML_DIR);
 
+	_wrapper = new DeclarativeWatchWrapper(server, server->watch(), this);
 	_engine->rootContext()->setContextProperty("watch", _wrapper);
 }
 
