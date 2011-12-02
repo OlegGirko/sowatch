@@ -143,9 +143,9 @@ void MetaWatchDigital::clear(Mode mode, bool black)
 
 void MetaWatchDigital::renderIdleScreen()
 {
-	QImage idle_call(QString(":/metawatch/graphics/idle_call.bmp"));
-	QImage idle_sms(QString(":/metawatch/graphics/idle_sms.bmp"));
-	QImage idle_mail(QString(":/metawatch/graphics/idle_gmail.bmp"));
+	QImage idle_call(QString(SOWATCH_RESOURCES_DIR "/metawatch/graphics/idle_call.bmp"));
+	QImage idle_sms(QString(SOWATCH_RESOURCES_DIR "/metawatch/graphics/idle_sms.bmp"));
+	QImage idle_mail(QString(SOWATCH_RESOURCES_DIR "/metawatch/graphics/idle_gmail.bmp"));
 	QPainter p;
 
 	_paintMode = IdleMode;
@@ -204,17 +204,17 @@ QImage MetaWatchDigital::iconForWeather(WeatherNotification::WeatherType w)
 {
 	switch (w) {
 	case WeatherNotification::Sunny:
-		return QImage(QString(":/metawatch/graphics/weather_sunny.bmp"));
+		return QImage(QString(SOWATCH_RESOURCES_DIR "/metawatch/graphics/weather_sunny.bmp"));
 	case WeatherNotification::PartlyCloudy:
 	case WeatherNotification::Cloudy:
 	case WeatherNotification::Fog:
-		return QImage(QString(":/metawatch/graphics/weather_cloudy.bmp"));
+		return QImage(QString(SOWATCH_RESOURCES_DIR "/metawatch/graphics/weather_cloudy.bmp"));
 	case WeatherNotification::Rain:
-		return QImage(QString(":/metawatch/graphics/weather_rain.bmp"));
+		return QImage(QString(SOWATCH_RESOURCES_DIR "/metawatch/graphics/weather_rain.bmp"));
 	case WeatherNotification::Thunderstorm:
-		return QImage(QString(":/metawatch/graphics/weather_thunderstorm.bmp"));
+		return QImage(QString(SOWATCH_RESOURCES_DIR "/metawatch/graphics/weather_thunderstorm.bmp"));
 	case WeatherNotification::Snow:
-		return QImage(QString(":/metawatch/graphics/weather_snow.bmp"));
+		return QImage(QString(SOWATCH_RESOURCES_DIR "/metawatch/graphics/weather_snow.bmp"));
 	default:
 		return QImage();
 	}
@@ -313,18 +313,18 @@ QImage MetaWatchDigital::iconForNotification(const Notification *n)
 	switch (n->type()) {
 	case Notification::CallNotification:
 	case Notification::MissedCallNotification:
-		return QImage(QString(":/metawatch/graphics/phone.bmp"));
+		return QImage(QString(SOWATCH_RESOURCES_DIR "/metawatch/graphics/phone.bmp"));
 		break;
 	case Notification::SmsNotification:
 	case Notification::MmsNotification:
 	case Notification::ImNotification:
-		return QImage(QString(":/metawatch/graphics/message.bmp"));
+		return QImage(QString(SOWATCH_RESOURCES_DIR "/metawatch/graphics/message.bmp"));
 		break;
 	case Notification::EmailNotification:
-		return QImage(QString(":/metawatch/graphics/email.bmp"));
+		return QImage(QString(SOWATCH_RESOURCES_DIR "/metawatch/graphics/email.bmp"));
 		break;
 	case Notification::CalendarNotification:
-		return QImage(QString(":/metawatch/graphics/timer.bmp"));
+		return QImage(QString(SOWATCH_RESOURCES_DIR "/metawatch/graphics/timer.bmp"));
 		break;
 	default:
 		return QImage();

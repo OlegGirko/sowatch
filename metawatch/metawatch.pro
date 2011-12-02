@@ -30,22 +30,8 @@ HEADERS += metawatchplugin.h \
 FORMS += \
 	metawatchsimulatorform.ui
 
-RESOURCES += \
-    metawatch.qrc
-
-OTHER_FILES += \
-	idle_sms.bmp \
-	idle_gmail.bmp \
-	idle_call.bmp \
-    weather_wind.bmp \
-    weather_thunderstorm.bmp \
-    weather_sunny.bmp \
-    weather_snow.bmp \
-    weather_rain.bmp \
-    weather_cloudy.bmp \
-    metawatch_16pt_11pxl.ttf \
-    metawatch_8pt_7pxl_CAPS.ttf \
-    metawatch_8pt_5pxl_CAPS.ttf
+res_files.files += res/graphics res/fonts
+qml_files.files += qml/MWListView.qml
 
 win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../libsowatch/release/ -lsowatch
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../libsowatch/debug/ -lsowatch
@@ -69,8 +55,17 @@ unix:!symbian {
 	!isEmpty(MEEGO_VERSION_MAJOR)|maemo5 {
 		QMAKE_RPATHDIR += /opt/sowatch/lib
 		target.path = /opt/sowatch/lib/drivers
+		res_files.path = /opt/sowatch/share/metawatch
+		qml_files.path = /opt/sowatch/qml/metawatch
     } else {
 		target.path = /usr/lib/sowatch/drivers
+		res_files.path = /usr/share/sowatch/metawatch
+		qml_files.path = /usr/share/sowatch/qml/metawatch
     }
-    INSTALLS += target
+	INSTALLS += target res_files qml_files
 }
+
+OTHER_FILES += \
+    qml/MWTitle.qml
+
+

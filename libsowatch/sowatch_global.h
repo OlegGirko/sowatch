@@ -11,11 +11,15 @@
 #endif
 
 #if defined(MEEGO_VERSION_MAJOR) || defined(Q_WS_MAEMO_5)
-#	define SOWATCH_PLUGINS_DIR "/opt/sowatch/lib"
+#	define SOWATCH_PLUGINS_DIR		"/opt/sowatch/lib"
+#	define SOWATCH_RESOURCES_DIR	"/opt/sowatch/share"
+#	define SOWATCH_QML_DIR			"/opt/sowatch/qml"
 #elif defined(Q_OS_LINUX)
-#	define SOWATCH_PLUGINS_DIR "/usr/lib/sowatch"
+#	define SOWATCH_PLUGINS_DIR		"/usr/lib/sowatch"
+#	define SOWATCH_RESOURCES_DIR	"/usr/share/sowatch"
+#	define SOWATCH_QML_DIR			SOWATCH_RESOURCES_DIR "/qml"
 #else
-#	error Please define a path for your platform
+#	error Please define the paths for your platform
 #endif
 
 #define SOWATCH_DRIVERS_DIR       SOWATCH_PLUGINS_DIR "/drivers"

@@ -13,9 +13,9 @@ bool MetaWatchPlugin::fontsLoaded = false;
 MetaWatchPlugin::MetaWatchPlugin()
 {
 	if (!fontsLoaded) {
-		QFontDatabase::addApplicationFont(":/metawatch/fonts/metawatch_16pt_11pxl.ttf");
-		QFontDatabase::addApplicationFont(":/metawatch/fonts/metawatch_8pt_7pxl_CAPS.ttf");
-		QFontDatabase::addApplicationFont(":/metawatch/fonts/metawatch_8pt_5pxl_CAPS.ttf");
+		QFontDatabase::addApplicationFont(SOWATCH_RESOURCES_DIR "/metawatch/fonts/metawatch_16pt_11pxl.ttf");
+		QFontDatabase::addApplicationFont(SOWATCH_RESOURCES_DIR "/metawatch/fonts/metawatch_8pt_7pxl_CAPS.ttf");
+		QFontDatabase::addApplicationFont(SOWATCH_RESOURCES_DIR "/metawatch/fonts/metawatch_8pt_5pxl_CAPS.ttf");
 		// "MetaWatch Large 16pt", "MetaWatch Large caps 8pt", "MetaWatch Small caps 8pt"
 		fontsLoaded = true;
 	}
