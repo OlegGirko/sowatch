@@ -333,6 +333,18 @@ QImage MetaWatchDigital::iconForNotification(const Notification *n)
 
 void MetaWatchDigital::handleWatchConnected()
 {
+	// Grab all of the buttons that are of interest to us
+	// We do not grab the D button, as it triggers the LED.
+	grabButton(IdleMode, BtnA);
+	grabButton(NotificationMode, BtnA);
+	grabButton(NotificationMode, BtnB);
+	grabButton(NotificationMode, BtnC);
+	grabButton(ApplicationMode, BtnA);
+	grabButton(ApplicationMode, BtnB);
+	grabButton(ApplicationMode, BtnC);
+	grabButton(ApplicationMode, BtnE);
+	grabButton(ApplicationMode, BtnF);
+
 	// Configure to show watch-rendered clock in idle screen
 	configureLcdIdleSystemArea(false);
 

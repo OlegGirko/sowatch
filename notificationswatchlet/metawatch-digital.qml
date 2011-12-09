@@ -45,10 +45,6 @@ Rectangle {
 		wrapMode: Text.Wrap
 	}
 
-	Component.onCompleted: {
-		watch.useButton(1);
-		watch.useButton(2);
-	}
 	Connections {
 		target: watch
 		onButtonPressed : {

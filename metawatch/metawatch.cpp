@@ -102,7 +102,7 @@ MetaWatch::MetaWatch(const QBluetoothAddress& address, QSettings* settings, QObj
 	_idleTimer->setSingleShot(true);
 	connect(_idleTimer, SIGNAL(timeout()), SIGNAL(idling()));
 
-	_ringTimer->setInterval(2500);
+	_ringTimer->setInterval(DelayBetweenRings);
 	connect(_ringTimer, SIGNAL(timeout()), SLOT(timedRing()));
 
 	_connectTimer->setSingleShot(true);
@@ -110,7 +110,7 @@ MetaWatch::MetaWatch(const QBluetoothAddress& address, QSettings* settings, QObj
 	connect(_connectTimer, SIGNAL(timeout()), SLOT(retryConnect()));
 	connect(_connectAlignedTimer, SIGNAL(timeout()), SLOT(retryConnect()));
 
-	_sendTimer->setInterval(10);
+	_sendTimer->setInterval(DelayBetweenMessages);
 	connect(_sendTimer, SIGNAL(timeout()), SLOT(timedSend()));
 
 	retryConnect();
@@ -209,16 +209,6 @@ bool MetaWatch::charging() const
 	return _watchCharging;
 }
 
-void MetaWatch::grabButton(int button)
-{
-	grabButton(_currentMode, (Button) button);
-}
-
-void MetaWatch::ungrabButton(int button)
-{
-	ungrabButton(_currentMode, (Button) button);
-}
-
 void MetaWatch::updateNotificationCount(Notification::Type type, int count)
 {
 	Q_UNUSED(type);
@@ -251,7 +241,7 @@ void MetaWatch::displayNotification(Notification *notification)
 		_idleTimer->stop();
 	} else {
 		_ringTimer->stop();
-		setVibrateMode(true, 500, 500, 2);
+		setVibrateMode(true, RingLength, RingLength, 2);
 		_idleTimer->start();
 	}
 }
@@ -480,6 +470,8 @@ void MetaWatch::enableButton(Mode mode, Button button, ButtonPress press)
 	msg.data[1] = btnToWatch[button];
 	msg.data[2] = press;
 	msg.data[3] = ButtonEvent;
+	// We create a custom event code that allows us to know what
+	// the pressed button and the event code were.
 	msg.data[4] = 0x80 | ((press << 4) & 0x30) | (button & 0xF);
 
 	send(msg);
@@ -681,11 +673,6 @@ void MetaWatch::socketConnected()
 
 		// Sync watch date & time
 		setDateTime(QDateTime::currentDateTime());
-
-		// Grab a few buttons from Notification mode that we handle
-		grabButton(NotificationMode, BtnA);
-		grabButton(NotificationMode, BtnB);
-		grabButton(NotificationMode, BtnC);
 
 		// Call the MetaWatch Model-specific setup routines
 		handleWatchConnected();

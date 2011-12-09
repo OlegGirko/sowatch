@@ -37,14 +37,11 @@ Rectangle {
 			case 2:
 				player.volumeDown();
 				break;
-			case 3:
+			case 4:
 				player.playPause();
 				break;
-			case 4:
-				player.next();
-				break;
 			case 5:
-				player.previous();
+				player.next();
 				break;
 			}
 		}

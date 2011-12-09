@@ -55,11 +55,6 @@ public:
 	virtual void queryCharging() = 0;
 	virtual bool charging() const = 0;
 
-	/** Grabs a button from whatever is default function is for the current mode. */
-	virtual void grabButton(int button) = 0;
-	/** Restores a button to its default function. */
-	virtual void ungrabButton(int button) = 0;
-
 	/** Tells the watch to update the unread notifications count, if visible. */
 	virtual void updateNotificationCount(Notification::Type type, int count) = 0;
 
@@ -71,7 +66,7 @@ public slots:
 	virtual void displayIdleScreen() = 0;
 	/** A standard notification; it's up to the watch when to stop showing it. */
 	virtual void displayNotification(Notification* notification) = 0;
-	/** Enter application mode. */
+	/** Enter application mode; after this, server can draw on the QPaintDevice. */
 	virtual void displayApplication() = 0;
 
 	/** Vibrate for a while. The default implementation does nothing. */

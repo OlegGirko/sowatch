@@ -26,6 +26,10 @@ public:
 	explicit MetaWatch(const QBluetoothAddress& address, QSettings* settings = 0, QObject *parent = 0);
 	~MetaWatch();
 
+	static const int DelayBetweenMessages = 10;
+	static const int DelayBetweenRings = 2500;
+	static const int RingLength = 500;
+
 	enum MessageType {
 		NoMessage = 0,
 		GetDeviceType = 0x01,
@@ -108,9 +112,6 @@ public:
 
 	void queryCharging();
 	bool charging() const;
-
-	void grabButton(int button);
-	void ungrabButton(int button);
 
 	void updateNotificationCount(Notification::Type type, int count);
 	void updateWeather(WeatherNotification *weather);

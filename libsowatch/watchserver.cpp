@@ -141,9 +141,6 @@ uint WatchServer::getNotificationCount(Notification::Type type)
 void WatchServer::goToIdle()
 {
 	_watch->displayIdleScreen();
-	if (_nextWatchletButton >= 0) {
-		_watch->grabButton(_nextWatchletButton);
-	}
 }
 
 void WatchServer::watchConnected()

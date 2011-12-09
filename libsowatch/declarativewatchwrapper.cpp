@@ -36,16 +36,6 @@ QList<QObject*> DeclarativeWatchWrapper::notifications() const
 	return ol;
 }
 
-void DeclarativeWatchWrapper::useButton(int button)
-{
-	if (!_usedButtons.contains(button)) {
-		_usedButtons.insert(button);
-		if (_active) {
-			_watch->grabButton(button);
-		}
-	}
-}
-
 void DeclarativeWatchWrapper::vibrate(int msecs)
 {
 	if (_active) {
@@ -57,11 +47,6 @@ void DeclarativeWatchWrapper::activate()
 {
 	if (!_active) {
 		_active = true;
-
-		// Grab all of the buttons used by this watchlet
-		foreach (int button, _usedButtons) {
-			_watch->grabButton(button);
-		}
 
 		// Forward the button signals
 		connect(_watch, SIGNAL(buttonPressed(int)), this, SIGNAL(buttonPressed(int)));
@@ -84,13 +69,7 @@ void DeclarativeWatchWrapper::deactivate()
 		// Stop forwarding button presses
 		disconnect(_watch, 0, this, 0);
 
-		// Ungrab all the buttons used by this watchlet
-		foreach (int button, _usedButtons) {
-			_watch->ungrabButton(button);
-		}
-
 		// Emit the deactivated signal
 		emit activeChanged();
 	}
 }
-

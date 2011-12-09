@@ -77,11 +77,13 @@ private:
 	/** Used for periodic time syncing. */
 	QTimer* _syncTimeTimer;
 
+	/** Called by Watchlet constructor to register itself as a child. */
 	void registerWatchlet(Watchlet *watchlet);
-	void reactivateCurrentWatchlet();
 
+	/** Counts all notifications from a given type. */
 	uint getNotificationCount(Notification::Type type);
 
+	void reactivateCurrentWatchlet();
 	void goToIdle();
 
 private slots:
