@@ -1,22 +1,24 @@
 TEMPLATE = subdirs
-SUBDIRS = libsowatch \
-	metawatch \
-	sowatchd \
-	sowatchui \
-	notificationswatchlet \
-	sysinfowatchlet
+SUBDIRS = libsowatch
+
+SUBDIRS += metawatch sowatchd sowatchui
+SUBDIRS += notificationswatchlet sysinfowatchlet
+
+metawatch.depends = libsowatch
+sowatchd.depends = libsowatch
+sowatchui.depends = libsowatch sowatchd
+notificationswatchlet.depends = libsowatch
+sysinfowatchlet.depends = libsowatch
 
 !isEmpty(MEEGO_VERSION_MAJOR) {
-	SUBDIRS += meegohandsetnotification ckitcallnotification harmaccuweather qmafwwatchlet qmapwatchlet
-}
+	SUBDIRS += meegohandsetnotification ckitcallnotification harmaccuweather
+	SUBDIRS += qmafwwatchlet qmapwatchlet
 
-unix:!symbian {
-	maemo5 {
-		target.path = /opt/sowatch/notifications
-	} else {
-		target.path = /usr/lib/sowatch/notifications
-	}
-	INSTALLS += target
+	meegohandsetnotification.depends = libsowatch
+	ckitcallnotification.depends = libsowatch
+	harmaccuweather.depends = libsowatch
+	qmafwwatchlet.depends = libsowatch
+	qmapwatchlet.depends = libsowatch
 }
 
 OTHER_FILES += \

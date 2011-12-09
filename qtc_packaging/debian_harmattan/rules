@@ -9,6 +9,14 @@
 # Uncomment this to turn on verbose mode.
 #export DH_VERBOSE=1
 
+# Enable parallelism in $(MAKE) subcall if requested
+ifneq (,$(filter parallel=%,$(DEB_BUILD_OPTIONS)))
+	NUMJOBS:= $(patsubst parallel=%,%,$(filter parallel=%,$(DEB_BUILD_OPTIONS)))
+	PARALLEL:= -j$(NUMJOBS)
+else
+	PARALLEL:=
+endif
+
 configure: configure-stamp
 configure-stamp:
 	dh_testdir
@@ -23,7 +31,7 @@ build-stamp: configure-stamp
 	dh_testdir
 
 	# Add here commands to compile the package.
-	# $(MAKE) # Uncomment this line for use without Qt Creator
+	# $(MAKE) $(PARALLEL) # Uncomment this line for use without Qt Creator
 	#docbook-to-man debian/sowatch.sgml > sowatch.1
 
 	touch $@
