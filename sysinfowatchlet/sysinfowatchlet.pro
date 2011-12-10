@@ -1,14 +1,14 @@
-#-------------------------------------------------
-#
-# Project created by QtCreator 2011-09-24T00:00:03
-#
-#-------------------------------------------------
-
 TARGET = sysinfowatchlet
 TEMPLATE = lib
 # CONFIG   += plugin # Qt creator doesn't want to deploy plugins
 QT       += network
-CONFIG   += mobility
+
+# Qt Mobility 1.2
+maemo5 {
+	CONFIG += mobility12
+} else {
+	CONFIG += mobility
+}
 MOBILITY += systeminfo
 
 SOURCES += sysinfoplugin.cpp sysinfowatchlet.cpp

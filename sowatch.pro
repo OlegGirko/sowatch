@@ -1,11 +1,13 @@
 TEMPLATE = subdirs
 SUBDIRS = libsowatch
 
-SUBDIRS += metawatch sowatchd sowatchui
+SUBDIRS += sowatchd
+SUBDIRS += metawatch
+SUBDIRS += sowatchui
 SUBDIRS += notificationswatchlet sysinfowatchlet
 
-metawatch.depends = libsowatch
 sowatchd.depends = libsowatch
+metawatch.depends = libsowatch
 sowatchui.depends = libsowatch sowatchd
 notificationswatchlet.depends = libsowatch
 sysinfowatchlet.depends = libsowatch

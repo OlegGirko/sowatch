@@ -2,7 +2,6 @@
 TARGET = notificationswatchlet
 TEMPLATE = lib
 # CONFIG   += plugin
-CONFIG   += mobility
 
 SOURCES += notificationswatchletplugin.cpp notificationswatchlet.cpp
 

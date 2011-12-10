@@ -1,14 +1,14 @@
-#-------------------------------------------------
-#
-# Project created by QtCreator 2011-09-17T03:22:32
-#
-#-------------------------------------------------
-
 TARGET = metawatchdriver
 TEMPLATE = lib
-# CONFIG   += plugin # Stupid Qt creator doesn't want to deploy plugins
+# CONFIG   += plugin # QtCreator < 2.4 doesn't want to deploy plugins
 QT       += gui
-CONFIG   += mobility
+
+# Qt Mobility 1.2
+maemo5 {
+	CONFIG += mobility12
+} else {
+	CONFIG += mobility
+}
 MOBILITY += connectivity systeminfo
 
 SOURCES += metawatchplugin.cpp \

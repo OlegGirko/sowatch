@@ -1,21 +1,21 @@
-#-------------------------------------------------
-#
-# Project created by QtCreator 2011-09-17T04:55:26
-#
-#-------------------------------------------------
-
 TEMPLATE = app
 
 TARGET = sowatchd
 
 QT       += core gui
-CONFIG   += mobility
 CONFIG   -= app_bundle
+
+# Qt Mobility 1.2
+maemo5 {
+	CONFIG += mobility12
+} else {
+	CONFIG += mobility
+}
 MOBILITY += serviceframework
 
-SOURCES += main.cpp \
-    daemon.cpp \
-    service.cpp
+SOURCES += main.cpp daemon.cpp service.cpp
+
+HEADERS += global.h daemon.h service.h
 
 win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../libsowatch/release/ -lsowatch
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../libsowatch/debug/ -lsowatch
@@ -34,11 +34,6 @@ unix {
 	}
 	INSTALLS += target
 }
-
-HEADERS += \
-    daemon.h \
-    service.h \
-    global.h
 
 xml.path = /opt/sowatch/xml
 xml.files = service.xml
