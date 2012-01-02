@@ -1,7 +1,7 @@
 
 TARGET = qmapwatchlet
 TEMPLATE = lib
-# CONFIG   += plugin
+CONFIG   += plugin
 CONFIG   += mobility
 
 SOURCES += qmapwatchletplugin.cpp qmapwatchlet.cpp

@@ -1,7 +1,7 @@
 
 TARGET = qmafwwatchlet
 TEMPLATE = lib
-# CONFIG   += plugin
+CONFIG   += plugin
 QT       += dbus
 CONFIG   += link_pkgconfig
 unix: PKGCONFIG += qmafw qmafw-shared

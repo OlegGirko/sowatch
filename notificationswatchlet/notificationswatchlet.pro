@@ -1,7 +1,7 @@
 
 TARGET = notificationswatchlet
 TEMPLATE = lib
-# CONFIG   += plugin
+CONFIG   += plugin
 
 SOURCES += notificationswatchletplugin.cpp notificationswatchlet.cpp
 
@@ -25,7 +25,7 @@ unix:!symbian {
 		qml_files.path = /opt/sowatch/qml/$$TARGET
 	} else {
 		target.path = /usr/lib/sowatch/watchlets
-		qml_files.path = /opt/sowatch/qml/$$TARGET
+		qml_files.path = /usr/share/sowatch/qml/$$TARGET
 	}
 	INSTALLS += target qml_files
 }

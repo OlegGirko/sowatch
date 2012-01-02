@@ -6,7 +6,7 @@
 
 TARGET = ckitcallnotification
 TEMPLATE = lib
-# CONFIG   += plugin # Stupid Qt creator doesn't want to deploy plugins
+CONFIG   += plugin
 QT       += dbus
 
 SOURCES += ckitcallplugin.cpp \

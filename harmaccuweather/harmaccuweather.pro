@@ -1,6 +1,6 @@
 TARGET = harmaccuweather
 TEMPLATE = lib
-# CONFIG   += plugin # Qt creator doesn't want to deploy plugins
+CONFIG   += plugin
 CONFIG += mobility
 MOBILITY += systeminfo
 

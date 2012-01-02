@@ -1,6 +1,6 @@
 TARGET = metawatchdriver
 TEMPLATE = lib
-# CONFIG   += plugin # QtCreator < 2.4 doesn't want to deploy plugins
+CONFIG   += plugin
 QT       += gui
 
 # Qt Mobility 1.2

@@ -1,6 +1,6 @@
 TARGET = sysinfowatchlet
 TEMPLATE = lib
-# CONFIG   += plugin # Qt creator doesn't want to deploy plugins
+CONFIG   += plugin
 QT       += network
 
 # Qt Mobility 1.2

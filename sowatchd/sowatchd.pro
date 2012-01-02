@@ -25,18 +25,21 @@ else:unix: LIBS += -L$$OUT_PWD/../libsowatch/ -lsowatch
 INCLUDEPATH += $$PWD/../libsowatch
 DEPENDPATH += $$PWD/../libsowatch
 
+xml.files = service.xml
+INSTALLS += xml
+
 unix {
 	!isEmpty(MEEGO_VERSION_MAJOR)|maemo5 {
 		QMAKE_RPATHDIR += /opt/sowatch/lib
 		target.path = /opt/sowatch/bin
+		xml.path = /opt/sowatch/xml
 	} else {
 		target.path = /usr/bin
+		xml.path = /usr/share/sowatch/xml
 	}
 	INSTALLS += target
-}
 
-xml.path = /opt/sowatch/xml
-xml.files = service.xml
-dbus.path = /usr/share/dbus-1/services
-dbus.files = com.javispedro.sowatch.service.sowatch-service.service
-INSTALLS += xml dbus
+	dbus.path = /usr/share/dbus-1/services
+	dbus.files = com.javispedro.sowatch.service.sowatch-service.service
+	INSTALLS += dbus
+}

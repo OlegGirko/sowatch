@@ -1,7 +1,7 @@
 
 TARGET = meegohandsetnotification
 TEMPLATE = lib
-# CONFIG   += plugin
+CONFIG   += plugin
 QT       += dbus
 
 SOURCES += meegohandsetplugin.cpp \
