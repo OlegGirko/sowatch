@@ -171,7 +171,7 @@ void MetaWatchDigital::renderIdleScreen()
 void MetaWatchDigital::renderIdleWeather()
 {
 	_paintMode = IdleMode;
-	QFont sf("MetaWatch Small caps 8pt", 6);
+	QFont sf("MetaWatch Small caps 8pt");
 	QFont lf("MetaWatch Large 16pt");
 	QPainter p(this);
 
