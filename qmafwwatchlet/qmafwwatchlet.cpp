@@ -21,7 +21,7 @@ QMafwWatchlet::QMafwWatchlet(WatchServer* server) :
 	connect(this, SIGNAL(deactivated()), _player, SLOT(deactivate()));
 
 	rootContext()->setContextProperty("player", _player);
-	setSource(QUrl("qrc:/qmafwwatchlet/" + server->watch()->model() + ".qml"));
+	setSource(QUrl(SOWATCH_QML_DIR "/qmafwwatchlet/" + server->watch()->model() + ".qml"));
 }
 
 void QMafwWatchlet::handleRendererAdded(const QString &uuid)

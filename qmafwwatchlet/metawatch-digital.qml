@@ -1,10 +1,20 @@
 import QtQuick 1.0
+import com.javispedro.sowatch.metawatch 1.0
 
 Rectangle {
 	width: 96
 	height: 96
 
 	color: "white"
+
+	MWTitle {
+		anchors.top: parent.top
+		anchors.left: parent.left
+		anchors.right: parent.right
+		visible: player.mediaArt.length == 0
+		text: qsTr("Music")
+		icon.source: "icon.png"
+	}
 
 	Image {
 		anchors.fill: parent
