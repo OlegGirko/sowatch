@@ -13,10 +13,12 @@ Rectangle {
 		MWTitle {
 			id: title
 			text: qsTr("Phone Info")
+			icon.source: "icon.png"
 		}
 
 		Column {
 			spacing: 4
+			width: 96
 
 			Text {
 				text: "Battery: " + batteryLevel + "%"

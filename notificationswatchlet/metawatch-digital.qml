@@ -9,10 +9,11 @@ Rectangle {
 
 	MWTitle {
 		id: title
-		text: qsTr("Notifications")
 		anchors.top: parent.top
 		anchors.left: parent.left
 		anchors.right: parent.right
+		text: qsTr("Notifications")
+		icon.source: "icon.png"
 	}
 
 	MWListView {

@@ -7,7 +7,7 @@ SOURCES += notificationswatchletplugin.cpp notificationswatchlet.cpp
 
 HEADERS += notificationswatchletplugin.h notificationswatchlet.h
 
-qml_files.files = metawatch-digital.qml
+qml_files.files = metawatch-digital.qml icon.png
 
 win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../libsowatch/release/ -lsowatch
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../libsowatch/debug/ -lsowatch
