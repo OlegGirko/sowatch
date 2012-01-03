@@ -1,4 +1,5 @@
 import Qt 4.7
+import com.javispedro.sowatch.metawatch 1.0
 
 Rectangle {
 	width: 96
@@ -8,39 +9,47 @@ Rectangle {
 
 	Column {
 		anchors.fill: parent
-		spacing: 4
 
-		Text {
-			text: "Battery: " + batteryLevel + "%"
+		MWTitle {
+			id: title
+			text: qsTr("Phone Info")
 		}
 
-		Rectangle {
-			id: battery
-			x: 12
-			width: 72
-			height: 16
+		Column {
+			spacing: 4
 
-			border.color: "black"
-			border.width: 1
+			Text {
+				text: "Battery: " + batteryLevel + "%"
+			}
 
 			Rectangle {
-				width: (batteryLevel / 100) * parent.width
-				height: parent.height
+				id: battery
+				x: 12
+				width: 72
+				height: 16
 
-				color: "black"
+				border.color: "black"
+				border.width: 1
+
+				Rectangle {
+					width: (batteryLevel / 100) * parent.width
+					height: parent.height
+
+					color: "black"
+				}
 			}
-		}
 
-		Text {
-			width: parent.width
-			text: "Connected to:"
-		}
+			Text {
+				width: parent.width
+				text: "Connected to:"
+			}
 
-		Text {
-			width: parent.width
-			text: networkName
-			horizontalAlignment: Text.AlignHCenter
-			wrapMode: Text.Wrap
+			Text {
+				width: parent.width
+				text: networkName
+				horizontalAlignment: Text.AlignHCenter
+				wrapMode: Text.Wrap
+			}
 		}
 	}
 }

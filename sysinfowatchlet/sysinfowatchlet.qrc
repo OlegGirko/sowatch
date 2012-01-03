@@ -1,5 +1,0 @@
-<RCC>
-    <qresource prefix="/sysinfowatchlet">
-        <file>metawatch-digital.qml</file>
-    </qresource>
-</RCC>

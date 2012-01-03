@@ -10,7 +10,7 @@ SysInfoWatchlet::SysInfoWatchlet(WatchServer* server) :
 {
 	rootContext()->setContextProperty("batteryLevel", 0);
 	rootContext()->setContextProperty("networkName", "");
-	setSource(QUrl("qrc:/sysinfowatchlet/" + server->watch()->model() + ".qml"));
+	setSource(QUrl(SOWATCH_QML_DIR "/sysinfowatchlet/" + server->watch()->model() + ".qml"));
 	connect(this, SIGNAL(activated()), SLOT(handleActivated()));
 }
 
