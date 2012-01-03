@@ -14,7 +14,8 @@ sysinfowatchlet.depends = libsowatch
 
 !isEmpty(MEEGO_VERSION_MAJOR) {
 	SUBDIRS += meegohandsetnotification ckitcallnotification harmaccuweather
-	SUBDIRS += qmafwwatchlet qmapwatchlet
+	SUBDIRS += qmafwwatchlet
+	SUBDIRS += qmapwatchlet
 
 	meegohandsetnotification.depends = libsowatch
 	ckitcallnotification.depends = libsowatch

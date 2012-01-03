@@ -4,7 +4,7 @@ TEMPLATE = lib
 CONFIG   += plugin
 QT       += dbus
 CONFIG   += link_pkgconfig
-unix: PKGCONFIG += qmafw qmafw-shared
+PKGCONFIG += qmafw qmafw-shared
 
 SOURCES += qmafwwatchlet.cpp \
     qmafwwatchletplugin.cpp \
@@ -13,7 +13,7 @@ HEADERS += qmafwwatchlet.h \
     qmafwwatchletplugin.h \
     qmafwwatchletplayer.h
 
-unix: LIBS += -L$$OUT_PWD/../libsowatch/ -lsowatch
+LIBS += -L$$OUT_PWD/../libsowatch/ -lsowatch
 INCLUDEPATH += $$PWD/../libsowatch
 DEPENDPATH += $$PWD/../libsowatch
 
