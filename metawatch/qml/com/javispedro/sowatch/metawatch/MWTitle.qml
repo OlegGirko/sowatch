@@ -17,7 +17,7 @@ Rectangle {
 		id: label
 		anchors.left: image.right
 		anchors.leftMargin: 2
-		anchors.verticalCenter: parent
+		anchors.verticalCenter: parent.verticalCenter
 		font.bold: true
 	}
 }
