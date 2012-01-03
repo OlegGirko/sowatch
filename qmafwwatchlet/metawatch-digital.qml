@@ -11,12 +11,13 @@ Rectangle {
 		anchors.top: parent.top
 		anchors.left: parent.left
 		anchors.right: parent.right
-		visible: player.mediaArt.length == 0
-		text: qsTr("Music")
+		visible: mediaart.status != Image.Ready
+		text: qsTr("Now playing")
 		icon.source: "icon.png"
 	}
 
 	Image {
+		id: mediaart
 		anchors.fill: parent
 		fillMode: Image.PreserveAspectFit
 		smooth: true
