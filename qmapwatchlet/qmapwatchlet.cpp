@@ -6,6 +6,6 @@ QMapWatchlet::QMapWatchlet(WatchServer* server) :
 	DeclarativeWatchlet(server, "com.javispedro.sowatch.map")
 {
 
-	setSource(QUrl("qrc:/qmapwatchlet/" + server->watch()->model() + ".qml"));
+	setSource(QUrl(SOWATCH_QML_DIR "/qmapwatchlet/" + server->watch()->model() + ".qml"));
 }
 
