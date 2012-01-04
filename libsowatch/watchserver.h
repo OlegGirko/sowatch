@@ -71,10 +71,12 @@ private:
 
 	/** Current watchlet. */
 	Watchlet* _currentWatchlet;
+	/** Is the current watchlet active? */
+	bool _currentWatchletActive;
 	/** The current watchlet index if any, for use by nextWatchlet() */
 	int _currentWatchletIndex;
 
-	/** Used for periodic time syncing. */
+	/** Used for periodic watch time syncing. */
 	QTimer* _syncTimeTimer;
 
 	/** Called by Watchlet constructor to register itself as a child. */
@@ -83,6 +85,7 @@ private:
 	/** Counts all notifications from a given type. */
 	uint getNotificationCount(Notification::Type type);
 
+	void deactivateCurrentWatchlet();
 	void reactivateCurrentWatchlet();
 	void goToIdle();
 
