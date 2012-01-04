@@ -18,6 +18,8 @@ public:
 
 private slots:
 	void handleActivated();
+	void handleDeactivated();
+	void updateInformation();
 
 private:
 	QSystemDeviceInfo *_devInfo;
