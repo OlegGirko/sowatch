@@ -554,7 +554,7 @@ void MetaWatch::handleNvalOperationMessage(const Message& msg)
 	uint id = ((msg.data[1] & 0xFF) << 8) | (msg.data[0] & 0xFF);
 	NvalValue value = static_cast<NvalValue>(id);
 
-	qDebug() << "nval operation response for value" << value;
+	qDebug() << "nval operation response for value" << hex << value;
 
 	switch (msg.options) {
 	case 0: // Success
@@ -579,9 +579,11 @@ void MetaWatch::handleNvalOperationMessage(const Message& msg)
 		// Check if there's a pending write for this nval.
 		if (_nvals.contains(value)) {
 			int new_data = _nvals[value];
-			qDebug() << "nval" << value << "currently =" << data << "is pending write to =" << new_data;
+			qDebug() << "nval" << hex << value << "currently =" << dec << data << "is pending write to =" << new_data;
 			if (new_data != data) {
 				realNvalWrite(value, _nvals[value]);
+			} else {
+				qDebug() << " not rewriting it";
 			}
 			_nvals.remove(value);
 		}
@@ -666,10 +668,9 @@ void MetaWatch::socketConnected()
 		_currentMode = IdleMode;
 		_paintMode = IdleMode;
 
-#if FIRMWARE_NOT_BUGGY
 		// Configure the watch according to user preferences
-		//nvalWrite(TimeFormat, _24hMode ? 1 : 0);
-#endif
+		nvalWrite(TimeFormat, _24hMode ? 1 : 0);
+		nvalWrite(DateFormat, _dayMonthOrder ? 1 : 0);
 
 		// Sync watch date & time
 		setDateTime(QDateTime::currentDateTime());
@@ -761,7 +762,7 @@ void MetaWatch::realNvalWrite(NvalValue value, int data)
 	uint id = static_cast<uint>(value);
 	Message msg(NvalOperation, QByteArray(3 + size, 0), 2);
 
-	qDebug() << "nval" << value << "will be written with" << data;
+	qDebug() << "nval" << hex << value << "will be written with" << dec << data;
 
 	msg.data[0] = id & 0xFF;
 	msg.data[1] = id >> 8;
