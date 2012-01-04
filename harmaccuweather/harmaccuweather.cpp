@@ -232,12 +232,38 @@ void HarmAccuWeather::update()
 	QDateTime lastUpdate = s->value("LastUpdate").toDateTime();
 	if (lastUpdate > _lastUpdate) {
 		_lastUpdate = lastUpdate;
-		_metric = s->value("useMetric").toBool();
-		_lastTemp = s->value("LastTemp").toInt();
-		_lastLocation = s->value("LastLocation").toString();
-		_lastWxCode = s->value("LastWxCode").toInt();
-		qDebug() << "updated weather info" << _lastUpdate << _lastWxCode;
-		emit changed();
+		bool anythingChanged = false;
+
+		qDebug() << "reading weather info at" << _lastUpdate;
+
+		bool useMetric = s->value("useMetric").toBool();
+		if (useMetric != _metric) {
+			_metric = useMetric;
+			anythingChanged = true;
+		}
+
+		int temp = s->value("LastTemp").toInt();
+		if (_lastTemp != temp) {
+			_lastTemp = temp;
+			anythingChanged = true;
+		}
+
+		QString location = s->value("LastLocation").toString();
+		if (_lastLocation != location) {
+			_lastLocation = location;
+			anythingChanged = true;
+		}
+
+		int wxCode = s->value("LastWxCode").toInt();
+		if (_lastWxCode != wxCode) {
+			_lastWxCode = wxCode;
+			anythingChanged = true;
+		}
+
+		if (anythingChanged) {
+			qDebug() << "weather info changed wxcode=" << wxCode;
+			emit changed();
+		}
 	}
 
 	delete s;
