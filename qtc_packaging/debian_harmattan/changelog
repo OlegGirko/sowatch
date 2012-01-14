@@ -1,3 +1,20 @@
+sowatch (0.3.1) unstable; urgency=low
+
+  * No longer using Qt Resources for anything.
+  * A new set of "MetaWatch components" for QML watchlets: button
+    scrollable list, title bar.
+  * Make all the metawatch watchlets use the above components.
+  * Removing the "button grabs" model. All watchlets grab all buttons.
+  * On MetaWatch, the D button is no longer available for watchlets. It
+    will always trigger the LED.
+  * Sowatch also builds in Fremantle.
+  * Added MetaWatch's NVAL writing/reading support.
+  * Added support for MetaWatch's 24h mode.
+  * Fix a bug where a watchlet would not get the deactivated() signal if
+    a notification appeared at the right moment.
+
+ -- Javier S. Pedro <maemo@javispedro.com>  Sat, 14 Jan 2012 21:37:47 +0100
+
 sowatch (0.3.0) unstable; urgency=low
 
   * Using actual files instead of Qt Resources for MetaWatch resources.
