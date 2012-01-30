@@ -5,23 +5,24 @@ SUBDIRS += sowatchd
 SUBDIRS += metawatch
 SUBDIRS += sowatchui
 SUBDIRS += notificationswatchlet sysinfowatchlet
+SUBDIRS += qmsgwatchlet qmapwatchlet
 
 sowatchd.depends = libsowatch
 metawatch.depends = libsowatch
 sowatchui.depends = libsowatch sowatchd
 notificationswatchlet.depends = libsowatch
 sysinfowatchlet.depends = libsowatch
+qmsgwatchlet.depends = libsowatch
+qmapwatchlet.depends = libsowatch
 
-!isEmpty(MEEGO_VERSION_MAJOR) {
+contains(MEEGO_EDITION,harmattan) {
 	SUBDIRS += meegohandsetnotification ckitcallnotification harmaccuweather
-	SUBDIRS += qmafwwatchlet
-	SUBDIRS += qmapwatchlet
+    SUBDIRS += qmafwwatchlet
 
 	meegohandsetnotification.depends = libsowatch
 	ckitcallnotification.depends = libsowatch
 	harmaccuweather.depends = libsowatch
-	qmafwwatchlet.depends = libsowatch
-	qmapwatchlet.depends = libsowatch
+    qmafwwatchlet.depends = libsowatch
 }
 
 OTHER_FILES += \
