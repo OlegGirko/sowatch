@@ -19,7 +19,7 @@ QStringList SysInfoPlugin::watchlets()
 	return l;
 }
 
-Watchlet* SysInfoPlugin::getWatchlet(const QString& driver, QSettings& settings, WatchServer *server)
+Watchlet* SysInfoPlugin::getWatchlet(const QString& driver, ConfigKey *settings, WatchServer *server)
 {
 	Q_UNUSED(driver);
 	Q_UNUSED(settings);

@@ -6,8 +6,8 @@ using namespace sowatch;
 // TODO : Figure out how the OLED screen protocol works, including scrolling
 // TODO : Idle and Notification screens for the Analog Metawatch
 
-MetaWatchAnalog::MetaWatchAnalog(const QBluetoothAddress& address, QSettings* settings, QObject *parent) :
-	MetaWatch(address, settings, parent)
+MetaWatchAnalog::MetaWatchAnalog(ConfigKey* settings, QObject *parent) :
+	MetaWatch(settings, parent)
 {
 }
 

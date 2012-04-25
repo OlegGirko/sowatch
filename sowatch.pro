@@ -1,23 +1,29 @@
 TEMPLATE = subdirs
 SUBDIRS = libsowatch
 
-SUBDIRS += sowatchd
+# The MetaWatch driver plugin
 SUBDIRS += metawatch
-SUBDIRS += sowatchui
-SUBDIRS += notificationswatchlet sysinfowatchlet
-SUBDIRS += qmsgwatchlet qmapwatchlet
-
-sowatchd.depends = libsowatch
 metawatch.depends = libsowatch
-sowatchui.depends = libsowatch sowatchd
+
+# Some watchlets
+SUBDIRS += notificationswatchlet sysinfowatchlet
+#SUBDIRS += qmsgwatchlet qmapwatchlet
 notificationswatchlet.depends = libsowatch
 sysinfowatchlet.depends = libsowatch
 qmsgwatchlet.depends = libsowatch
 qmapwatchlet.depends = libsowatch
 
+unix {
+	SUBDIRS += sowatchd
+	SUBDIRS += sowatchui
+
+	sowatchd.depends = libsowatch
+	sowatchui.depends = libsowatch sowatchd
+}
+
 contains(MEEGO_EDITION,harmattan) {
-	SUBDIRS += meegohandsetnotification ckitcallnotification harmaccuweather
-    SUBDIRS += qmafwwatchlet
+#	SUBDIRS += meegohandsetnotification ckitcallnotification harmaccuweather
+#   SUBDIRS += qmafwwatchlet
 
 	meegohandsetnotification.depends = libsowatch
 	ckitcallnotification.depends = libsowatch

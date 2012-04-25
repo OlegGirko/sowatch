@@ -3,9 +3,13 @@
 
 #include "sowatch_global.h"
 
+#include "configkey.h"
+#include "gconfkey.h"
+
 #include "watch.h"
 #include "watchserver.h"
 #include "watchsimulator.h"
+#include "watchscanner.h"
 #include "watchplugininterface.h"
 
 #include "notification.h"

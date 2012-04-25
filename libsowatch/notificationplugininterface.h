@@ -9,6 +9,7 @@
 namespace sowatch
 {
 
+class ConfigKey;
 class Notification;
 class NotificationProvider;
 
@@ -18,7 +19,7 @@ public:
 	virtual ~NotificationPluginInterface();
 
 	virtual QStringList providers() = 0;
-	virtual NotificationProvider* getProvider(const QString& driver, QSettings& settings, QObject *parent = 0) = 0;
+	virtual NotificationProvider* getProvider(const QString& driver, ConfigKey *settings, QObject *parent = 0) = 0;
 };
 
 }

@@ -7,7 +7,7 @@
 #include <QtConnectivity/QBluetoothAddress>
 #include <QtConnectivity/QBluetoothSocket>
 #include <QtSystemInfo/QSystemAlignedTimer>
-#include "watch.h"
+#include <sowatch.h>
 
 using QTM_PREPEND_NAMESPACE(QBluetoothSocket);
 using QTM_PREPEND_NAMESPACE(QBluetoothAddress);
@@ -23,7 +23,7 @@ class MetaWatch : public Watch
     Q_OBJECT
 
 public:
-	explicit MetaWatch(const QBluetoothAddress& address, QSettings* settings = 0, QObject *parent = 0);
+	explicit MetaWatch(ConfigKey *settings, QObject *parent = 0);
 	~MetaWatch();
 
 	static const int DelayBetweenMessages = 10;
@@ -134,6 +134,8 @@ public:
 	void ungrabButton(Mode mode, Button button);
 
 protected:
+	ConfigKey *_settings;
+
 	// Some configurable stuff.
 	short _notificationTimeout;
 	bool _24hMode : 1;
@@ -229,6 +231,7 @@ protected:
 	virtual void handleWatchConnected() = 0;
 
 private slots:
+	void settingChanged(const QString& key);
 	void socketConnected();
 	void socketDisconnected();
 	void socketData();

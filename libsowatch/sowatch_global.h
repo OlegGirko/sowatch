@@ -10,7 +10,11 @@
 #	define SOWATCH_EXPORT Q_DECL_IMPORT
 #endif
 
-#if defined(MEEGO_VERSION_MAJOR) || defined(Q_WS_MAEMO_5)
+#if defined(QT_SIMULATOR) || !defined(QT_NO_DEBUG)
+#	define SOWATCH_PLUGINS_DIR		".."
+#	define SOWATCH_RESOURCES_DIR	".."
+#	define SOWATCH_QML_DIR			".."
+#elif defined(MEEGO_VERSION_MAJOR) || defined(Q_WS_MAEMO_5)
 #	define SOWATCH_PLUGINS_DIR		"/opt/sowatch/lib"
 #	define SOWATCH_RESOURCES_DIR	"/opt/sowatch/share"
 #	define SOWATCH_QML_DIR			"/opt/sowatch/qml"

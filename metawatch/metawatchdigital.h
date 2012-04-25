@@ -10,7 +10,7 @@ class MetaWatchDigital : public MetaWatch
 {
     Q_OBJECT
 public:
-	explicit MetaWatchDigital(const QBluetoothAddress& address, QSettings* settings = 0, QObject *parent = 0);
+	explicit MetaWatchDigital(ConfigKey *settings, QObject *parent = 0);
 
 	static const int screenWidth = 96;
 	static const int screenHeight = 96;

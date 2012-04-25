@@ -15,7 +15,8 @@ public:
 	~MetaWatchPlugin();
 
 	virtual QStringList drivers();
-	virtual Watch* getWatch(const QString& driver, QSettings& settings, QObject* parent = 0);
+	virtual WatchScanner* getScanner(QObject *parent);
+	virtual Watch* getWatch(const QString& driver, ConfigKey *settings, QObject *parent);
 
 private:
 	static bool fontsLoaded;

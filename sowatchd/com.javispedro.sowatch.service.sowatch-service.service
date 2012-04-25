@@ -1,3 +1,0 @@
-[D-BUS Service]
-Name=com.nokia.qtmobility.sfw.sowatch-service
-Exec=/opt/sowatch/bin/sowatchd

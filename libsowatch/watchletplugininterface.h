@@ -9,6 +9,7 @@
 namespace sowatch
 {
 
+class ConfigKey;
 class Watchlet;
 class WatchServer;
 
@@ -18,7 +19,7 @@ public:
 	virtual ~WatchletPluginInterface();
 
 	virtual QStringList watchlets() = 0;
-	virtual Watchlet* getWatchlet(const QString& id, QSettings& settings, WatchServer *server) = 0;
+	virtual Watchlet* getWatchlet(const QString& id, ConfigKey *settings, WatchServer *server) = 0;
 };
 
 }

@@ -6,74 +6,123 @@ using namespace sowatch;
 
 Daemon::Daemon(QObject *parent) :
 	QObject(parent),
-	_registry(Registry::registry())
+	_registry(Registry::registry()),
+	_settings(new GConfKey("/apps/sowatch", this))
 {
-	initWatches();
+	connect(_settings, SIGNAL(subkeyChanged(QString)), SLOT(settingsChanged(QString)));
+	QStringList activeWatches = _settings->value("active-watches").toStringList();
+	foreach (const QString& s, activeWatches) {
+		startWatch(s);
+	}
 }
 
-void Daemon::initWatches()
+QString Daemon::getWatchStatus(const QString &name)
 {
-	QSettings settings;
-	int size = settings.beginReadArray("watches");
-
-	for (int i = 0; i < size; i++) {
-		settings.setArrayIndex(i);
-		QString driver = settings.value("driver").toString().toLower();
-		WatchPluginInterface *plugin = _registry->getWatchPlugin(driver);
-		if (plugin) {
-			Watch *watch = plugin->getWatch(driver, settings, this);
-			if (watch) {
-				initWatch(watch, settings);
-			} else {
-				qWarning() << "Driver" << driver << "refused to getWatch";
-			}
+	if (_servers.contains(name)) {
+		WatchServer* server = _servers[name];
+		Watch* watch = server->watch();
+		if (watch->isConnected()) {
+			return QLatin1String("connected");
 		} else {
-			qWarning() << "Invalid driver" << driver;
+			return QLatin1String("enabled");
 		}
+	} else {
+		return QLatin1String("disabled");
+	}
+}
+
+void Daemon::terminate()
+{
+	QApplication::quit();
+}
+
+void Daemon::startWatch(const QString &name)
+{
+	qDebug() << "Starting watch" << name;
+	QScopedPointer<ConfigKey> watchSettings(_settings->getSubkey(name));
+
+	const QString driver = watchSettings->value("driver").toString().toLower();
+	if (driver.isEmpty()) {
+		qWarning() << "Watch" << name << "has no driver setting";
+		return;
 	}
 
-	settings.endArray();
-	qDebug() << "handling" << _servers.size() << "watches";
-}
+	WatchPluginInterface *watchPlugin = _registry->getWatchPlugin(driver);
+	if (!watchPlugin) {
+		qWarning() << "Invalid driver" << driver;
+		return;
+	}
 
-void Daemon::initWatch(Watch* watch, QSettings& settings)
-{
-	int size;
+	// Create the watch object from the plugin
+	Watch *watch = watchPlugin->getWatch(driver, watchSettings.data(), this);
+	if (!watch) {
+		qWarning() << "Driver" << driver << "failed to initiate watch";
+	}
 
 	// Create the server
 	WatchServer* server = new WatchServer(watch, this);
-	_servers.append(server);
+	_servers[name] = server;
 
 	// Configure the server
-	server->setNextWatchletButton(settings.value("nextWatchletButton").toString());
+	server->setNextWatchletButton(watchSettings->value("next-watchlet-button").toString());
 
 	// Initialize providers
-	size = settings.beginReadArray("notifications");
-	for (int i = 0; i < size; i++) {
-		settings.setArrayIndex(i);
-		QString id = settings.value("provider").toString().toLower();
+	QStringList list;
+	list = watchSettings->value("active-notifications").toStringList();
+	foreach (const QString& s, list) {
+		QScopedPointer<ConfigKey> settings(watchSettings->getSubkey(s));
+		QString id = settings->value("id").toString().toLower();
 		NotificationPluginInterface *plugin = _registry->getNotificationPlugin(id);
 		if (plugin) {
-			NotificationProvider *provider = plugin->getProvider(id, settings, server);
+			NotificationProvider *provider = plugin->getProvider(id, settings.data(), server);
 			server->addProvider(provider);
 		} else {
 			qWarning() << "Unknown notification provider" << id;
 		}
 	}
-	settings.endArray();
 
 	// Initialize watchlets
-	size = settings.beginReadArray("watchlets");
-	for (int i = 0; i < size; i++) {
-		settings.setArrayIndex(i);
-		QString id = settings.value("id").toString().toLower();
+	list = watchSettings->value("active-watchlets").toStringList();
+	foreach (const QString& s, list) {
+		QScopedPointer<ConfigKey> settings(watchSettings->getSubkey(s));
+		QString id = settings->value("id").toString().toLower();
 		WatchletPluginInterface *plugin = _registry->getWatchletPlugin(id);
 		if (plugin) {
-			plugin->getWatchlet(id, settings, server);
-			// Watchlets are associated to server via parent-child relationship.
+			Watchlet *watchlet = plugin->getWatchlet(id, settings.data(), server);
+			server->addWatchlet(watchlet);
 		} else {
 			qWarning() << "Unknown watchlet" << id;
 		}
 	}
-	settings.endArray();
+}
+
+void Daemon::stopWatch(const QString &name)
+{
+	qDebug() << "Stopping watch" << name;
+}
+
+#if TODO
+void Daemon::initWatch(Watch* watch, QSettings& settings)
+{
+	int size;
+
+
+}
+#endif
+
+void Daemon::settingsChanged(const QString &subkey)
+{
+	qDebug() << "Daemon settings changed" << subkey;
+	if (subkey == "active-watches") {
+		QSet<QString> confActiveWatches = _settings->value("active-watches").toStringList().toSet();
+		QSet<QString> curActiveWatches = _servers.keys().toSet();
+		QSet<QString> removed = curActiveWatches - confActiveWatches;
+		QSet<QString> added = confActiveWatches - curActiveWatches;
+		foreach (const QString& s, removed) {
+			stopWatch(s);
+		}
+		foreach (const QString& s, added) {
+			startWatch(s);
+		}
+	}
 }

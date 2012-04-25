@@ -16,7 +16,7 @@ public:
 	~NotificationsWatchletPlugin();
 
 	QStringList watchlets();
-	Watchlet* getWatchlet(const QString& driver, QSettings& settings, WatchServer* server);
+	Watchlet* getWatchlet(const QString& driver, ConfigKey *settings, WatchServer* server);
 };
 
 }

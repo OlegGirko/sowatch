@@ -2,8 +2,8 @@
 
 using namespace sowatch;
 
-MetaWatchDigital::MetaWatchDigital(const QBluetoothAddress& address, QSettings* settings, QObject *parent) :
-	MetaWatch(address, settings, parent),
+MetaWatchDigital::MetaWatchDigital(ConfigKey* settings, QObject *parent) :
+	MetaWatch(settings, parent),
 	_nMails(0), _nCalls(0), _nIms(0), _nSms(0), _nMms(0),
 	_wForecast(WeatherNotification::UnknownWeather)
 {

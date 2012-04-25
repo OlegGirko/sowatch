@@ -78,8 +78,9 @@ const quint16 MetaWatch::crcTable[256] = {
 	}
 #endif
 
-MetaWatch::MetaWatch(const QBluetoothAddress& address, QSettings* settings, QObject* parent) :
-	Watch(parent),
+MetaWatch::MetaWatch(ConfigKey* settings, QObject* parent) :
+    Watch(parent),
+    _settings(settings->getSubkey(QString(), this)),
 	_idleTimer(new QTimer(this)), _ringTimer(new QTimer(this)),
 	_watchTime(), _watchBattery(0), _watchBatteryAverage(0), _watchCharging(false),
 	_currentMode(IdleMode),	_paintMode(IdleMode),
@@ -87,14 +88,15 @@ MetaWatch::MetaWatch(const QBluetoothAddress& address, QSettings* settings, QObj
 	_connectRetries(0),	_connected(false),
 	_connectTimer(new QTimer(this)),
 	_connectAlignedTimer(new QSystemAlignedTimer(this)),
-	_address(address), _socket(0),
+	_socket(0),
 	_sendTimer(new QTimer(this))
 {
-	if (settings) {
-		_notificationTimeout = settings->value("NotificationTimeout", 15).toInt();
-		_24hMode = settings->value("24hMode", false).toBool();
-		_dayMonthOrder = settings->value("DayMonthOrder", false).toBool();
-	}
+	connect(_settings, SIGNAL(subkeyChanged(QString)), SLOT(settingChanged(QString)));
+
+	_address = QBluetoothAddress(settings->value("address").toString());
+	_notificationTimeout = settings->value("notification-timeout", 15).toInt();
+	_24hMode = settings->value("24h-mode", false).toBool();
+	_dayMonthOrder = settings->value("day-month-order", false).toBool();
 
 	_buttonNames << "A" << "B" << "C" << "D" << "E" << "F";
 
@@ -654,6 +656,27 @@ void MetaWatch::handleBatteryVoltageMessage(const Message &msg)
 
 	emit chargingChanged();
 	emit batteryLevelChanged();
+}
+
+void MetaWatch::settingChanged(const QString &key)
+{
+	qDebug() << "Metawatch setting changed:" << key;
+
+	if (key == "address") {
+		_address = QBluetoothAddress(_settings->value(key).toString());
+	} else if (key == "notification-timeout") {
+		_notificationTimeout = _settings->value(key, 15).toInt();
+	} else if (key == "day-month-order") {
+		_dayMonthOrder = _settings->value(key, false).toBool();
+		if (isConnected()) {
+			nvalWrite(DateFormat, _dayMonthOrder ? 1 : 0);
+		}
+	} else if (key == "24h-mode") {
+		_24hMode = _settings->value(key, false).toBool();
+		if (isConnected()) {
+			nvalWrite(TimeFormat, _24hMode ? 1 : 0);
+		}
+	}
 }
 
 void MetaWatch::socketConnected()

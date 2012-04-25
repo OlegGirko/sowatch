@@ -4,11 +4,14 @@
 #
 #-------------------------------------------------
 
-QT       += gui declarative
+QT        += gui declarative
 
-TARGET   = sowatch
-TEMPLATE = lib
-VERSION  = 1.0.0
+CONFIG    += link_pkgconfig
+PKGCONFIG += gconf-2.0
+
+TARGET    = sowatch
+TEMPLATE  = lib
+VERSION   = 1.0.0
 
 DEFINES += SOWATCH_LIBRARY
 
@@ -27,7 +30,10 @@ SOURCES += \
     notificationplugininterface.cpp \
     notificationprovider.cpp \
     watchletplugininterface.cpp \
-	registry.cpp
+	registry.cpp \
+    watchscanner.cpp \
+    configkey.cpp \
+    gconfkey.cpp
 
 HEADERS += \
     watchsimulator.h \
@@ -46,26 +52,18 @@ HEADERS += \
     notificationplugininterface.h \
     notificationprovider.h \
     watchletplugininterface.h \
-	registry.h
+	registry.h \
+    watchscanner.h \
+    configkey.h \
+    gconfkey.h
 
 install_headers.files = $$HEADERS
 
-symbian {
-    MMP_RULES += EXPORTUNFROZEN
-    TARGET.UID3 = 0xE6B95AFF
-    TARGET.CAPABILITY = 
-    TARGET.EPOCALLOWDLLDATA = 1
-    addFiles.sources = libsowatch.dll
-    addFiles.path = !:/sys/bin
-    DEPLOYMENT += addFiles
+install_headers.path = /usr/include/sowatch
+!isEmpty(MEEGO_VERSION_MAJOR)|maemo5 {
+	target.path = /opt/sowatch/lib
+} else {
+	target.path = /usr/lib
 }
 
-unix:!symbian {
-	install_headers.path = /usr/include/sowatch
-	!isEmpty(MEEGO_VERSION_MAJOR)|maemo5 {
-		target.path = /opt/sowatch/lib
-	} else {
-		target.path = /usr/lib
-	}
-	INSTALLS += install_headers target
-}
+INSTALLS += install_headers target

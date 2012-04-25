@@ -3,6 +3,7 @@
 #include "metawatchdigital.h"
 #include "metawatchanalog.h"
 #include "metawatchsimulator.h"
+#include "metawatchscanner.h"
 #include "metawatchplugin.h"
 
 using namespace sowatch;
@@ -33,14 +34,17 @@ QStringList MetaWatchPlugin::drivers()
 	return d;
 }
 
-Watch* MetaWatchPlugin::getWatch(const QString& driver, QSettings& settings, QObject *parent)
+WatchScanner* MetaWatchPlugin::getScanner(QObject *parent)
+{
+	return new MetaWatchScanner(parent);
+}
+
+Watch* MetaWatchPlugin::getWatch(const QString& driver, ConfigKey* settings, QObject *parent)
 {
 	if (driver == "metawatch-digital") {
-		QBluetoothAddress address(settings.value("address").toString());
-		return new MetaWatchDigital(address, &settings, parent);
+		return new MetaWatchDigital(settings, parent);
 	} else if (driver == "metawatch-analog") {
-		QBluetoothAddress address(settings.value("address").toString());
-		return new MetaWatchAnalog(address, &settings, parent);
+		return new MetaWatchAnalog(settings, parent);
 	} else {
 		return 0;
 	}

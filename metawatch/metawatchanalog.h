@@ -10,7 +10,7 @@ class MetaWatchAnalog : public MetaWatch
 {
     Q_OBJECT
 public:
-	explicit MetaWatchAnalog(const QBluetoothAddress& address, QSettings* settings = 0, QObject *parent = 0);
+	explicit MetaWatchAnalog(ConfigKey *settings, QObject *parent = 0);
 
 	static const int screenWidth = 80;
 	static const int screenHeight = 16*2;

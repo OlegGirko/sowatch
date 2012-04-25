@@ -19,7 +19,7 @@ QStringList NotificationsWatchletPlugin::watchlets()
 	return l;
 }
 
-Watchlet* NotificationsWatchletPlugin::getWatchlet(const QString& driver, QSettings& settings, WatchServer *server)
+Watchlet* NotificationsWatchletPlugin::getWatchlet(const QString& driver, ConfigKey *settings, WatchServer *server)
 {
 	Q_UNUSED(driver);
 	Q_UNUSED(settings);

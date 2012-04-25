@@ -32,6 +32,7 @@ public:
 	QString nextWatchletButton() const;
 	void setNextWatchletButton(const QString& value);
 
+	void addWatchlet(Watchlet* watchlet);
 	void addProvider(NotificationProvider* provider);
 
 	/** Get a list of all current live notifications. */
@@ -41,6 +42,7 @@ public slots:
 	void postNotification(Notification *notification);
 	void nextNotification();
 
+	void runWatchlet(Watchlet* watchlet);
 	void runWatchlet(const QString& id);
 	void closeWatchlet();
 	void nextWatchlet();
@@ -55,10 +57,10 @@ private:
 	/** The amount of seconds that have to pass for a notification to be considered "outdated" and not shown. */
 	int _oldNotificationThreshold;
 
-	/** A list of watchlets in order, for use by nextWatchlet() */
-	QStringList _watchletIds;
-	/** Actual Watchlet child objects by id. */
-	QMap<QString, Watchlet*> _watchlets;
+	/** A list of watchlets, in order. */
+	QList<Watchlet*> _watchlets;
+	/** Stores all the watchlets with a given watchled id. */
+	QMap<QString, Watchlet*> _watchletIds;
 
 	/** Stores current live notifications, classified by type. */
 	QList<Notification*> _notifications[Notification::TypeCount];
@@ -79,9 +81,6 @@ private:
 	/** Used for periodic watch time syncing. */
 	QTimer* _syncTimeTimer;
 
-	/** Called by Watchlet constructor to register itself as a child. */
-	void registerWatchlet(Watchlet *watchlet);
-
 	/** Counts all notifications from a given type. */
 	uint getNotificationCount(Notification::Type type);
 
@@ -97,8 +96,6 @@ private slots:
 
 	void notificationChanged();
 	void notificationDismissed();
-
-friend class Watchlet;
 };
 
 }

@@ -6,7 +6,7 @@ using namespace sowatch;
 Watchlet::Watchlet(WatchServer *server, const QString& id) :
 	QObject(server), _id(id), _active(false), _server(server)
 {
-	_server->registerWatchlet(this);
+
 }
 
 Watchlet::~Watchlet()

@@ -56,6 +56,17 @@ void WatchServer::addProvider(NotificationProvider *provider)
 	connect(provider, SIGNAL(incomingNotification(Notification*)), SLOT(postNotification(Notification*)));
 }
 
+void WatchServer::addWatchlet(Watchlet *watchlet)
+{
+	// A watchlet is best not reparented; just look that the parent is correct
+	Q_ASSERT(watchlet->_server == this);
+	_watchlets.append(watchlet);
+	QString id = watchlet->id();
+	if (!_watchletIds.contains(id)) {
+		_watchletIds[id] = watchlet;
+	}
+}
+
 QList<Notification*> WatchServer::liveNotifications()
 {
 	QList<Notification*> notifications;
@@ -67,15 +78,22 @@ QList<Notification*> WatchServer::liveNotifications()
 	return notifications;
 }
 
-void WatchServer::runWatchlet(const QString& id)
+void WatchServer::runWatchlet(Watchlet *watchlet)
 {
+	Q_ASSERT(watchlet->_server == this);
 	if (_currentWatchlet && _currentWatchletActive) {
 		deactivateCurrentWatchlet();
 	}
-	_currentWatchlet = _watchlets[id];
+	_currentWatchlet = watchlet;
 	if (_watch->isConnected()) {
 		reactivateCurrentWatchlet();
 	}
+}
+
+void WatchServer::runWatchlet(const QString& id)
+{
+	Q_ASSERT(_watchletIds.contains(id));
+	runWatchlet(_watchletIds[id]);
 }
 
 void WatchServer::closeWatchlet()
@@ -90,15 +108,6 @@ void WatchServer::closeWatchlet()
 		}
 	}
 }
-
-void WatchServer::registerWatchlet(Watchlet *watchlet)
-{
-	Q_ASSERT(watchlet->_server == this);
-	QString id = watchlet->id();
-	_watchlets[id] = watchlet;
-	_watchletIds.append(id);
-}
-
 
 void WatchServer::deactivateCurrentWatchlet()
 {
@@ -123,11 +132,11 @@ void WatchServer::nextWatchlet()
 {
 	qDebug() << "current watchlet index" << _currentWatchletIndex;
 	_currentWatchletIndex++;
-	if (_currentWatchletIndex >= _watchletIds.size() || _currentWatchletIndex < 0) {
+	if (_currentWatchletIndex >= _watchlets.size() || _currentWatchletIndex < 0) {
 		_currentWatchletIndex = -1;
 		closeWatchlet();
 	} else {
-		QString watchlet = _watchletIds.at(_currentWatchletIndex);
+		Watchlet* watchlet = _watchlets.at(_currentWatchletIndex);
 		runWatchlet(watchlet);
 	}
 }
