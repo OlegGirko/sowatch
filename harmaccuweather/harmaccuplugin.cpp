@@ -19,7 +19,7 @@ QStringList HarmAccuPlugin::providers()
 	return providers;
 }
 
-NotificationProvider* HarmAccuPlugin::getProvider(const QString& id, QSettings& settings, QObject *parent)
+NotificationProvider* HarmAccuPlugin::getProvider(const QString& id, ConfigKey *settings, QObject *parent)
 {
 	Q_UNUSED(settings);
 	if (id != "harmaccu") return 0;

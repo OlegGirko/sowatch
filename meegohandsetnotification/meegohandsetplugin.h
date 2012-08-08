@@ -16,7 +16,7 @@ public:
 	~MeegoHandsetPlugin();
 
 	QStringList providers();
-	NotificationProvider* getProvider(const QString& driver, QSettings& settings, QObject *parent = 0);
+	NotificationProvider* getProvider(const QString& driver, ConfigKey *settings, QObject *parent = 0);
 };
 
 }

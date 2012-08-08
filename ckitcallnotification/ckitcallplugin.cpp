@@ -19,7 +19,7 @@ QStringList CKitCallPlugin::providers()
 	return providers;
 }
 
-NotificationProvider* CKitCallPlugin::getProvider(const QString& driver, QSettings& settings, QObject *parent)
+NotificationProvider* CKitCallPlugin::getProvider(const QString& driver, ConfigKey *settings, QObject *parent)
 {
 	Q_UNUSED(driver);
 	Q_UNUSED(settings);

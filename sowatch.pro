@@ -22,8 +22,8 @@ unix {
 }
 
 contains(MEEGO_EDITION,harmattan) {
-#	SUBDIRS += meegohandsetnotification ckitcallnotification harmaccuweather
-#   SUBDIRS += qmafwwatchlet
+	SUBDIRS += meegohandsetnotification ckitcallnotification harmaccuweather
+	#SUBDIRS += qmafwwatchlet
 
 	meegohandsetnotification.depends = libsowatch
 	ckitcallnotification.depends = libsowatch

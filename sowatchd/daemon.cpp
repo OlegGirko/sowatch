@@ -101,15 +101,6 @@ void Daemon::stopWatch(const QString &name)
 	qDebug() << "Stopping watch" << name;
 }
 
-#if TODO
-void Daemon::initWatch(Watch* watch, QSettings& settings)
-{
-	int size;
-
-
-}
-#endif
-
 void Daemon::settingsChanged(const QString &subkey)
 {
 	qDebug() << "Daemon settings changed" << subkey;
