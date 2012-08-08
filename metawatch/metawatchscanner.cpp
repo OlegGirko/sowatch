@@ -34,7 +34,7 @@ void MetaWatchScanner::handleDiscoveredService(const QBluetoothServiceInfo &info
 		QVariantMap foundInfo;
 		foundInfo["address"] = dev.address().toString();
 		foundInfo["name"] = deviceName;
-		qDebug() << "metawatch bluetooth scan found" << deviceName;
+		qDebug() << "metawatch bluetooth scan found:" << deviceName;
 		if (deviceName.contains("Digital", Qt::CaseInsensitive)) {
 			foundInfo["driver"] = QString("metawatch-digital");
 			emit watchFound(foundInfo);

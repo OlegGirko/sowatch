@@ -9,6 +9,10 @@ DEPLOYMENTFOLDERS = qml_folder
 
 # Additional import path used to resolve QML modules in Creator's code model
 QML_IMPORT_PATH =
+simulator {
+	QML_IMPORT_PATH += $$[QT_INSTALL_PREFIX]/imports/simulatorHarmattan
+	DEFINES += QT_INSTALL_PREFIX=\\\"$$[QT_INSTALL_PREFIX]\\\"
+}
 
 # Speed up launching on MeeGo/Harmattan when using applauncherd daemon
 CONFIG += qdeclarative-boostable
@@ -19,11 +23,18 @@ INCLUDEPATH += $$PWD/../libsowatch
 DEPENDPATH += $$PWD/../libsowatch
 
 # Source files
-SOURCES += main.cpp
+SOURCES += main.cpp \
+    watchesmodel.cc \
+    scanwatchesmodel.cc scannerproxy.cc
 
-OTHER_FILES += \
+HEADERS += \
+    watchesmodel.h \
+    scanwatchesmodel.h scannerproxy.h
+
+OTHER_FILES += qml/main.qml \
 	qml/MainPage.qml \
-	qml/main.qml \
+	qml/NewWatchSheet.qml \
+	qml/WatchPage.qml \
     sowatch_harmattan.desktop \
     sowatch.desktop
 

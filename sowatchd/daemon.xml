@@ -6,5 +6,9 @@
 			<arg name="status" type="s" direction="out" />
 		</method>
 		<method name="Terminate" />
+		<signal name="WatchStatusChanged">
+			<arg name="watch" type="s" />
+			<arg name="status" type="s" />
+		</signal>
 	</interface>
 </node>

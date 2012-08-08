@@ -3,26 +3,24 @@ import com.nokia.meego 1.1
 import com.nokia.extras 1.1
 
 Page {
-	id: mainPage
+	id: watchPage
 	anchors.leftMargin: UiConstants.DefaultMargin
 	anchors.rightMargin: UiConstants.DefaultMargin
 
 	tools: ToolBarLayout {
 		ToolIcon {
-			platformIconId: "toolbar-add"
-			anchors.right: parent.right
-			onClicked: newWatchSheet.open()
+			platformIconId: "toolbar-back"
+			anchors.left: parent.left
+			onClicked: pageStack.pop()
 		}
 	}
 
-	NewWatchSheet {
-		id: newWatchSheet
-	}
-
 	ListView {
-		id: watchesListView
+		id: emptyListView
 		anchors.fill: parent
-		model: watches
+		model: ListModel {
+
+		}
 
 		delegate: ListDelegate {
 			Image {
