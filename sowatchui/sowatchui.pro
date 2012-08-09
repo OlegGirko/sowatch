@@ -21,14 +21,17 @@ CONFIG += qdeclarative-boostable
 LIBS += -L$$OUT_PWD/../libsowatch/ -lsowatch
 INCLUDEPATH += $$PWD/../libsowatch
 DEPENDPATH += $$PWD/../libsowatch
+!isEmpty(MEEGO_VERSION_MAJOR)|maemo5 {
+	QMAKE_RPATHDIR += /opt/sowatch/lib
+}
 
 # Source files
 SOURCES += main.cpp \
-    watchesmodel.cc \
-    scanwatchesmodel.cc scannerproxy.cc
+    watchesmodel.cpp daemonproxy.cpp \
+    scanwatchesmodel.cpp scannerproxy.cpp
 
 HEADERS += \
-    watchesmodel.h \
+    watchesmodel.h daemonproxy.h \
     scanwatchesmodel.h scannerproxy.h
 
 OTHER_FILES += qml/main.qml \

@@ -29,6 +29,8 @@ public:
 
     static QmlApplicationViewer *create();
 
+	QDeclarativeContext *rootContext();
+
     void setMainQmlFile(const QString &file);
     void addImportPath(const QString &path);
 

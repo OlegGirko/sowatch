@@ -49,6 +49,10 @@ public slots:
 
 	void syncTime();
 
+signals:
+	void watchConnected();
+	void watchDisconnected();
+
 private:
 	Watch* _watch;
 
@@ -89,13 +93,13 @@ private:
 	void goToIdle();
 
 private slots:
-	void watchConnected();
-	void watchDisconnected();
-	void watchIdling();
-	void watchButtonPress(int button);
+	void handleWatchConnected();
+	void handleWatchDisconnected();
+	void handleWatchIdling();
+	void handleWatchButtonPress(int button);
 
-	void notificationChanged();
-	void notificationDismissed();
+	void handleNotificationChanged();
+	void handleNotificationDismissed();
 };
 
 }

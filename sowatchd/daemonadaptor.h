@@ -9,8 +9,8 @@
  * before re-generating it.
  */
 
-#ifndef DAEMONADAPTOR_H_1335395583
-#define DAEMONADAPTOR_H_1335395583
+#ifndef DAEMONADAPTOR_H_1344470120
+#define DAEMONADAPTOR_H_1344470120
 
 #include <QtCore/QObject>
 #include <QtDBus/QtDBus>
@@ -35,6 +35,10 @@ class DaemonAdaptor: public QDBusAbstractAdaptor
 "      <arg direction=\"out\" type=\"s\" name=\"status\"/>\n"
 "    </method>\n"
 "    <method name=\"Terminate\"/>\n"
+"    <signal name=\"WatchStatusChanged\">\n"
+"      <arg type=\"s\" name=\"watch\"/>\n"
+"      <arg type=\"s\" name=\"status\"/>\n"
+"    </signal>\n"
 "  </interface>\n"
         "")
 public:
@@ -46,6 +50,7 @@ public Q_SLOTS: // METHODS
     QString GetWatchStatus(const QString &watch);
     void Terminate();
 Q_SIGNALS: // SIGNALS
+    void WatchStatusChanged(const QString &watch, const QString &status);
 };
 
 #endif

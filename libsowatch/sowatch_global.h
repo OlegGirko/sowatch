@@ -10,7 +10,7 @@
 #	define SOWATCH_EXPORT Q_DECL_IMPORT
 #endif
 
-#if defined(QT_SIMULATOR) || !defined(QT_NO_DEBUG)
+#if defined(QT_SIMULATOR) || (!defined(MEEGO_VERSION_MAJOR) && !defined(Q_WS_MAEMO_5) && !defined(QT_NO_DEBUG))
 #	define SOWATCH_PLUGINS_DIR		".."
 #	define SOWATCH_RESOURCES_DIR	".."
 #	define SOWATCH_QML_DIR			".."

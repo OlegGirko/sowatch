@@ -14,10 +14,10 @@ WatchServer::WatchServer(Watch* watch, QObject* parent) :
 	_currentWatchlet(0), _currentWatchletActive(false), _currentWatchletIndex(-1),
 	_syncTimeTimer(new QTimer(this))
 {
-	connect(_watch, SIGNAL(connected()), SLOT(watchConnected()));
-	connect(_watch, SIGNAL(disconnected()), SLOT(watchDisconnected()));
-	connect(_watch, SIGNAL(idling()), SLOT(watchIdling()));
-	connect(_watch, SIGNAL(buttonPressed(int)), SLOT(watchButtonPress(int)));
+	connect(_watch, SIGNAL(connected()), SLOT(handleWatchConnected()));
+	connect(_watch, SIGNAL(disconnected()), SLOT(handleWatchDisconnected()));
+	connect(_watch, SIGNAL(idling()), SLOT(handleWatchIdling()));
+	connect(_watch, SIGNAL(buttonPressed(int)), SLOT(handleWatchButtonPress(int)));
 	connect(_syncTimeTimer, SIGNAL(timeout()), SLOT(syncTime()));
 
 	_syncTimeTimer->setSingleShot(true);
@@ -165,7 +165,7 @@ void WatchServer::goToIdle()
 	_watch->displayIdleScreen();
 }
 
-void WatchServer::watchConnected()
+void WatchServer::handleWatchConnected()
 {
 	syncTime();
 	if (!_pendingNotifications.isEmpty()) {
@@ -175,18 +175,20 @@ void WatchServer::watchConnected()
 	} else {
 		goToIdle();
 	}
+	emit watchConnected();
 }
 
-void WatchServer::watchDisconnected()
+void WatchServer::handleWatchDisconnected()
 {
 	_syncTimeTimer->stop();
 	if (_currentWatchlet && _currentWatchletActive) {
 		deactivateCurrentWatchlet();
 	}
 	_pendingNotifications.clear();
+	emit watchDisconnected();
 }
 
-void WatchServer::watchIdling()
+void WatchServer::handleWatchIdling()
 {
 	qDebug() << "watch idling";
 	if (!_pendingNotifications.empty()) {
@@ -195,7 +197,7 @@ void WatchServer::watchIdling()
 	}
 }
 
-void WatchServer::watchButtonPress(int button)
+void WatchServer::handleWatchButtonPress(int button)
 {
 	if (button == _nextWatchletButton) {
 		qDebug() << "next watchlet button pressed";
@@ -216,8 +218,8 @@ void WatchServer::postNotification(Notification *notification)
 	_notifications[type].append(notification);
 	_notificationCounts[notification] = notification->count();
 
-	connect(notification, SIGNAL(changed()), SLOT(notificationChanged()));
-	connect(notification, SIGNAL(dismissed()), SLOT(notificationDismissed()));
+	connect(notification, SIGNAL(changed()), SLOT(handleNotificationChanged()));
+	connect(notification, SIGNAL(dismissed()), SLOT(handleNotificationDismissed()));
 
 	qDebug() << "notification received" << notification->title() << "(" << notification->count() << ")";
 
@@ -264,7 +266,7 @@ void WatchServer::nextNotification()
 	}
 }
 
-void WatchServer::notificationChanged()
+void WatchServer::handleNotificationChanged()
 {
 	QObject *obj = sender();
 	if (obj) {
@@ -307,7 +309,7 @@ void WatchServer::notificationChanged()
 	}
 }
 
-void WatchServer::notificationDismissed()
+void WatchServer::handleNotificationDismissed()
 {
 	QObject *obj = sender();
 	if (obj) {

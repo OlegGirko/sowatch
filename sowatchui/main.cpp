@@ -19,6 +19,8 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
 	watches = new WatchesModel(app.data());
 	watchScanner = new ScanWatchesModel(app.data());
 
+	qDebug() << "Starting" << watches << endl;
+
 	viewer->rootContext()->setContextProperty("watches", watches);
 	viewer->rootContext()->setContextProperty("watchScanner", watchScanner);
 

@@ -5,6 +5,8 @@
 
 #include <sowatch.h>
 
+#include "daemonproxy.h"
+
 class WatchesModel : public QAbstractListModel
 {
 	Q_OBJECT
@@ -27,14 +29,18 @@ private slots:
 	void reload();
 	void handleConfigChanged();
 	void handleSubkeyChanged(const QString& subkey);
+	void handleWatchStatusChanged(const QString& watch, const QString& status);
 
 private:
 	int findRowByWatchId(const QString& id);
+	bool isWatchIdActive(const QString& id) const;
 
 private:
 	sowatch::ConfigKey *_config;
 	sowatch::ConfigKey *_active_watches;
+	DaemonProxy *_daemon;
 	QList<sowatch::ConfigKey*> _list;
+	QMap<QString, QString> _status;
 };
 
 #endif // WATCHESMODEL_H

@@ -11,6 +11,7 @@ static GConfClient* g_client = NULL;
 
 static GConfClient* get_client() {
 	if (!g_client) {
+		g_type_init();
 		g_client = gconf_client_get_default();
 	}
 	return g_client;

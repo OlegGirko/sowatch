@@ -7,9 +7,14 @@ using namespace sowatch;
 Daemon::Daemon(QObject *parent) :
 	QObject(parent),
 	_registry(Registry::registry()),
-	_settings(new GConfKey("/apps/sowatch", this))
+	_settings(new GConfKey("/apps/sowatch", this)),
+    _status_mapper(new QSignalMapper(this))
 {
-	connect(_settings, SIGNAL(subkeyChanged(QString)), SLOT(settingsChanged(QString)));
+	connect(_settings, SIGNAL(subkeyChanged(QString)),
+	        SLOT(handleSettingsChanged(QString)));
+	connect(_status_mapper, SIGNAL(mapped(QString)),
+	        SLOT(handleWatchStatusChange(QString)));
+
 	QStringList activeWatches = _settings->value("active-watches").toStringList();
 	foreach (const QString& s, activeWatches) {
 		startWatch(s);
@@ -63,6 +68,13 @@ void Daemon::startWatch(const QString &name)
 	WatchServer* server = new WatchServer(watch, this);
 	_servers[name] = server;
 
+	// Connect watch status signals
+	_status_mapper->setMapping(watch, name);
+	connect(watch, SIGNAL(connected()),
+	        _status_mapper, SLOT(map()));
+	connect(watch, SIGNAL(disconnected()),
+	        _status_mapper, SLOT(map()));
+
 	// Configure the server
 	server->setNextWatchletButton(watchSettings->value("next-watchlet-button").toString());
 
@@ -101,7 +113,7 @@ void Daemon::stopWatch(const QString &name)
 	qDebug() << "Stopping watch" << name;
 }
 
-void Daemon::settingsChanged(const QString &subkey)
+void Daemon::handleSettingsChanged(const QString &subkey)
 {
 	qDebug() << "Daemon settings changed" << subkey;
 	if (subkey == "active-watches") {
@@ -115,5 +127,16 @@ void Daemon::settingsChanged(const QString &subkey)
 		foreach (const QString& s, added) {
 			startWatch(s);
 		}
+	}
+}
+
+void Daemon::handleWatchStatusChange(const QString &name)
+{
+	WatchServer* server = _servers[name];
+	Watch* watch = server->watch();
+	if (watch->isConnected()) {
+		emit WatchStatusChanged(name, QLatin1String("connected"));
+	} else {
+		emit WatchStatusChanged(name, QLatin1String("enabled"));
 	}
 }

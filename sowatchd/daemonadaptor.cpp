@@ -16,6 +16,7 @@
 #include <QtCore/QString>
 #include <QtCore/QStringList>
 #include <QtCore/QVariant>
+#include "daemon.h"
 
 /*
  * Implementation of adaptor class DaemonAdaptor
@@ -36,14 +37,12 @@ DaemonAdaptor::~DaemonAdaptor()
 QString DaemonAdaptor::GetWatchStatus(const QString &watch)
 {
     // handle method call com.javispedro.sowatch.Daemon.GetWatchStatus
-    QString status;
-    QMetaObject::invokeMethod(parent(), "getWatchStatus", Q_RETURN_ARG(QString, status), Q_ARG(QString, watch));
-    return status;
+	return static_cast<sowatch::Daemon*>(parent())->getWatchStatus(watch);
 }
 
 void DaemonAdaptor::Terminate()
 {
     // handle method call com.javispedro.sowatch.Daemon.Terminate
-    QMetaObject::invokeMethod(parent(), "terminate");
+    static_cast<sowatch::Daemon*>(parent())->terminate();
 }
 
