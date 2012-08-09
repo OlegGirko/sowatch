@@ -34,6 +34,7 @@ WatchesModel::~WatchesModel()
 
 int WatchesModel::rowCount(const QModelIndex &parent) const
 {
+	Q_UNUSED(parent);
 	return _list.count();
 }
 
@@ -75,6 +76,9 @@ QVariant WatchesModel::data(const QModelIndex &index, int role) const
 
 bool WatchesModel::removeRows(int row, int count, const QModelIndex &parent)
 {
+	Q_UNUSED(row);
+	Q_UNUSED(count);
+	Q_UNUSED(parent);
 	return false; // TODO
 }
 
@@ -90,9 +94,16 @@ void WatchesModel::addFoundWatch(const QVariantMap &info)
 		name = base.arg(num);
 	}
 
+	// Load the autodetected settings
 	ConfigKey* newkey = _config->getSubkey(name);
 	foreach (const QString& key, info.keys()) {
 		newkey->set(key, info[key]);
+	}
+
+	// Set some defaults
+	Registry *registry = Registry::registry();
+	foreach (const QStringList& providerId, registry->allNotificationProviders()) {
+		qDebug() << "Would add" << providerId;
 	}
 
 	// Now add to active watches

@@ -3,6 +3,7 @@
 
 #include <QtCore/QPluginLoader>
 #include <QtCore/QString>
+#include <QtCore/QStringList>
 #include <QtCore/QMap>
 #include <QtCore/QFileSystemWatcher>
 #include "sowatch_global.h"
@@ -43,6 +44,18 @@ public:
 
 	inline WatchletPluginInterface* getWatchletPlugin(const QString& id) {
 		return _watchletIds.value(id, 0);
+	}
+
+	inline QStringList allWatchDrivers() const {
+		return _driverIds.keys();
+	}
+
+	inline QStringList allNotificationProviders() const {
+		return _providerIds.keys();
+	}
+
+	inline QStringList allWatchlets() const {
+		return _watchletIds.keys();
 	}
 
 protected:

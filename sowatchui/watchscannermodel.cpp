@@ -48,6 +48,7 @@ bool WatchScannerModel::active() const
 
 int WatchScannerModel::rowCount(const QModelIndex &parent) const
 {
+	Q_UNUSED(parent);
 	return _list.count();
 }
 
