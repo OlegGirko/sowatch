@@ -71,10 +71,50 @@ Page {
 				visible: configQmlLoader.status === Loader.Ready
 			}
 
+			ListView {
+				id: watchletsListView
+				interactive: false
+				width: parent.width
+				height: UiConstants.ListItemHeightDefault * count
+				model: ListModel {
+					ListElement {
+						title: "Test"
+					}
+				}
+				delegate: ListDelegate {
+
+				}
+			}
+
+			Button {
+				anchors.horizontalCenter: parent.horizontalCenter
+				text: qsTr("Add watchlet")
+			}
+
 			GroupHeader {
 				width: parent.width
 				text: "Notification sources"
 				visible: configQmlLoader.status === Loader.Ready
+			}
+
+			ListView {
+				id: providersListView
+				interactive: false
+				width: parent.width
+				height: UiConstants.ListItemHeightDefault * count
+				model: ListModel {
+					ListElement {
+						title: "Test"
+					}
+				}
+				delegate: ListDelegate {
+
+				}
+			}
+
+			Button {
+				anchors.horizontalCenter: parent.horizontalCenter
+				text: qsTr("Add notification source")
 			}
 		}
 	}

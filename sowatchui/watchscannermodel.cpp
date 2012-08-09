@@ -53,7 +53,6 @@ int WatchScannerModel::rowCount(const QModelIndex &parent) const
 
 QVariant WatchScannerModel::data(const QModelIndex &index, int role) const
 {
-	qDebug() << "Asked for data" << index.row() << index.column() << role;
 	const QVariantMap &info = _list.at(index.row());
 	switch (role) {
 	case Qt::DisplayRole:
@@ -68,7 +67,7 @@ QVariant WatchScannerModel::data(const QModelIndex &index, int role) const
 
 void WatchScannerModel::handleWatchFound(const QVariantMap &info)
 {
-	qDebug() << "Watch found" << info << endl;
+	qDebug() << "Scan found a watch:" << info << endl;
 	if (!_list.contains(info)) {
 		int count = _list.count();
 		beginInsertRows(QModelIndex(), count, count);
@@ -88,6 +87,7 @@ void WatchScannerModel::handleFinished()
 	qDebug() << "Scan finished";
 	_active = false;
 	if (_enabled) {
+		qDebug() << "Setting timer for next scan";
 		_timer->start();
 	}
 	emit activeChanged();
@@ -95,6 +95,6 @@ void WatchScannerModel::handleFinished()
 
 void WatchScannerModel::handleTimeout()
 {
-	qDebug() << "Restarting scan";
+	qDebug() << "Restarting scan now";
 	_scanner->start();
 }

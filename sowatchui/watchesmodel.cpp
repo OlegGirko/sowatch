@@ -39,7 +39,6 @@ int WatchesModel::rowCount(const QModelIndex &parent) const
 
 QVariant WatchesModel::data(const QModelIndex &index, int role) const
 {
-	qDebug() << "Asked for data" << index.row() << index.column() << role;
 	ConfigKey *config = _list[index.row()];
 	QString key = config->key();
 	QString id = key.mid(key.lastIndexOf('/') + 1);
