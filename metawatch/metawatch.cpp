@@ -120,7 +120,13 @@ MetaWatch::MetaWatch(ConfigKey* settings, QObject* parent) :
 
 MetaWatch::~MetaWatch()
 {
-	delete _paintEngine;
+	if (_socket) {
+		_socket->close();
+		delete _socket;
+	}
+	if (_paintEngine) {
+		delete _paintEngine;
+	}
 }
 
 QPaintEngine* MetaWatch::paintEngine() const
@@ -724,7 +730,7 @@ void MetaWatch::socketDisconnected()
 		timeToNextRetry = connectRetryTimes[_connectRetries];
 		_connectRetries++;
 	}
-	qDebug() << "Backing off for " << timeToNextRetry << "seconds for next retry";
+	qDebug() << "Backing off for" << timeToNextRetry << "seconds for next retry";
 	_connectAlignedTimer->start(timeToNextRetry / 2, timeToNextRetry * 2);
 	if (_connectAlignedTimer->lastError() != QSystemAlignedTimer::NoError) {
 		// I would like to know why QtM couldn't _emulate_ here using a QTimer by itself.

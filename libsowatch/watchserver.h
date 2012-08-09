@@ -25,15 +25,19 @@ class SOWATCH_EXPORT WatchServer : public QObject
 	Q_PROPERTY(QString nextWatchletButton READ nextWatchletButton WRITE setNextWatchletButton)
 
 public:
-	explicit WatchServer(Watch* watch, QObject* parent = 0);
+	explicit WatchServer(Watch *watch, QObject *parent = 0);
 
 	Watch* watch();
 
 	QString nextWatchletButton() const;
 	void setNextWatchletButton(const QString& value);
 
-	void addWatchlet(Watchlet* watchlet);
-	void addProvider(NotificationProvider* provider);
+	void addWatchlet(Watchlet *watchlet);
+	void insertWatchlet(int position, Watchlet *watchlet);
+	void removeWatchlet(const Watchlet *watchlet);
+
+	void addProvider(NotificationProvider *provider);
+	void removeProvider(const NotificationProvider *provider);
 
 	/** Get a list of all current live notifications. */
 	QList<Notification*> liveNotifications();

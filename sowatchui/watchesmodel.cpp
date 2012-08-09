@@ -12,6 +12,7 @@ WatchesModel::WatchesModel(QObject *parent) :
 {
 	QHash<int, QByteArray> roles = roleNames();
 	roles[Qt::DisplayRole] = QByteArray("title");
+	roles[Qt::DecorationRole] = QByteArray("iconSource");
 	roles[Qt::StatusTipRole] = QByteArray("subtitle");
 	roles[EnabledRole] = QByteArray("enabled");
 	roles[ConfigKeyRole] = QByteArray("configKey");
@@ -44,6 +45,12 @@ QVariant WatchesModel::data(const QModelIndex &index, int role) const
 	switch (role) {
 	case Qt::DisplayRole:
 		return config->value("name");
+	case Qt::DecorationRole:
+#if defined(QT_DEBUG)
+		return QVariant(QDir::current().absoluteFilePath(SOWATCH_RESOURCES_DIR "/sowatch64.png"));
+#else
+		return QVariant(SOWATCH_RESOURCES_DIR "/sowatch64.png");
+#endif
 	case Qt::StatusTipRole:
 		if (config->value("enable").toBool()) {
 			QString status = _status[id];

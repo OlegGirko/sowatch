@@ -50,21 +50,46 @@ void WatchServer::setNextWatchletButton(const QString& value)
 	}
 }
 
-void WatchServer::addProvider(NotificationProvider *provider)
-{
-	provider->setParent(this);
-	connect(provider, SIGNAL(incomingNotification(Notification*)), SLOT(postNotification(Notification*)));
-}
-
 void WatchServer::addWatchlet(Watchlet *watchlet)
 {
-	// A watchlet is best not reparented; just look that the parent is correct
+	insertWatchlet(_watchlets.size(), watchlet);
+}
+
+void WatchServer::insertWatchlet(int position, Watchlet *watchlet)
+{
+	const QString id = watchlet->id();
 	Q_ASSERT(watchlet->_server == this);
-	_watchlets.append(watchlet);
-	QString id = watchlet->id();
-	if (!_watchletIds.contains(id)) {
-		_watchletIds[id] = watchlet;
+	Q_ASSERT(!_watchletIds.contains(id));
+
+	_watchlets.insert(position, watchlet);
+	_watchletIds[id] = watchlet;
+}
+
+void WatchServer::removeWatchlet(const Watchlet *watchlet)
+{
+	const QString id = watchlet->id();
+
+	Q_ASSERT(watchlet->_server == this);
+	Q_ASSERT(_watchletIds.contains(id));
+
+	if (_currentWatchlet == watchlet) {
+		closeWatchlet();
 	}
+
+	_watchlets.removeAll(const_cast<Watchlet*>(watchlet));
+	_watchletIds.remove(id);
+}
+
+void WatchServer::addProvider(NotificationProvider *provider)
+{
+	connect(provider, SIGNAL(incomingNotification(Notification*)),
+	        this, SLOT(postNotification(Notification*)));
+}
+
+void WatchServer::removeProvider(const NotificationProvider *provider)
+{
+	disconnect(provider, SIGNAL(incomingNotification(Notification*)),
+	           this, SLOT(postNotification(Notification*)));
 }
 
 QList<Notification*> WatchServer::liveNotifications()

@@ -12,7 +12,7 @@ class SOWATCH_EXPORT NotificationProvider : public QObject
 {
     Q_OBJECT
 
-protected:
+public:
 	explicit NotificationProvider(QObject *parent = 0);
 	virtual ~NotificationProvider();
 

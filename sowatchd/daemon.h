@@ -7,6 +7,8 @@
 
 #include <sowatch.h>
 
+#include "watchhandler.h"
+
 namespace sowatch
 {
 
@@ -28,7 +30,7 @@ private:
 	Registry* _registry;
 	ConfigKey* _config;
 	ConfigKey* _watches_list;
-	QMap<QString, WatchServer*> _servers;
+	QMap<QString, WatchHandler*> _watches;
 	QSignalMapper *_status_mapper;
 
 	void startWatch(const QString& name);
