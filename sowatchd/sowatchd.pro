@@ -5,8 +5,8 @@ TEMPLATE = app
 QT       += core gui dbus
 CONFIG   -= app_bundle
 
-SOURCES += main.cpp daemon.cpp allscanner.cpp scanneradaptor.cpp daemonadaptor.cpp
-HEADERS += global.h daemon.h allscanner.h scanneradaptor.h daemonadaptor.h
+SOURCES += main.cpp daemon.cpp daemonadaptor.cpp
+HEADERS += global.h daemon.h daemonadaptor.h
 
 LIBS += -L$$OUT_PWD/../libsowatch/ -lsowatch
 INCLUDEPATH += $$PWD/../libsowatch

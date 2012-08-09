@@ -28,16 +28,17 @@ DEPENDPATH += $$PWD/../libsowatch
 # Source files
 SOURCES += main.cpp \
     watchesmodel.cpp daemonproxy.cpp \
-    scanwatchesmodel.cpp scannerproxy.cpp
+    watchscannermodel.cpp
 
 HEADERS += \
     watchesmodel.h daemonproxy.h \
-    scanwatchesmodel.h scannerproxy.h
+    watchscannermodel.h
 
 OTHER_FILES += qml/main.qml \
 	qml/MainPage.qml \
 	qml/NewWatchSheet.qml \
 	qml/WatchPage.qml \
+	sowatch.svg sowatch_src.svg sowatch64.png sowatch80.png \
     sowatch_harmattan.desktop \
     sowatch.desktop
 

@@ -97,9 +97,14 @@ void WatchesModel::reload()
 	foreach (ConfigKey* conf, _list) {
 		conf->deleteLater();
 	}
+	_status.clear();
 	_list.clear();
 	foreach (const QString& s, dirs) {
 		_list.append(_config->getSubkey(s, this));
+		QDBusReply<QString> reply = _daemon->GetWatchStatus(s);
+		if (reply.isValid()) {
+			_status[s] = reply.value();
+		}
 	}
 	endResetModel();
 

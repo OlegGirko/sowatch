@@ -23,5 +23,6 @@
 #include "watchletplugininterface.h"
 
 #include "registry.h"
+#include "allwatchscanner.h"
 
 #endif // SOWATCH_H

@@ -6,6 +6,7 @@ Page {
 	id: mainPage
 	anchors.leftMargin: UiConstants.DefaultMargin
 	anchors.rightMargin: UiConstants.DefaultMargin
+	orientationLock: PageOrientation.LockPortrait
 
 	tools: ToolBarLayout {
 		ToolIcon {
@@ -30,6 +31,11 @@ Page {
                 anchors.right: parent.right;
                 anchors.verticalCenter: parent.verticalCenter
             }
+
+			onClicked: {
+				var page = Qt.createComponent("WatchPage.qml");
+				pageStack.push(page);
+			}
 		}
 	}
 	ScrollDecorator {

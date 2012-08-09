@@ -1,5 +1,5 @@
-#ifndef ALLSCANNER_H
-#define ALLSCANNER_H
+#ifndef SOWATCH_ALLWATCHSCANNER_H
+#define SOWATCH_ALLWATCHSCANNER_H
 
 #include <QtCore/QObject>
 #include <QtCore/QList>
@@ -9,11 +9,11 @@
 namespace sowatch
 {
 
-class AllScanner : public WatchScanner
+class AllWatchScanner : public WatchScanner
 {
 	Q_OBJECT
 public:
-	explicit AllScanner(QObject *parent = 0);
+	explicit AllWatchScanner(QObject *parent = 0);
 	void start();
 
 private:
@@ -26,4 +26,4 @@ private slots:
 
 }
 
-#endif // ALLSCANNER_H
+#endif // SOWATCH_ALLWATCHSCANNER_H

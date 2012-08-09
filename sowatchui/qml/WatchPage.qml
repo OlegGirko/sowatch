@@ -6,6 +6,7 @@ Page {
 	id: watchPage
 	anchors.leftMargin: UiConstants.DefaultMargin
 	anchors.rightMargin: UiConstants.DefaultMargin
+	orientationLock: PageOrientation.LockPortrait
 
 	tools: ToolBarLayout {
 		ToolIcon {

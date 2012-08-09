@@ -4,11 +4,11 @@
 #include <sowatch.h>
 
 #include "watchesmodel.h"
-#include "scanwatchesmodel.h"
+#include "watchscannermodel.h"
 
 static sowatch::Registry *registry;
 static WatchesModel *watches;
-static ScanWatchesModel *watchScanner;
+static WatchScannerModel *watchScanner;
 
 Q_DECL_EXPORT int main(int argc, char *argv[])
 {
@@ -17,7 +17,7 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
 
 	registry = sowatch::Registry::registry();
 	watches = new WatchesModel(app.data());
-	watchScanner = new ScanWatchesModel(app.data());
+	watchScanner = new WatchScannerModel(app.data());
 
 	qDebug() << "Starting" << watches << endl;
 

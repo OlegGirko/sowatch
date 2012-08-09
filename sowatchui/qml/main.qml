@@ -9,17 +9,4 @@ PageStackWindow {
     MainPage {
         id: mainPage
     }
-
-    Menu {
-        id: myMenu
-        visualParent: pageStack
-        MenuLayout {
-			MenuItem {
-				text: qsTr("Crap")
-				onClicked: {
-					console.log("Crap")
-				}
-			}
-        }
-    }
 }

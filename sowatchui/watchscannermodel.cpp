@@ -1,10 +1,8 @@
-#include <QtDebug>
+#include "watchscannermodel.h"
 
-#include "scanwatchesmodel.h"
-
-ScanWatchesModel::ScanWatchesModel(QObject *parent) :
+WatchScannerModel::WatchScannerModel(QObject *parent) :
     QAbstractListModel(parent),
-    _scanner(new ScannerProxy("com.javispedro.sowatchd", "/com/javispedro/sowatch/allscanner", QDBusConnection::sessionBus())),
+    _scanner(new sowatch::AllWatchScanner(this)),
     _timer(new QTimer(this)),
     _enabled(false), _active(false)
 {
@@ -17,43 +15,43 @@ ScanWatchesModel::ScanWatchesModel(QObject *parent) :
 	_timer->setSingleShot(true);
 	_timer->setInterval(3000);
 
-	connect(_scanner, SIGNAL(WatchFound(QVariantMap)), SLOT(handleWatchFound(QVariantMap)));
-	connect(_scanner, SIGNAL(Started()), SLOT(handleStarted()));
-	connect(_scanner, SIGNAL(Finished()), SLOT(handleFinished()));
+	connect(_scanner, SIGNAL(watchFound(QVariantMap)), SLOT(handleWatchFound(QVariantMap)));
+	connect(_scanner, SIGNAL(started()), SLOT(handleStarted()));
+	connect(_scanner, SIGNAL(finished()), SLOT(handleFinished()));
 	connect(_timer, SIGNAL(timeout()), SLOT(handleTimeout()));
 }
 
-ScanWatchesModel::~ScanWatchesModel()
+WatchScannerModel::~WatchScannerModel()
 {
 }
 
-bool ScanWatchesModel::enabled() const
+bool WatchScannerModel::enabled() const
 {
 	return _enabled;
 }
 
-void ScanWatchesModel::setEnabled(bool enabled)
+void WatchScannerModel::setEnabled(bool enabled)
 {
 	_timer->stop();
 
 	_enabled = enabled;
 
 	if (_enabled && !_active) {
-		_scanner->Start();
+		_scanner->start();
 	}
 }
 
-bool ScanWatchesModel::active() const
+bool WatchScannerModel::active() const
 {
 	return _active;
 }
 
-int ScanWatchesModel::rowCount(const QModelIndex &parent) const
+int WatchScannerModel::rowCount(const QModelIndex &parent) const
 {
 	return _list.count();
 }
 
-QVariant ScanWatchesModel::data(const QModelIndex &index, int role) const
+QVariant WatchScannerModel::data(const QModelIndex &index, int role) const
 {
 	qDebug() << "Asked for data" << index.row() << index.column() << role;
 	const QVariantMap &info = _list.at(index.row());
@@ -68,7 +66,7 @@ QVariant ScanWatchesModel::data(const QModelIndex &index, int role) const
 	return QVariant();
 }
 
-void ScanWatchesModel::handleWatchFound(const QVariantMap &info)
+void WatchScannerModel::handleWatchFound(const QVariantMap &info)
 {
 	qDebug() << "Watch found" << info << endl;
 	if (!_list.contains(info)) {
@@ -79,13 +77,13 @@ void ScanWatchesModel::handleWatchFound(const QVariantMap &info)
 	}
 }
 
-void ScanWatchesModel::handleStarted()
+void WatchScannerModel::handleStarted()
 {
 	_active = true;
 	emit activeChanged();
 }
 
-void ScanWatchesModel::handleFinished()
+void WatchScannerModel::handleFinished()
 {
 	qDebug() << "Scan finished";
 	_active = false;
@@ -95,8 +93,8 @@ void ScanWatchesModel::handleFinished()
 	emit activeChanged();
 }
 
-void ScanWatchesModel::handleTimeout()
+void WatchScannerModel::handleTimeout()
 {
 	qDebug() << "Restarting scan";
-	_scanner->Start();
+	_scanner->start();
 }

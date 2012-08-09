@@ -1,8 +1,8 @@
-#include "allscanner.h"
+#include "allwatchscanner.h"
 
 using namespace sowatch;
 
-AllScanner::AllScanner(QObject *parent) :
+AllWatchScanner::AllWatchScanner(QObject *parent) :
 	WatchScanner(parent), _finishedCount(0)
 {
 	QList<WatchPluginInterface*> plugins = Registry::registry()->getWatchPlugins();
@@ -17,7 +17,7 @@ AllScanner::AllScanner(QObject *parent) :
 	}
 }
 
-void AllScanner::start()
+void AllWatchScanner::start()
 {
 	if (_scanners.empty()) {
 		emit finished();
@@ -29,7 +29,7 @@ void AllScanner::start()
 	}
 }
 
-void AllScanner::handleFinished()
+void AllWatchScanner::handleFinished()
 {
 	qDebug() << "one finished";
 	_finishedCount++;

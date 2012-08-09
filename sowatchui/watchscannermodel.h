@@ -1,21 +1,19 @@
-#ifndef SCANWATCHESMODEL_H
-#define SCANWATCHESMODEL_H
+#ifndef WATCHSCANNERMODEL_H
+#define WATCHSCANNERMODEL_H
 
 #include <QtCore/QAbstractListModel>
-#include <QtCore/QTimer>
+
 #include <sowatch.h>
 
-#include "scannerproxy.h"
-
-class ScanWatchesModel : public QAbstractListModel
+class WatchScannerModel : public QAbstractListModel
 {
 	Q_OBJECT
 	Q_PROPERTY(bool enabled READ enabled WRITE setEnabled)
 	Q_PROPERTY(bool active READ active NOTIFY activeChanged)
 
 public:
-	explicit ScanWatchesModel(QObject *parent = 0);
-	~ScanWatchesModel();
+	explicit WatchScannerModel(QObject *parent = 0);
+	~WatchScannerModel();
 
 	enum DataRoles {
 		ObjectRole = Qt::UserRole
@@ -39,11 +37,11 @@ private slots:
 	void handleTimeout();
 
 private:
-	ScannerProxy *_scanner;
+	sowatch::WatchScanner *_scanner;
 	QList<QVariantMap> _list;
 	QTimer *_timer;
 	bool _enabled;
 	bool _active;
 };
 
-#endif // SCANWATCHESMODEL_H
+#endif // WATCHSCANNERMODEL_H

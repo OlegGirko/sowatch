@@ -32,6 +32,7 @@ SOURCES += \
     watchletplugininterface.cpp \
 	registry.cpp \
     watchscanner.cpp \
+    allwatchscanner.cpp \
     configkey.cpp \
     gconfkey.cpp
 
@@ -54,6 +55,7 @@ HEADERS += \
     watchletplugininterface.h \
 	registry.h \
     watchscanner.h \
+    allwatchscanner.h \
     configkey.h \
     gconfkey.h
 
