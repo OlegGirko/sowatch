@@ -28,6 +28,19 @@ Sheet {
 
 		model: watchScanner
 
+		header: Column {
+			width: parent.width
+
+			Label {
+				text: qsTr("Pick a watch")
+				font: UiConstants.HeaderFont
+			}
+			GroupHeader {
+				width: parent.width
+				text: qsTr("Nearby watches")
+			}
+		}
+
 		delegate: ListDelegate {
 			onClicked: {
 				watches.addFoundWatch(object);

@@ -7,21 +7,19 @@ using namespace sowatch;
 WatchesModel::WatchesModel(QObject *parent) :
     QAbstractListModel(parent),
     _config(new GConfKey("/apps/sowatch", this)),
-    _active_watches(_config->getSubkey("active-watches", this)),
+    _watches_list(_config->getSubkey("watches", this)),
     _daemon(new DaemonProxy("com.javispedro.sowatchd", "/com/javispedro/sowatch/daemon", QDBusConnection::sessionBus()))
 {
 	QHash<int, QByteArray> roles = roleNames();
 	roles[Qt::DisplayRole] = QByteArray("title");
 	roles[Qt::StatusTipRole] = QByteArray("subtitle");
-	roles[ObjectRole] = QByteArray("object");
+	roles[EnabledRole] = QByteArray("enabled");
 	roles[ConfigKeyRole] = QByteArray("configKey");
 	roles[ConfigQmlUrlRole] = QByteArray("configQmlUrl");
 	setRoleNames(roles);
 
-	connect(_config, SIGNAL(changed()),
-	        this, SLOT(handleConfigChanged()));
-	connect(_config, SIGNAL(subkeyChanged(QString)),
-	        this, SLOT(handleSubkeyChanged(QString)));
+	connect(_watches_list, SIGNAL(changed()),
+	        SLOT(handleWatchesListChanged()));
 	connect(_daemon, SIGNAL(WatchStatusChanged(QString,QString)),
 	        this, SLOT(handleWatchStatusChanged(QString,QString)));
 
@@ -47,18 +45,20 @@ QVariant WatchesModel::data(const QModelIndex &index, int role) const
 	case Qt::DisplayRole:
 		return config->value("name");
 	case Qt::StatusTipRole:
-		if (isWatchIdActive(id)) {
+		if (config->value("enable").toBool()) {
 			QString status = _status[id];
 			if (status == "connected") {
 				return QVariant(tr("Connected"));
 			} else if (status == "enabled") {
-				return QVariant(tr("Searching..."));
+				return QVariant(tr("Disconnected, Searching..."));
 			} else {
-				return QVariant(tr("Enabled"));
+				return QVariant(tr("Disconnected"));
 			}
 		} else {
 			return QVariant(tr("Disabled"));
 		}
+	case EnabledRole:
+		return config->value("enable");
 	case ConfigKeyRole:
 		return QVariant::fromValue(key);
 	case ConfigQmlUrlRole:
@@ -106,23 +106,26 @@ void WatchesModel::addFoundWatch(const QVariantMap &info)
 		qDebug() << "Would add" << providerId;
 	}
 
-	// Now add to active watches
-	QStringList active = _active_watches->value().toStringList();
+	// Now add to the watches list
+	QStringList active = _watches_list->value().toStringList();
 	active << name;
-	_active_watches->set(active);
+	_watches_list->set(active);
+
+	// Now enable
+	newkey->set("enable", true);
 }
 
 void WatchesModel::reload()
 {
-	QStringList dirs = _config->dirs();
+	QStringList names = _watches_list->value().toStringList();
 
 	beginResetModel();
 	foreach (ConfigKey* conf, _list) {
-		conf->deleteLater();
+		delete conf;
 	}
 	_status.clear();
 	_list.clear();
-	foreach (const QString& s, dirs) {
+	foreach (const QString& s, names) {
 		_list.append(_config->getSubkey(s, this));
 		QDBusReply<QString> reply = _daemon->GetWatchStatus(s);
 		if (reply.isValid()) {
@@ -134,37 +137,9 @@ void WatchesModel::reload()
 	qDebug() << "Found" << _list.count() << "configured watches";
 }
 
-void WatchesModel::handleConfigChanged()
+void WatchesModel::handleWatchesListChanged()
 {
-	qDebug() << "Key changed";
-}
-
-void WatchesModel::handleSubkeyChanged(const QString &subkey)
-{
-	QRegExp nameexp("^([^/]+)/name");
-	if (nameexp.exactMatch(subkey)) {
-		qDebug() << "Name key changed:" << subkey;
-		QString id = nameexp.cap(1);
-		int i = findRowByWatchId(id);
-		if (i != -1) {
-			if (_config->value(subkey).isNull()) {
-				beginRemoveRows(QModelIndex(), i, i);
-				_list[i]->deleteLater();
-				_list.removeAt(i);
-				qDebug() << "Removing" << i;
-				endRemoveRows();
-			} else {
-				emit dataChanged(createIndex(i, 0), createIndex(i, 0));
-				qDebug() << "Changing" << i;
-			}
-		} else {
-			i = _list.size();
-			qDebug() << "Inserting" << i;
-			beginInsertRows(QModelIndex(), i, i);
-			_list.append(_config->getSubkey(id, this));
-			endInsertRows();
-		}
-	}
+	reload();
 }
 
 void WatchesModel::handleWatchStatusChanged(const QString &watch, const QString &status)
@@ -185,10 +160,4 @@ int WatchesModel::findRowByWatchId(const QString &id)
 		}
 	}
 	return -1;
-}
-
-bool WatchesModel::isWatchIdActive(const QString &id) const
-{
-	QStringList active = _active_watches->value().toStringList();
-	return active.contains(id);
 }

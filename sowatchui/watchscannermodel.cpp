@@ -8,6 +8,7 @@ WatchScannerModel::WatchScannerModel(QObject *parent) :
 {
 	QHash<int, QByteArray> roles = roleNames();
 	roles[Qt::DisplayRole] = QByteArray("title");
+	roles[Qt::DecorationRole] = QByteArray("iconSource");
 	roles[Qt::StatusTipRole] = QByteArray("subtitle");
 	roles[ObjectRole] = QByteArray("object");
 	setRoleNames(roles);
@@ -58,6 +59,8 @@ QVariant WatchScannerModel::data(const QModelIndex &index, int role) const
 	switch (role) {
 	case Qt::DisplayRole:
 		return info["name"];
+	case Qt::DecorationRole:
+		return QVariant(SOWATCH_RESOURCES_DIR "/sowatch64.png");
 	case Qt::StatusTipRole:
 		return info["address"];
 	case ObjectRole:

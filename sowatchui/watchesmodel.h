@@ -15,7 +15,7 @@ public:
 	~WatchesModel();
 
 	enum DataRoles {
-		ObjectRole = Qt::UserRole,
+		EnabledRole = Qt::UserRole,
 		ConfigKeyRole,
 		ConfigQmlUrlRole
 	};
@@ -29,17 +29,15 @@ public slots:
 
 private slots:
 	void reload();
-	void handleConfigChanged();
-	void handleSubkeyChanged(const QString& subkey);
+	void handleWatchesListChanged();
 	void handleWatchStatusChanged(const QString& watch, const QString& status);
 
 private:
 	int findRowByWatchId(const QString& id);
-	bool isWatchIdActive(const QString& id) const;
 
 private:
 	sowatch::ConfigKey *_config;
-	sowatch::ConfigKey *_active_watches;
+	sowatch::ConfigKey *_watches_list;
 	DaemonProxy *_daemon;
 	QList<sowatch::ConfigKey*> _list;
 	QMap<QString, QString> _status;

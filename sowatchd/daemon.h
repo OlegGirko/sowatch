@@ -26,7 +26,8 @@ signals:
 
 private:
 	Registry* _registry;
-	ConfigKey* _settings;
+	ConfigKey* _config;
+	ConfigKey* _watches_list;
 	QMap<QString, WatchServer*> _servers;
 	QSignalMapper *_status_mapper;
 
@@ -34,6 +35,7 @@ private:
 	void stopWatch(const QString& name);
 
 private slots:
+	void startEnabledWatches();
 	void handleSettingsChanged(const QString& subkey);
 	void handleWatchStatusChange(const QString& watch);
 };

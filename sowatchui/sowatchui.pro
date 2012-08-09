@@ -7,6 +7,15 @@ qml_folder.source = qml
 qml_folder.target = .
 DEPLOYMENTFOLDERS = qml_folder
 
+# Install icon files also to resources directory
+res_files.files += sowatch64.png sowatch80.png
+!isEmpty(MEEGO_VERSION_MAJOR)|maemo5 {
+	res_files.path = /opt/sowatch/share/metawatch
+} else {
+	res_files.path = /usr/share/sowatch/metawatch
+}
+INSTALLS += res_files
+
 # Additional import path used to resolve QML modules in Creator's code model
 QML_IMPORT_PATH =
 simulator {
