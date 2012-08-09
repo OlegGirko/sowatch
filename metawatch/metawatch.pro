@@ -33,7 +33,7 @@ FORMS += \
 	metawatchsimulatorform.ui
 
 res_files.files += res/graphics res/fonts
-qml_files.files += qml/com
+qml_files.files += qml/com qml/metawatch-digital-config.qml
 
 LIBS += -L$$OUT_PWD/../libsowatch/ -lsowatch
 

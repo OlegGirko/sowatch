@@ -141,6 +141,16 @@ QString GConfKey::key() const
 	return _key;
 }
 
+void GConfKey::setKey(const QString &key)
+{
+	_key = key;
+	if (_key.endsWith("/")) {
+		_key.chop(1);
+	}
+	emit keyChanged();
+	emit changed();
+}
+
 QVariant GConfKey::value() const
 {
 	return value(QString());

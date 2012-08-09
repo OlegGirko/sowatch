@@ -20,6 +20,7 @@ public:
 
 	virtual QStringList drivers() = 0;
 	virtual WatchScanner* getScanner(QObject *parent = 0) = 0;
+	virtual QUrl getConfigQmlUrl(const QString& driver) = 0;
 	virtual Watch* getWatch(const QString& driver, ConfigKey* settings, QObject *parent = 0) = 0;
 };
 

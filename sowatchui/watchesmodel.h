@@ -15,7 +15,9 @@ public:
 	~WatchesModel();
 
 	enum DataRoles {
-		ObjectRole = Qt::UserRole
+		ObjectRole = Qt::UserRole,
+		ConfigKeyRole,
+		ConfigQmlUrlRole
 	};
 
 	int rowCount(const QModelIndex &parent) const;

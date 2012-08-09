@@ -32,10 +32,9 @@ Page {
                 anchors.verticalCenter: parent.verticalCenter
             }
 
-			onClicked: {
-				var page = Qt.createComponent("WatchPage.qml");
-				pageStack.push(page);
-			}
+			onClicked: pageStack.push(Qt.resolvedUrl("WatchPage.qml"),
+									  {configKey: model.configKey,
+			                           configQmlUrl: model.configQmlUrl});
 		}
 	}
 	ScrollDecorator {

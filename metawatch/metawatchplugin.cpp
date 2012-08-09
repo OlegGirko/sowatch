@@ -39,6 +39,15 @@ WatchScanner* MetaWatchPlugin::getScanner(QObject *parent)
 	return new MetaWatchScanner(parent);
 }
 
+QUrl MetaWatchPlugin::getConfigQmlUrl(const QString &driver)
+{
+	if (driver == "metawatch-digital") {
+		return QUrl::fromLocalFile(SOWATCH_QML_DIR "/metawatch-digital-config.qml");
+	} else {
+		return QUrl();
+	}
+}
+
 Watch* MetaWatchPlugin::getWatch(const QString& driver, ConfigKey* settings, QObject *parent)
 {
 	if (driver == "metawatch-digital") {

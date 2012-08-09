@@ -12,7 +12,7 @@ namespace sowatch
 class SOWATCH_EXPORT ConfigKey : public QObject
 {
 	Q_OBJECT
-	Q_PROPERTY(QString key READ key CONSTANT)
+	Q_PROPERTY(QString key READ key WRITE setKey NOTIFY keyChanged)
 	Q_PROPERTY(QVariant value READ value WRITE set RESET unset NOTIFY changed USER true)
 	Q_PROPERTY(QStringList dirs READ dirs)
 	Q_PROPERTY(QStringList keys READ keys)
@@ -21,6 +21,7 @@ public:
 	ConfigKey(QObject *parent = 0);
 
 	virtual QString key() const = 0;
+	virtual void setKey(const QString& key) = 0;
 
 	virtual QVariant value() const = 0;
 	virtual void set(const QVariant& value) = 0;
@@ -43,7 +44,11 @@ public:
 	virtual ConfigKey* getSubkey(const QString& subkey, QObject *parent = 0) const = 0;
 
 signals:
+	/** Key property changed (via setKey) */
+	void keyChanged();
+	/** Value changed. */
 	void changed();
+	/** A value of a subkey changed. */
 	void subkeyChanged(const QString& subkey);
 };
 

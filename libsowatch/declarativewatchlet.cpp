@@ -1,6 +1,7 @@
 #include <QtCore/QDebug>
 #include <QtDeclarative/QtDeclarative>
 #include "watchserver.h"
+#include "gconfkey.h"
 #include "declarativewatchwrapper.h"
 #include "declarativewatchlet.h"
 
@@ -20,6 +21,8 @@ DeclarativeWatchlet::DeclarativeWatchlet(WatchServer* server, const QString& id)
 	if (!_registered) {
 		qmlRegisterUncreatableType<DeclarativeWatchWrapper>("com.javispedro.sowatch", 1, 0,
 			"Watch", "Watch is only available via the 'watch' object");
+		qmlRegisterType<ConfigKey>();
+		qmlRegisterType<GConfKey>("com.javispedro.sowatch", 1, 0, "GConfKey");
 		_registered = true;
 	}
 

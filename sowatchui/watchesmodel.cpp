@@ -14,6 +14,8 @@ WatchesModel::WatchesModel(QObject *parent) :
 	roles[Qt::DisplayRole] = QByteArray("title");
 	roles[Qt::StatusTipRole] = QByteArray("subtitle");
 	roles[ObjectRole] = QByteArray("object");
+	roles[ConfigKeyRole] = QByteArray("configKey");
+	roles[ConfigQmlUrlRole] = QByteArray("configQmlUrl");
 	setRoleNames(roles);
 
 	connect(_config, SIGNAL(changed()),
@@ -57,6 +59,17 @@ QVariant WatchesModel::data(const QModelIndex &index, int role) const
 		} else {
 			return QVariant(tr("Disabled"));
 		}
+	case ConfigKeyRole:
+		return QVariant::fromValue(key);
+	case ConfigQmlUrlRole:
+		if (config->isSet("driver")) {
+			QString driver = config->value("driver").toString();
+			WatchPluginInterface *plugin = Registry::registry()->getWatchPlugin(driver);
+			if (plugin) {
+				return QVariant::fromValue(plugin->getConfigQmlUrl(driver));
+			}
+		}
+		return QVariant::fromValue(QUrl());
 	}
 	return QVariant();
 }

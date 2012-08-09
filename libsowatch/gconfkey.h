@@ -11,10 +11,11 @@ class SOWATCH_EXPORT GConfKey : public ConfigKey
 	Q_OBJECT
 
 public:
-	GConfKey(const QString& key, QObject *parent = 0);
+	GConfKey(const QString& key = QString(), QObject *parent = 0);
 	~GConfKey();
 
 	QString key() const;
+	void setKey(const QString &key);
 
 	QVariant value() const;
 	void set(const QVariant& value);

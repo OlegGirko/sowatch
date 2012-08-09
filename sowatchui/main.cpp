@@ -1,4 +1,5 @@
 #include <QtGui/QApplication>
+#include <QtDeclarative/QtDeclarative>
 #include "qmlapplicationviewer.h"
 
 #include <sowatch.h>
@@ -20,6 +21,9 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
 	watchScanner = new WatchScannerModel(app.data());
 
 	qDebug() << "Starting" << watches << endl;
+
+	qmlRegisterType<sowatch::ConfigKey>();
+	qmlRegisterType<sowatch::GConfKey>("com.javispedro.sowatch", 1, 0, "GConfKey");
 
 	viewer->rootContext()->setContextProperty("watches", watches);
 	viewer->rootContext()->setContextProperty("watchScanner", watchScanner);
