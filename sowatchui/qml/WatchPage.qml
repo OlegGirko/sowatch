@@ -39,6 +39,10 @@ Page {
 				width: parent.width
 				height: UiConstants.ListItemHeightDefault
 
+				GConfKey {
+					id: enableKey
+					key: configKey + "/enable"
+				}
 				Label {
 					text: qsTr("Enabled")
 					font: UiConstants.TitleFont
@@ -46,9 +50,11 @@ Page {
 					anchors.left: parent.left
 				}
 				Switch {
+					id: enableSwitch
 					anchors.verticalCenter: parent.verticalCenter
 					anchors.right: parent.right
-					checked: true
+					checked: enableKey.value
+					onCheckedChanged: enableKey.value = checked
 				}
 			}
 

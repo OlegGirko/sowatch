@@ -13,7 +13,6 @@ Column {
 		GConfKey {
 			id: hourModeKey
 			key: configKey + "/24h-mode"
-			value: hourModeSwitch.checked
 		}
 		Label {
 			text: qsTr("24-hour clock mode")
@@ -26,6 +25,7 @@ Column {
 			anchors.verticalCenter: parent.verticalCenter
 			anchors.right: parent.right
 			checked: hourModeKey.value
+			onCheckedChanged: hourModeKey.value = checked
 		}
 	}
 
@@ -37,7 +37,6 @@ Column {
 		GConfKey {
 			id: dayMonthOrderKey
 			key: configKey + "/day-month-order"
-			value: dayMonthOrderSwitch.checked
 		}
 		Label {
 			text: qsTr("Use DD/MM instead of MM/DD")
@@ -50,6 +49,7 @@ Column {
 			anchors.verticalCenter: parent.verticalCenter
 			anchors.right: parent.right
 			checked: dayMonthOrderKey.value
+			onCheckedChanged: dayMonthOrderKey.value = checked
 		}
 	}
 }
