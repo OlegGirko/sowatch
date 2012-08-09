@@ -102,7 +102,7 @@ void WatchesModel::addFoundWatch(const QVariantMap &info)
 
 	// Set some defaults
 	Registry *registry = Registry::registry();
-	foreach (const QStringList& providerId, registry->allNotificationProviders()) {
+	foreach (const QString& providerId, registry->allNotificationProviders()) {
 		qDebug() << "Would add" << providerId;
 	}
 
