@@ -73,6 +73,31 @@ Page {
 
 			GroupHeader {
 				width: parent.width
+				text: "Notification sources"
+				visible: configQmlLoader.status === Loader.Ready
+			}
+
+			ListView {
+				id: providersListView
+				interactive: false
+				width: parent.width
+				height: UiConstants.ListItemHeightDefault * count
+				model: ProvidersModel {
+					id: providersModel
+					configKey: watchPage.configKey + "/providers"
+				}
+				delegate: ListDelegate {
+					CheckBox {
+						anchors.verticalCenter: parent.verticalCenter
+						anchors.right: parent.right
+						checked: model.enabled
+						onCheckedChanged: providersModel.setProviderEnabled(model.name, checked);
+					}
+				}
+			}
+
+			GroupHeader {
+				width: parent.width
 				text: "Watchlets"
 				visible: configQmlLoader.status === Loader.Ready
 			}
@@ -94,33 +119,7 @@ Page {
 
 			Button {
 				anchors.horizontalCenter: parent.horizontalCenter
-				text: qsTr("Add watchlet")
-			}
-
-			GroupHeader {
-				width: parent.width
-				text: "Notification sources"
-				visible: configQmlLoader.status === Loader.Ready
-			}
-
-			ListView {
-				id: providersListView
-				interactive: false
-				width: parent.width
-				height: UiConstants.ListItemHeightDefault * count
-				model: ListModel {
-					ListElement {
-						title: "Test"
-					}
-				}
-				delegate: ListDelegate {
-
-				}
-			}
-
-			Button {
-				anchors.horizontalCenter: parent.horizontalCenter
-				text: qsTr("Add notification source")
+				text: qsTr("Add new watchlet")
 			}
 		}
 	}

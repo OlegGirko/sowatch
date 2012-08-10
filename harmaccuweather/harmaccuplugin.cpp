@@ -19,6 +19,14 @@ QStringList HarmAccuPlugin::providers()
 	return providers;
 }
 
+NotificationPluginInterface::NotificationProviderInfo HarmAccuPlugin::describeProvider(const QString &driver)
+{
+	NotificationProviderInfo info;
+	if (driver != "harmaccu") return info;
+	info.name = "Accuweather";
+	return info;
+}
+
 NotificationProvider* HarmAccuPlugin::getProvider(const QString& id, ConfigKey *settings, QObject *parent)
 {
 	Q_UNUSED(settings);

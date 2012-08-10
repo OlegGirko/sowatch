@@ -19,6 +19,14 @@ QStringList CKitCallPlugin::providers()
 	return providers;
 }
 
+NotificationPluginInterface::NotificationProviderInfo CKitCallPlugin::describeProvider(const QString &driver)
+{
+	Q_UNUSED(driver);
+	NotificationProviderInfo info;
+	info.name = "MeeGo Incoming calls";
+	return info;
+}
+
 NotificationProvider* CKitCallPlugin::getProvider(const QString& driver, ConfigKey *settings, QObject *parent)
 {
 	Q_UNUSED(driver);

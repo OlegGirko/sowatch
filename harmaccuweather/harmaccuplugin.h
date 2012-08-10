@@ -16,6 +16,7 @@ public:
 	~HarmAccuPlugin();
 
 	QStringList providers();
+	NotificationProviderInfo describeProvider(const QString &driver);
 	NotificationProvider* getProvider(const QString& driver, ConfigKey *settings, QObject *parent = 0);
 };
 

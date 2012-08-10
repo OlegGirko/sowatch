@@ -4,6 +4,7 @@
 #include <QtPlugin>
 #include <QtCore/QSettings>
 #include <QtCore/QStringList>
+#include <QtGui/QIcon>
 #include "sowatch_global.h"
 
 namespace sowatch
@@ -18,7 +19,13 @@ class SOWATCH_EXPORT NotificationPluginInterface
 public:
 	virtual ~NotificationPluginInterface();
 
+	struct NotificationProviderInfo {
+		QString name;
+		QIcon icon;
+	};
+
 	virtual QStringList providers() = 0;
+	virtual NotificationProviderInfo describeProvider(const QString& driver) = 0;
 	virtual NotificationProvider* getProvider(const QString& driver, ConfigKey *settings, QObject *parent = 0) = 0;
 };
 

@@ -37,11 +37,13 @@ DEPENDPATH += $$PWD/../libsowatch
 # Source files
 SOURCES += main.cpp \
     watchesmodel.cpp daemonproxy.cpp \
-    watchscannermodel.cpp
+    watchscannermodel.cpp \
+    providersmodel.cc
 
 HEADERS += \
     watchesmodel.h daemonproxy.h \
-    watchscannermodel.h
+    watchscannermodel.h \
+    providersmodel.h
 
 OTHER_FILES += qml/main.qml \
 	qml/MainPage.qml \

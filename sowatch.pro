@@ -29,6 +29,9 @@ contains(MEEGO_EDITION,harmattan) {
 	ckitcallnotification.depends = libsowatch
 	harmaccuweather.depends = libsowatch
     qmafwwatchlet.depends = libsowatch
+} else:simulator {
+	SUBDIRS += harmaccuweather
+	harmaccuweather.depends = libsowatch
 }
 
 OTHER_FILES += \

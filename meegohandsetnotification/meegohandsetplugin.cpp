@@ -18,10 +18,18 @@ QStringList MeegoHandsetPlugin::providers()
 	return providers;
 }
 
+NotificationPluginInterface::NotificationProviderInfo MeegoHandsetPlugin::describeProvider(const QString &driver)
+{
+	NotificationProviderInfo info;
+	if (driver != "meegohandset") return info;
+	info.name = "MeeGo Notifications";
+	return info;
+}
+
 NotificationProvider* MeegoHandsetPlugin::getProvider(const QString& driver, ConfigKey* settings, QObject *parent)
 {
-	Q_UNUSED(driver);
 	Q_UNUSED(settings);
+	if (driver != "meegohandset") return 0;
 	return new MeegoHandsetNotificationProvider(parent);
 }
 
