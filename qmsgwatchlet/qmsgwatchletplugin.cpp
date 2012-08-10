@@ -19,10 +19,19 @@ QStringList QMsgWatchletPlugin::watchlets()
 	return l;
 }
 
-Watchlet* QMsgWatchletPlugin::getWatchlet(const QString& driver, QSettings& settings, WatchServer *server)
+WatchletPluginInterface::WatchletInfo QMsgWatchletPlugin::describeWatchlet(const QString &id)
 {
-	Q_UNUSED(driver);
-	Q_UNUSED(settings);
+	WatchletInfo info;
+	if (id != "com.javispedro.sowatch.qmsg") return info;
+	info.name = "Inbox";
+	info.icon = QUrl::fromLocalFile(SOWATCH_QML_DIR "/qmsgwatchlet/icon.png");
+	return info;
+}
+
+Watchlet* QMsgWatchletPlugin::getWatchlet(const QString &id, ConfigKey *config, WatchServer *server)
+{
+	Q_UNUSED(config);
+	if (id != "com.javispedro.sowatch.qmsg") return 0;
 	return new QMsgWatchlet(server);
 }
 

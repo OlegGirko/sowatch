@@ -19,10 +19,19 @@ QStringList QMafwWatchletPlugin::watchlets()
 	return l;
 }
 
-Watchlet* QMafwWatchletPlugin::getWatchlet(const QString& driver, QSettings& settings, WatchServer *server)
+WatchletPluginInterface::WatchletInfo QMafwWatchletPlugin::describeWatchlet(const QString &id)
 {
-	Q_UNUSED(driver);
-	Q_UNUSED(settings);
+	WatchletInfo info;
+	if (id != "com.javispedro.sowatch.qmafw") return info;
+	info.name = "Music player";
+	info.icon = QUrl::fromLocalFile(SOWATCH_QML_DIR "/qmafwwatchlet/icon.png");
+	return info;
+}
+
+Watchlet* QMafwWatchletPlugin::getWatchlet(const QString &id, ConfigKey *config, WatchServer *server)
+{
+	Q_UNUSED(config);
+	if (id != "com.javispedro.sowatch.qmafw") return 0;
 	return new QMafwWatchlet(server);
 }
 

@@ -1,4 +1,6 @@
 TEMPLATE = subdirs
+
+# Core library
 SUBDIRS = libsowatch
 
 # The MetaWatch driver plugin
@@ -7,7 +9,7 @@ metawatch.depends = libsowatch
 
 # Some watchlets
 SUBDIRS += notificationswatchlet sysinfowatchlet
-#SUBDIRS += qmsgwatchlet qmapwatchlet
+SUBDIRS += qmsgwatchlet qmapwatchlet
 notificationswatchlet.depends = libsowatch
 sysinfowatchlet.depends = libsowatch
 qmsgwatchlet.depends = libsowatch
@@ -22,14 +24,16 @@ unix {
 }
 
 contains(MEEGO_EDITION,harmattan) {
+	# Harmattan specific stuff
 	SUBDIRS += meegohandsetnotification ckitcallnotification harmaccuweather
-	#SUBDIRS += qmafwwatchlet
+	SUBDIRS += qmafwwatchlet
 
 	meegohandsetnotification.depends = libsowatch
 	ckitcallnotification.depends = libsowatch
 	harmaccuweather.depends = libsowatch
     qmafwwatchlet.depends = libsowatch
 } else:simulator {
+	# This notification provider builds almost everywhere so it's good enough as testcase
 	SUBDIRS += harmaccuweather
 	harmaccuweather.depends = libsowatch
 }

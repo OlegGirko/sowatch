@@ -35,7 +35,7 @@ WatchHandler::WatchHandler(ConfigKey *config, QObject *parent)
 	// Setup watch status connections
 	connect(_watch, SIGNAL(connected()),
 	        SIGNAL(statusChanged()));
-	connect(_watch, SIGNAL(connected()),
+	connect(_watch, SIGNAL(disconnected()),
 	        SIGNAL(statusChanged()));
 
 	// Now create the UI server
