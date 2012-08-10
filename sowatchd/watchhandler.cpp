@@ -108,7 +108,7 @@ void WatchHandler::updateWatchlets()
 		delete subconfig;
 	}
 
-	qDebug() << "Watchlets reloaded";
+	qDebug() << "Watchlets reloaded: " << _watchlets.keys();
 }
 
 void WatchHandler::updateProviders()
@@ -122,9 +122,13 @@ void WatchHandler::updateProviders()
 	QSet<QString> removed = curProviders - newProviders;
 	QSet<QString> added = newProviders - curProviders;
 
+	qDebug() << "Providers to remove: " << removed;
+	qDebug() << "Providers to add: " << added;
+
 	foreach (const QString& s, removed) {
 		NotificationProvider *provider = _providers[s];
 		_server->removeProvider(provider);
+		_providers.remove(s);
 		delete provider;
 	}
 
@@ -140,13 +144,17 @@ void WatchHandler::updateProviders()
 		_providers[s] = provider;
 		delete subconfig;
 	}
+
+	qDebug() << "Providers reloaded: " << _providers.keys();
 }
 
 void WatchHandler::handleConfigSubkeyChanged(const QString &subkey)
 {
 	if (subkey == "watchlets") {
+		qDebug() << "Watchlets list changed";
 		updateWatchlets();
 	} else if (subkey == "providers") {
+		qDebug() << "Providers list changed";
 		updateProviders();
 	} else if (subkey == "next-watchlet-button" && _server) {
 		_server->setNextWatchletButton(_config->value("next-watchlet-button").toString());

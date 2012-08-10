@@ -31,7 +31,7 @@ Rectangle {
 		anchors.bottom: parent.bottom
 		color: "white"
 
-		Text {
+		MWLabel {
 			anchors.fill: parent
 			text: player.title.length > 0 ? player.title : qsTr("No media");
 			color: "black"

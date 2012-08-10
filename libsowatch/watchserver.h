@@ -104,6 +104,7 @@ private slots:
 
 	void handleNotificationChanged();
 	void handleNotificationDismissed();
+	void handleNotificationDestroyed();
 };
 
 }

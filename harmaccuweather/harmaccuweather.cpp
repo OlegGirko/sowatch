@@ -2,6 +2,8 @@
 
 using namespace sowatch;
 
+#define ACCUWEATHER_FILE_PATH "/home/user/.config/AccuWeather, Inc./awxapp.conf"
+
 HarmAccuWeather::HarmAccuWeather(QObject *parent) :
 	WeatherNotification(parent),
 	_watcher(new QFileSystemWatcher(this)),
@@ -10,7 +12,7 @@ HarmAccuWeather::HarmAccuWeather(QObject *parent) :
 {
 	// This only works on Harmattan either way, so I guess
 	// hardcoding the path is OK.
-	_watcher->addPath("/home/user/.config/AccuWeather, Inc./awxapp.conf");
+	_watcher->addPath(ACCUWEATHER_FILE_PATH);
 	connect(_watcher, SIGNAL(fileChanged(QString)), SLOT(fileChanged(QString)));
 
 	_timer->setInterval(5000);
@@ -23,7 +25,7 @@ HarmAccuWeather::HarmAccuWeather(QObject *parent) :
 
 QSettings* HarmAccuWeather::getAccuweatherData()
 {
-	return new QSettings("AccuWeather, Inc.", "awxapp");
+	return new QSettings(ACCUWEATHER_FILE_PATH, QSettings::IniFormat);
 }
 
 Notification::Type HarmAccuWeather::type() const

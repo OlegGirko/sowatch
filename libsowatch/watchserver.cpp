@@ -245,6 +245,7 @@ void WatchServer::postNotification(Notification *notification)
 
 	connect(notification, SIGNAL(changed()), SLOT(handleNotificationChanged()));
 	connect(notification, SIGNAL(dismissed()), SLOT(handleNotificationDismissed()));
+	connect(notification, SIGNAL(destroyed()), SLOT(handleNotificationDestroyed()));
 
 	qDebug() << "notification received" << notification->title() << "(" << notification->count() << ")";
 
@@ -358,6 +359,45 @@ void WatchServer::handleNotificationDismissed()
 			WeatherNotification* w = static_cast<WeatherNotification*>(n);
 			if (_weather == w) {
 				_weather = 0;
+			}
+		}
+
+		// No longer interested in this notification
+		disconnect(n, 0, this, 0);
+	}
+}
+
+void WatchServer::handleNotificationDestroyed()
+{
+	QObject *obj = sender();
+	if (obj) {
+		Notification* n = static_cast<Notification*>(obj);
+		// Cannot call any methods of n; it is a dangling pointer now.
+		if (_notificationCounts.contains(n)) {
+			qWarning() << "Notification destroyed without being dismissed!";
+			_notificationCounts.remove(n);
+
+			for (int i = 0; i < Notification::TypeCount; i++) {
+				Notification::Type type = static_cast<Notification::Type>(i);
+				if (_notifications[type].contains(n)) {
+					_notifications[type].removeAll(n);
+					_watch->updateNotificationCount(type, getNotificationCount(type));
+
+					if (type == Notification::WeatherNotification) {
+						WeatherNotification* w = static_cast<WeatherNotification*>(n);
+						if (_weather == w) {
+							_weather = 0;
+						}
+					}
+				}
+			}
+
+			if (!_pendingNotifications.isEmpty() && _pendingNotifications.head() == n) {
+				qDebug() << "removing top notification";
+				_pendingNotifications.removeAll(n);
+				nextNotification();
+			} else {
+				_pendingNotifications.removeAll(n);
 			}
 		}
 	}

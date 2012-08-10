@@ -9,6 +9,7 @@ Rectangle {
 
 	Column {
 		anchors.fill: parent
+		spacing: 4
 
 		MWTitle {
 			id: title
@@ -16,42 +17,37 @@ Rectangle {
 			icon.source: "icon.png"
 		}
 
-		Column {
-			spacing: 4
-			width: 96
+		MWSmallLabel {
+			text: "Battery: " + batteryLevel + "%"
+		}
 
-			Text {
-				text: "Battery: " + batteryLevel + "%"
-			}
+		Rectangle {
+			id: battery
+			x: 12
+			width: 72
+			height: 16
+
+			border.color: "black"
+			border.width: 1
 
 			Rectangle {
-				id: battery
-				x: 12
-				width: 72
-				height: 16
+				width: (batteryLevel / 100) * parent.width
+				height: parent.height
 
-				border.color: "black"
-				border.width: 1
-
-				Rectangle {
-					width: (batteryLevel / 100) * parent.width
-					height: parent.height
-
-					color: "black"
-				}
+				color: "black"
 			}
+		}
 
-			Text {
-				width: parent.width
-				text: "Connected to:"
-			}
+		MWSmallLabel {
+			width: parent.width
+			text: "Connected to:"
+		}
 
-			Text {
-				width: parent.width
-				text: networkName
-				horizontalAlignment: Text.AlignHCenter
-				wrapMode: Text.Wrap
-			}
+		MWLabel {
+			width: parent.width
+			text: networkName
+			horizontalAlignment: Text.AlignHCenter
+			wrapMode: Text.Wrap
 		}
 	}
 }

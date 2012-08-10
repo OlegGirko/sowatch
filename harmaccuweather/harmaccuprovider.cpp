@@ -14,7 +14,6 @@ HarmAccuProvider::HarmAccuProvider(QObject *parent) :
 
 HarmAccuProvider::~HarmAccuProvider()
 {
-
 }
 
 void HarmAccuProvider::generateNotification()

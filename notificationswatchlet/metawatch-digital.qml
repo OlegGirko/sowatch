@@ -24,15 +24,24 @@ Rectangle {
 		anchors.bottom: parent.bottom
 		model: watch.notifications
 		delegate: Rectangle {
+			id: notifDelegate
 			property bool selected: ListView.isCurrentItem
 			width: notifs.width
 			height: childrenRect.height
 			color: ListView.isCurrentItem ? "black" : "white"
-			MWLabel {
-				width: 96
-				text: "<b>" + model.modelData.title + "</b><br>" + model.modelData.body
-				wrapMode: Text.WrapAtWordBoundaryOrAnywhere
-				color: parent.selected ? "white" : "black"
+			Column {
+				MWLabel {
+					width: notifs.width
+					text: model.modelData.title
+					wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+					color: notifDelegate.selected ? "white" : "black"
+				}
+				MWSmallLabel {
+					width: notifs.width
+					text: model.modelData.body
+					wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+					color: notifDelegate.selected ? "white" : "black"
+				}
 			}
 		}
 		visible: count > 0;
