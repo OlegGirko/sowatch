@@ -17,7 +17,7 @@ ListView {
 			return; // No items
 		}
 		if (selectable) {
-			if (currentIndex == -1) {
+			if (currentIndex === -1) {
 				// If no item is selected, select the first one.
 				currentItem = 0;
 				return;
@@ -38,7 +38,7 @@ ListView {
 			return; // No items
 		}
 		if (selectable) {
-			if (currentIndex == -1) {
+			if (currentIndex === -1) {
 				// If no item is selected, select the last one.
 				currentIndex = count - 1;
 				return;

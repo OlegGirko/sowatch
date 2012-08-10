@@ -15,14 +15,14 @@ using namespace sowatch;
 
 int main(int argc, char *argv[])
 {
-	// Some plugins might require a user interface, so use QApplication instead
-	// of QCoreApplication
-	QApplication a(argc, argv);
+	// Some plugins use QtGui functionality, so QApplication must be used
+	// instead of QCoreApplication.
+	QApplication app(argc, argv);
 	QApplication::setOrganizationDomain("com.javispedro.sowatch");
 	QApplication::setOrganizationName("sowatch");
 	QApplication::setApplicationName("sowatchd");
 
-	sowatch::daemon = new Daemon(&a);
+	sowatch::daemon = new Daemon(&app);
 	new DaemonAdaptor(sowatch::daemon);
 
 	QDBusConnection connection = QDBusConnection::sessionBus();
@@ -33,5 +33,5 @@ int main(int argc, char *argv[])
 		qCritical("Could not register daemon object");
 	}
 
-	return a.exec();
+	return app.exec();
 }

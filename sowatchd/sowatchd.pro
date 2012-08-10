@@ -5,31 +5,31 @@ TEMPLATE = app
 QT       += core gui dbus
 CONFIG   -= app_bundle
 
-SOURCES += main.cpp daemon.cpp daemonadaptor.cpp \
-    watchhandler.cpp
-HEADERS += global.h daemon.h daemonadaptor.h \
-    watchhandler.h
+SOURCES += main.cpp daemon.cpp daemonadaptor.cpp watchhandler.cpp
+HEADERS += global.h daemon.h daemonadaptor.h watchhandler.h
 
 LIBS += -L$$OUT_PWD/../libsowatch/ -lsowatch
 INCLUDEPATH += $$PWD/../libsowatch
 DEPENDPATH += $$PWD/../libsowatch
 
-xml.files = service.xml
-INSTALLS += xml
-
+# Library & target paths
 !isEmpty(MEEGO_VERSION_MAJOR)|maemo5 {
 	QMAKE_RPATHDIR += /opt/sowatch/lib
 	target.path = /opt/sowatch/bin
-	xml.path = /opt/sowatch/xml
 } else {
 	target.path = /usr/bin
-	xml.path = /usr/share/sowatch/xml
 }
 INSTALLS += target
+
+# Service files
+!isEmpty(MEEGO_VERSION_MAJOR) {
+	service.files = sowatchd.conf
+	service.path = /etc/init/apps
+	INSTALLS += service
+}
 
 dbus.path = /usr/share/dbus-1/services
 dbus.files = com.javispedro.sowatch.service.sowatch-service.service
 INSTALLS += dbus
 
-OTHER_FILES += scanner.xml \
-    daemon.xml
+OTHER_FILES += daemon.xml

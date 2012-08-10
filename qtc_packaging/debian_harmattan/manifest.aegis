@@ -1,6 +1,10 @@
 <aegis>
 	<request>
-		<!-- Request a few tokens for watchlets to use. -->
+		<!-- The daemon is supposed to be run as user. -->
+		<credential name="UID::user" />
+		<credential name="GID::users" />
+
+		<!-- Request a few additional tokens for watchlets to use. -->
 		<credential name="TrackerReadAccess" />
 		<credential name="Location" />
 

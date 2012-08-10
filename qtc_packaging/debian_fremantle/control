@@ -1,7 +1,7 @@
 Source: sowatch
 Section: user/other
 Priority: optional
-Maintainer: Javier <javier@unknown>
+Maintainer: Javier S. Pedro <maemo@javispedro.com>
 Build-Depends: debhelper (>= 5), libqt4-dev, libqtm-12-dev, pkg-config
 Standards-Version: 3.7.3
 Homepage: http://gitorious.org/sowatch
@@ -16,6 +16,6 @@ Description: Bluetooth smartwatch manager
  - Notifications support: incoming calls, messages, etc.
  - Watchlets: control the media player or view a map.
  .
- Currently, only the MetaWatch is supported.
+ Currently, only the digital MetaWatch is supported.
 XB-Maemo-Display-Name: Sowatch
 XB-Maemo-Icon-26: 

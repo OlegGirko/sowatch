@@ -65,6 +65,8 @@ void WatchHandler::updateWatchlets()
 	QStringList newWatchlets = _config->value("watchlets").toStringList();
 	QStringList curWatchlets = _watchlet_order;
 
+	if (newWatchlets == curWatchlets) return; // Nothing to do
+
 	// TODO: Something better than removing all and readding
 	foreach (const QString& s, curWatchlets) {
 		Watchlet* watchlet = _watchlets[s];
