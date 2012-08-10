@@ -87,6 +87,7 @@ void Registry::loadDriver(const QString &file)
 			QStringList drivers = plugin->drivers();
 			foreach (const QString& driver, drivers) {
 				_driverIds[driver] = plugin;
+				emit driverLoaded(driver);
 			}
 			_watcher->addPath(file);
 		} else {
@@ -113,6 +114,7 @@ void Registry::loadNotificationProvider(const QString &file)
 			QStringList providers = plugin->providers();
 			foreach (const QString& provider, providers) {
 				_providerIds[provider] = plugin;
+				emit notificationProviderLoaded(provider);
 			}
 			_watcher->addPath(file);
 		} else {
@@ -139,6 +141,7 @@ void Registry::loadWatchlet(const QString &file)
 			QStringList watchlets = plugin->watchlets();
 			foreach (const QString& watchlet, watchlets) {
 				_watchletIds[watchlet] = plugin;
+				emit watchletLoaded(watchlet);
 			}
 			_watcher->addPath(file);
 		} else {
@@ -161,6 +164,7 @@ void Registry::unloadDriver(QPluginLoader *loader)
 	QStringList drivers = plugin->drivers();
 
 	foreach (const QString& driver, drivers) {
+		emit driverUnloaded(driver);
 		_driverIds.remove(driver);
 	}
 
@@ -168,9 +172,12 @@ void Registry::unloadDriver(QPluginLoader *loader)
 	_driverFiles.remove(file);
 	_watcher->removePath(file);
 
-	// loader->unload();
-	// TODO : Signal loss of a plugin so that servers can remove it before
-	// we unload it.
+	qDebug() << "Now unloading" << file;
+	if (!loader->unload()) {
+		qWarning() << "Could not unload plugin" << file;
+	}
+
+	delete loader;
 }
 
 void Registry::unloadNotificationProvider(QPluginLoader *loader)
@@ -180,12 +187,20 @@ void Registry::unloadNotificationProvider(QPluginLoader *loader)
 	QStringList providers = plugin->providers();
 
 	foreach (const QString& provider, providers) {
+		emit notificationProviderUnloaded(provider);
 		_providerIds.remove(provider);
 	}
 
 	_providers.removeAll(plugin);
 	_providerFiles.remove(file);
 	_watcher->removePath(file);
+
+	qDebug() << "Now unloading" << file;
+	if (!loader->unload()) {
+		qWarning() << "Could not unload plugin" << file;
+	}
+
+	delete loader;
 }
 
 void Registry::unloadWatchlet(QPluginLoader *loader)
@@ -195,17 +210,25 @@ void Registry::unloadWatchlet(QPluginLoader *loader)
 	QStringList watchlets = plugin->watchlets();
 
 	foreach (const QString& watchlet, watchlets) {
+		emit watchletUnloaded(watchlet);
 		_watchletIds.remove(watchlet);
 	}
 
 	_watchlets.removeAll(plugin);
 	_watchletFiles.remove(file);
 	_watcher->removePath(file);
+
+	qDebug() << "Now unloading" << file;
+	if (!loader->unload()) {
+		qWarning() << "Could not unload plugin" << file;
+	}
+
+	delete loader;
 }
 
 void Registry::handlePluginDirectoryChanged(const QString &path)
 {
-	// If the directory changed, rescan it to load new discover new plugins.
+	// If the directory changed, rescan it to discover new plugins.
 	if (path == SOWATCH_DRIVERS_DIR) {
 		QDir dir(path);
 		foreach (QString entry, dir.entryList(QDir::Files)) {
@@ -235,7 +258,6 @@ void Registry::handlePluginDirectoryChanged(const QString &path)
 
 void Registry::handlePluginFileChanged(const QString &file)
 {
-	QFile f(file);
 	if (_driverFiles.contains(file)) {
 		unloadDriver(_driverFiles[file]);
 	}

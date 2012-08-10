@@ -13,7 +13,7 @@ Rectangle {
 		anchors.top: parent.top
 	}
 
-	Text {
+	MWLabel {
 		id: label
 		anchors.left: image.right
 		anchors.leftMargin: 2

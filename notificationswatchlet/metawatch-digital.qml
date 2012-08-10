@@ -28,7 +28,7 @@ Rectangle {
 			width: notifs.width
 			height: childrenRect.height
 			color: ListView.isCurrentItem ? "black" : "white"
-			Text {
+			MWLabel {
 				width: 96
 				text: "<b>" + model.modelData.title + "</b><br>" + model.modelData.body
 				wrapMode: Text.WrapAtWordBoundaryOrAnywhere
@@ -38,7 +38,7 @@ Rectangle {
 		visible: count > 0;
 	}
 
-	Text {
+	MWLabel {
 		anchors.top: title.bottom
 		anchors.horizontalCenter: parent.horizontalCenter
 		text: qsTr("No notifications");

@@ -26,6 +26,9 @@ private slots:
 	void updateWatchlets();
 	void updateProviders();
 	void handleConfigSubkeyChanged(const QString& key);
+	void handleDriverUnloaded(const QString& id);
+	void handleWatchletUnloaded(const QString& id);
+	void handleProviderUnloaded(const QString& id);
 
 private:
 	ConfigKey *_config;

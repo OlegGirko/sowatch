@@ -27,7 +27,6 @@ signals:
 	void WatchStatusChanged(const QString &watch, const QString &status);
 
 private:
-	Registry* _registry;
 	ConfigKey* _config;
 	ConfigKey* _watches_list;
 	QMap<QString, WatchHandler*> _watches;

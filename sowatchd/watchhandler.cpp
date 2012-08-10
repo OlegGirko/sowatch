@@ -13,11 +13,25 @@ WatchHandler::WatchHandler(ConfigKey *config, QObject *parent)
 	connect(_config, SIGNAL(subkeyChanged(QString)),
 	        SLOT(handleConfigSubkeyChanged(QString)));
 
+	// Connect to the registry in case plugins are unloaded
+	connect(registry, SIGNAL(driverUnloaded(QString)),
+	        SLOT(handleDriverUnloaded(QString)));
+	connect(registry, SIGNAL(watchletLoaded(QString)),
+	        SLOT(updateWatchlets()));
+	connect(registry, SIGNAL(watchletUnloaded(QString)),
+	        SLOT(handleWatchletUnloaded(QString)));
+	connect(registry, SIGNAL(notificationProviderLoaded(QString)),
+	        SLOT(updateProviders()));
+	connect(registry, SIGNAL(notificationProviderUnloaded(QString)),
+	        SLOT(handleProviderUnloaded(QString)));
+
+	// Get the watch driver
 	const QString driver = _config->value("driver").toString();
 	if (driver.isEmpty()) {
 		qWarning() << "Watch" << _config->value("name") << "has no driver setting";
 		return;
 	}
+
 
 	WatchPluginInterface *watchPlugin = registry->getWatchPlugin(driver);
 	if (!watchPlugin) {
@@ -50,7 +64,7 @@ WatchHandler::WatchHandler(ConfigKey *config, QObject *parent)
 
 QString WatchHandler::status() const
 {
-	if (_watch->isConnected()) {
+	if (_watch && _watch->isConnected()) {
 		return "connected";
 	} else if (_config->value("enable").toBool()) {
 		return "enabled";
@@ -62,6 +76,9 @@ QString WatchHandler::status() const
 void WatchHandler::updateWatchlets()
 {
 	Registry *registry = Registry::registry();
+
+	if (!_server) return;
+
 	QStringList newWatchlets = _config->value("watchlets").toStringList();
 	QStringList curWatchlets = _watchlet_order;
 
@@ -97,6 +114,9 @@ void WatchHandler::updateWatchlets()
 void WatchHandler::updateProviders()
 {
 	Registry *registry = Registry::registry();
+
+	if (!_server) return;
+
 	QSet<QString> curProviders = _providers.keys().toSet();
 	QSet<QString> newProviders = _config->value("providers").toStringList().toSet();
 	QSet<QString> removed = curProviders - newProviders;
@@ -128,7 +148,46 @@ void WatchHandler::handleConfigSubkeyChanged(const QString &subkey)
 		updateWatchlets();
 	} else if (subkey == "providers") {
 		updateProviders();
-	} else if (subkey == "next-watchlet-button") {
+	} else if (subkey == "next-watchlet-button" && _server) {
 		_server->setNextWatchletButton(_config->value("next-watchlet-button").toString());
+	}
+}
+
+void WatchHandler::handleDriverUnloaded(const QString &id)
+{
+	if (id == _config->value("driver").toString()) {
+		// Emergency disconnection!
+		qWarning("Unloading driver of active watch!");
+		if (_server) {
+			delete _server;
+			_server = 0;
+		}
+		if (_watch) {
+			delete _watch;
+			_watch = 0;
+		}
+		emit statusChanged();
+	}
+}
+
+void WatchHandler::handleWatchletUnloaded(const QString &id)
+{
+	if (_watchlets.contains(id)) {
+		qDebug() << "Unloading watchlet" << id << "from watch";
+		Watchlet* watchlet = _watchlets[id];
+		_server->removeWatchlet(watchlet);
+		_watchlets.remove(id);
+		delete watchlet;
+	}
+}
+
+void WatchHandler::handleProviderUnloaded(const QString &id)
+{
+	if (_providers.contains(id)) {
+		qDebug() << "Unloading provider" << id << "from watch";
+		NotificationProvider *provider = _providers[id];
+		_server->removeProvider(provider);
+		_providers.remove(id);
+		delete provider;
 	}
 }

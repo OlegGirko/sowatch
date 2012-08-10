@@ -1,0 +1,13 @@
+#!/bin/sh
+
+set -e
+
+#DEBHELPER#
+
+case "$1" in
+    configure)
+		start -v apps/sowatchd || :
+    ;;
+esac
+
+exit 0

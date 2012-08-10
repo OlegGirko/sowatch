@@ -1,0 +1,13 @@
+#!/bin/sh
+
+set -e
+
+case "$1" in
+	upgrade|remove)
+		stop -v apps/sowatchd || :
+	;;
+esac
+
+#DEBHELPER#
+
+exit 0

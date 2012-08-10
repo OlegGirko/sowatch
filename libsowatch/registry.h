@@ -58,6 +58,15 @@ public:
 		return _watchletIds.keys();
 	}
 
+signals:
+	void driverLoaded(const QString& id);
+	void notificationProviderLoaded(const QString& id);
+	void watchletLoaded(const QString& id);
+
+	void driverUnloaded(const QString& id);
+	void notificationProviderUnloaded(const QString& id);
+	void watchletUnloaded(const QString& id);
+
 protected:
 	Registry();
 	~Registry();
