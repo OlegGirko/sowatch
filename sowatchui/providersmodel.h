@@ -33,6 +33,7 @@ signals:
 	
 private slots:
 	void reload();
+	void handleConfigChanged();
 
 private:
 	sowatch::ConfigKey *_config;

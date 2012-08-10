@@ -14,10 +14,55 @@ Page {
 
 	tools: ToolBarLayout {
 		ToolIcon {
+			id: backToolIcon
 			platformIconId: "toolbar-back"
 			anchors.left: parent.left
 			onClicked: pageStack.pop()
 		}
+		ToolIcon {
+			id: menuToolIcon
+			platformIconId: "toolbar-view-menu"
+			anchors.right: parent.right
+			onClicked: (watchMenu.status === DialogStatus.Closed) ? watchMenu.open() : watchMenu.close();
+		}
+	}
+
+	Menu {
+		id: watchMenu
+		MenuLayout {
+			MenuItem {
+				text: qsTr("Remove watch")
+				onClicked: {
+					watchMenu.close();
+					watches.removeWatch(watchPage.configKey);
+					pageStack.pop();
+				}
+			}
+		}
+	}
+
+	Menu {
+		id: watchletMenu
+		property string watchlet;
+		MenuLayout {
+			MenuItem {
+				text: qsTr("Move up")
+				onClicked: watchletsModel.moveWatchletUp(watchletMenu.watchlet)
+			}
+			MenuItem {
+				text: qsTr("Move down")
+				onClicked: watchletsModel.moveWatchletDown(watchletMenu.watchlet)
+			}
+			MenuItem {
+				text: qsTr("Remove watchlet")
+				onClicked: watchletsModel.removeWatchlet(watchletMenu.watchlet)
+			}
+		}
+	}
+
+	AddWatchletSheet {
+		id: addWatchletSheet
+		configKey: watchPage.configKey
 	}
 
 	GConfKey {
@@ -84,7 +129,7 @@ Page {
 				height: UiConstants.ListItemHeightDefault * count
 				model: ProvidersModel {
 					id: providersModel
-					configKey: watchPage.configKey + "/providers"
+					configKey: watchPage.configKey
 				}
 				delegate: ListDelegate {
 					CheckBox {
@@ -107,19 +152,24 @@ Page {
 				interactive: false
 				width: parent.width
 				height: UiConstants.ListItemHeightDefault * count
-				model: ListModel {
-					ListElement {
-						title: "Test"
-					}
+				model: WatchletsModel {
+					id: watchletsModel
+					configKey: watchPage.configKey
+					displayUnadded: false
 				}
-				delegate: ListDelegate {
 
+				delegate: ListDelegate {
+					onClicked: {
+						watchletMenu.watchlet = model.name;
+						watchletMenu.open();
+					}
 				}
 			}
 
 			Button {
 				anchors.horizontalCenter: parent.horizontalCenter
 				text: qsTr("Add new watchlet")
+				onClicked: addWatchletSheet.open()
 			}
 		}
 	}

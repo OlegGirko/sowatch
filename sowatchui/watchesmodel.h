@@ -22,10 +22,10 @@ public:
 
 	int rowCount(const QModelIndex &parent) const;
 	QVariant data(const QModelIndex &index, int role) const;
-	bool removeRows(int row, int count, const QModelIndex &parent);
 
 public slots:
 	void addFoundWatch(const QVariantMap& info);
+	void removeWatch(const QString& id);
 
 private slots:
 	void reload();

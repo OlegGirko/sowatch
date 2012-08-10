@@ -19,6 +19,15 @@ QStringList NotificationsWatchletPlugin::watchlets()
 	return l;
 }
 
+WatchletPluginInterface::WatchletInfo NotificationsWatchletPlugin::describeWatchlet(const QString &id)
+{
+	WatchletInfo info;
+	if (id != "com.javispedro.sowatch.notifications") return info;
+	info.name = "Pending notifications";
+	info.icon = QUrl::fromLocalFile(SOWATCH_QML_DIR "/notificationswatchlet/icon.png");
+	return info;
+}
+
 Watchlet* NotificationsWatchletPlugin::getWatchlet(const QString& driver, ConfigKey *settings, WatchServer *server)
 {
 	Q_UNUSED(driver);

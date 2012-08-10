@@ -4,7 +4,6 @@
 #include <QtPlugin>
 #include <QtCore/QSettings>
 #include <QtCore/QStringList>
-#include <QtGui/QIcon>
 #include "sowatch_global.h"
 
 namespace sowatch
@@ -21,7 +20,6 @@ public:
 
 	struct NotificationProviderInfo {
 		QString name;
-		QIcon icon;
 	};
 
 	virtual QStringList providers() = 0;

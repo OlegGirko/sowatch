@@ -19,9 +19,18 @@ QStringList SysInfoPlugin::watchlets()
 	return l;
 }
 
-Watchlet* SysInfoPlugin::getWatchlet(const QString& driver, ConfigKey *settings, WatchServer *server)
+SysInfoPlugin::WatchletInfo SysInfoPlugin::describeWatchlet(const QString &id)
 {
-	Q_UNUSED(driver);
+	WatchletInfo info;
+	if (id != "com.javispedro.sowatch.sysinfo") return info;
+	info.name = "Phone info";
+	info.icon = QUrl::fromLocalFile(SOWATCH_QML_DIR "/sysinfowatchlet/icon.png");
+	return info;
+}
+
+Watchlet* SysInfoPlugin::getWatchlet(const QString& id, ConfigKey *settings, WatchServer *server)
+{
+	Q_UNUSED(id);
 	Q_UNUSED(settings);
 	return new SysInfoWatchlet(server);
 }

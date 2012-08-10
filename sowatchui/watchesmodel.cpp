@@ -81,14 +81,6 @@ QVariant WatchesModel::data(const QModelIndex &index, int role) const
 	return QVariant();
 }
 
-bool WatchesModel::removeRows(int row, int count, const QModelIndex &parent)
-{
-	Q_UNUSED(row);
-	Q_UNUSED(count);
-	Q_UNUSED(parent);
-	return false; // TODO
-}
-
 void WatchesModel::addFoundWatch(const QVariantMap &info)
 {
 	QStringList existing = _config->dirs();
@@ -109,9 +101,8 @@ void WatchesModel::addFoundWatch(const QVariantMap &info)
 
 	// Set some defaults
 	Registry *registry = Registry::registry();
-	foreach (const QString& providerId, registry->allNotificationProviders()) {
-		qDebug() << "Would add" << providerId;
-	}
+	newkey->set("providers", registry->allNotificationProviders());
+	newkey->set("watchlets", registry->allWatchlets());
 
 	// Now add to the watches list
 	QStringList active = _watches_list->value().toStringList();
@@ -120,6 +111,33 @@ void WatchesModel::addFoundWatch(const QVariantMap &info)
 
 	// Now enable
 	newkey->set("enable", true);
+
+	delete newkey;
+}
+
+void WatchesModel::removeWatch(const QString &id)
+{
+	QString name;
+
+	int i = id.lastIndexOf('/');
+	if (i != -1) {
+		// Hack: QML UI might pass /apps/sowatch/id instead of id alone
+		name = id.mid(i + 1);
+	} else {
+		name = id;
+	}
+
+	ConfigKey *subkey = _config->getSubkey(name);
+
+	qDebug() << "Deleting watch" << name;
+
+	// Remove from watches list
+	QStringList active = _watches_list->value().toStringList();
+	active.removeAll(name);
+	_watches_list->set(active);
+
+	subkey->recursiveUnset();
+	delete subkey;
 }
 
 void WatchesModel::reload()

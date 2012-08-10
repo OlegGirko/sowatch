@@ -4,6 +4,7 @@
 #include <QtPlugin>
 #include <QtCore/QSettings>
 #include <QtCore/QStringList>
+#include <QtCore/QUrl>
 #include "sowatch_global.h"
 
 namespace sowatch
@@ -18,7 +19,13 @@ class SOWATCH_EXPORT WatchletPluginInterface
 public:
 	virtual ~WatchletPluginInterface();
 
+	struct WatchletInfo {
+		QString name;
+		QUrl icon;
+	};
+
 	virtual QStringList watchlets() = 0;
+	virtual WatchletInfo describeWatchlet(const QString& id) = 0;
 	virtual Watchlet* getWatchlet(const QString& id, ConfigKey *settings, WatchServer *server) = 0;
 };
 

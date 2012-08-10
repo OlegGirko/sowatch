@@ -4,6 +4,8 @@
 
 using namespace sowatch;
 
+static const QString providersSubKey("/providers");
+
 ProvidersModel::ProvidersModel(QObject *parent) :
     QAbstractListModel(parent),
     _config(0)
@@ -18,7 +20,8 @@ ProvidersModel::ProvidersModel(QObject *parent) :
 QString ProvidersModel::configKey() const
 {
 	if (_config) {
-		return _config->key();
+		QString key = _config->key();
+		return key.left(key.length() - providersSubKey.length());
 	} else {
 		return QString();
 	}
@@ -32,8 +35,8 @@ void ProvidersModel::setConfigKey(const QString &configKey)
 		_config = 0;
 	}
 	if (!configKey.isEmpty()) {
-		_config = new GConfKey(configKey, this);
-		connect(_config, SIGNAL(changed()), SLOT(reload()));
+		_config = new GConfKey(configKey + providersSubKey, this);
+		connect(_config, SIGNAL(changed()), SLOT(handleConfigChanged()));
 	}
 	if (this->configKey() != oldConfigKey) {
 		reload();
@@ -43,6 +46,7 @@ void ProvidersModel::setConfigKey(const QString &configKey)
 
 int ProvidersModel::rowCount(const QModelIndex &parent) const
 {
+	Q_UNUSED(parent);
 	return _all_list.count();
 }
 
@@ -76,6 +80,9 @@ void ProvidersModel::setProviderEnabled(const QString &id, bool enabled)
 	} else {
 		_enabled.remove(id);
 	}
+
+	qDebug() << "Storing providers" << _enabled;
+
 	_config->set(QVariant::fromValue(QStringList(_enabled.toList())));
 }
 
@@ -87,8 +94,11 @@ void ProvidersModel::reload()
 	_info_list.clear();
 	_enabled.clear();
 
+	qDebug() << "Reloading providers";
+
 	_all_list = registry->allNotificationProviders();
 	_info_list.reserve(_all_list.size());
+	_all_list.sort();
 	foreach (const QString& s, _all_list) {
 		NotificationPluginInterface *plugin = registry->getNotificationPlugin(s);
 		if (plugin) {
@@ -102,4 +112,17 @@ void ProvidersModel::reload()
 
 	_enabled = _config->value().toStringList().toSet();
 	endResetModel();
+}
+
+void ProvidersModel::handleConfigChanged()
+{
+	QSet<QString> prevEnabled = _enabled;
+	_enabled = _config->value().toStringList().toSet();
+
+	for (int i = 0; i < _all_list.count(); i++) {
+		const QString& id = _all_list[i];
+		if (_enabled.contains(id) != prevEnabled.contains(id)) {
+			emit dataChanged(createIndex(i, 0), createIndex(i, 0));
+		}
+	}
 }

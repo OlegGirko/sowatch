@@ -7,6 +7,7 @@
 #include "watchesmodel.h"
 #include "watchscannermodel.h"
 #include "providersmodel.h"
+#include "watchletsmodel.h"
 
 static sowatch::Registry *registry;
 static WatchesModel *watches;
@@ -26,6 +27,7 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
 	qmlRegisterType<sowatch::ConfigKey>();
 	qmlRegisterType<sowatch::GConfKey>("com.javispedro.sowatch", 1, 0, "GConfKey");
 	qmlRegisterType<ProvidersModel>("com.javispedro.sowatch", 1, 0, "ProvidersModel");
+	qmlRegisterType<WatchletsModel>("com.javispedro.sowatch", 1, 0, "WatchletsModel");
 
 	viewer->rootContext()->setContextProperty("watches", watches);
 	viewer->rootContext()->setContextProperty("watchScanner", watchScanner);
