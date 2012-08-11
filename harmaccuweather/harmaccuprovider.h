@@ -1,5 +1,5 @@
-#ifndef CKITCALLPROVIDER_H
-#define CKITCALLPROVIDER_H
+#ifndef HARMACCUPROVIDER_H
+#define HARMACCUPROVIDER_H
 
 #include <sowatch.h>
 
@@ -25,4 +25,4 @@ private:
 
 }
 
-#endif // CKITCALLPROVIDER_H
+#endif // HARMACCUPROVIDER_H

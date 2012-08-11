@@ -27,7 +27,7 @@ void WatchNotificationSink::removeNotification(uint notificationId)
 		MeegoHandsetNotification* n = _trackedNotifications[notificationId];
 		_trackedNotifications.remove(notificationId);
 		n->remove();
-		n->deleteLater();
+		delete n;
 	}
 }
 

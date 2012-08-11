@@ -39,6 +39,13 @@ contains(MEEGO_EDITION,harmattan) {
 	harmaccuweather.depends = libsowatch
 }
 
+# Debug only watchlets
+debug {
+	SUBDIRS += testnotification
+	testnotification.depends = libsowatch
+}
+
+# Packaging stuff
 OTHER_FILES += \
 	qtc_packaging/debian_harmattan/rules \
 	qtc_packaging/debian_harmattan/README \

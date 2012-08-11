@@ -26,7 +26,7 @@ Rectangle {
 		delegate: Rectangle {
 			id: notifDelegate
 			property bool selected: ListView.isCurrentItem
-			width: notifs.width
+			width: parent.width
 			height: childrenRect.height
 			color: ListView.isCurrentItem ? "black" : "white"
 			Column {

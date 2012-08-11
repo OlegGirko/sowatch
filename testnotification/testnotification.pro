@@ -1,19 +1,20 @@
-TARGET = harmaccuweather
+TARGET = testnotification
 TEMPLATE = lib
 CONFIG   += plugin
 CONFIG += mobility
 MOBILITY += systeminfo
 
-SOURCES += harmaccuplugin.cpp harmaccuprovider.cpp harmaccuweather.cpp
+SOURCES += testnotificationplugin.cpp testnotificationprovider.cpp \
+    testnotification.cpp
 
-HEADERS += harmaccuplugin.h harmaccuprovider.h harmaccuweather.h
+HEADERS += testnotificationplugin.h testnotificationprovider.h \
+    testnotification.h
 
 unix: LIBS += -L$$OUT_PWD/../libsowatch/ -lsowatch
-
 INCLUDEPATH += $$PWD/../libsowatch
 DEPENDPATH += $$PWD/../libsowatch
 
-unix:!symbian {
+unix {
 	!isEmpty(MEEGO_VERSION_MAJOR)|maemo5 {
 		QMAKE_RPATHDIR += /opt/sowatch/lib
 		target.path = /opt/sowatch/lib/notifications
