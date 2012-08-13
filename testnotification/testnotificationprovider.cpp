@@ -13,6 +13,10 @@ TestNotificationProvider::TestNotificationProvider(QObject *parent) :
 	QTimer::singleShot(1200, this, SLOT(generateNotification()));
 	QTimer::singleShot(1400, this, SLOT(generateNotification()));
 	QTimer::singleShot(1600, this, SLOT(generateNotification()));
+	QTimer::singleShot(1800, this, SLOT(generateNotification()));
+	QTimer::singleShot(2000, this, SLOT(generateNotification()));
+	QTimer::singleShot(2200, this, SLOT(generateNotification()));
+	QTimer::singleShot(2400, this, SLOT(generateInitialNotification()));
 	connect(_timer, SIGNAL(timeout()), SLOT(generateNotification()));
 	_timer->setInterval(60000);
 	//_timer->start();

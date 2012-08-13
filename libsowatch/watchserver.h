@@ -8,7 +8,7 @@
 #include <QtCore/QTimer>
 
 #include "sowatch_global.h"
-#include "notification.h"
+#include "notificationsmodel.h"
 
 namespace sowatch
 {
@@ -41,7 +41,7 @@ public:
 	void removeProvider(const NotificationProvider *provider);
 
 	/** Get a list of all current live notifications. */
-	QList<Notification*> liveNotifications();
+	const NotificationsModel * notifications() const;
 
 public slots:
 	void postNotification(Notification *notification);
@@ -71,8 +71,8 @@ private:
 	/** Stores all the watchlets with a given watchled id. */
 	QMap<QString, Watchlet*> _watchletIds;
 
-	/** Stores current live notifications, classified by type. */
-	QList<Notification*> _notifications[Notification::TypeCount];
+	/** Stores current live notifications. */
+	NotificationsModel *_notifications;
 	/** A list of notifications that are yet to be shown to the user. */
 	QQueue<Notification*> _pendingNotifications;
 	/** Stores the count of notifications hidden between each notification object. */
@@ -92,6 +92,8 @@ private:
 
 	/** Counts all notifications from a given type. */
 	uint getNotificationCount(Notification::Type type);
+	/** Remove a notification of a certain type. */
+	void removeNotification(Notification::Type type, Notification* n);
 
 	void deactivateCurrentWatchlet();
 	void reactivateCurrentWatchlet();

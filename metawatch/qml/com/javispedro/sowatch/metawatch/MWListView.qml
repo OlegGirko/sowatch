@@ -67,6 +67,17 @@ ListView {
 		}
 	}
 
+	function scrollTop() {
+		if (count == 0) {
+			return;
+		}
+		if (selectable) {
+			currentIndex = 0;
+		}
+		positionViewAtIndex(0, ListView.Beginning);
+
+	}
+
 	Rectangle {
 		id: indicatorCont
 		visible: list.indicator && (list.contentHeight > list.height)

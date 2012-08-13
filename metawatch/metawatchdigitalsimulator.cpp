@@ -116,4 +116,5 @@ void MetaWatchDigitalSimulator::retryConnect()
 void MetaWatchDigitalSimulator::send(const Message &msg)
 {
 	// Do not send messages
+	Q_UNUSED(msg);
 }

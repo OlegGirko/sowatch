@@ -11,6 +11,7 @@ WatchServer::WatchServer(Watch* watch, QObject* parent) :
 	QObject(parent), _watch(watch),
 	_nextWatchletButton(-1),
 	_oldNotificationThreshold(300),
+    _notifications(new NotificationsModel(this)),
 	_currentWatchlet(0), _currentWatchletActive(false), _currentWatchletIndex(-1),
 	_syncTimeTimer(new QTimer(this))
 {
@@ -97,15 +98,66 @@ void WatchServer::removeProvider(const NotificationProvider *provider)
 	           this, SLOT(postNotification(Notification*)));
 }
 
-QList<Notification*> WatchServer::liveNotifications()
+const NotificationsModel * WatchServer::notifications() const
 {
-	QList<Notification*> notifications;
+	return _notifications;
+}
 
-	for (int i = 0; i < Notification::TypeCount; i++) {
-		notifications.append(_notifications[i]);
+void WatchServer::postNotification(Notification *notification)
+{
+	const Notification::Type type = notification->type();
+
+	// Add notification to model
+	_notifications->add(notification);
+	_notificationCounts[notification] = notification->count();
+
+	connect(notification, SIGNAL(changed()), SLOT(handleNotificationChanged()));
+	connect(notification, SIGNAL(dismissed()), SLOT(handleNotificationDismissed()));
+	connect(notification, SIGNAL(destroyed()), SLOT(handleNotificationDestroyed()));
+
+	qDebug() << "notification received" << notification->title() << "(" << notification->count() << ")";
+
+	_watch->updateNotificationCount(type, getNotificationCount(type));
+
+	if (type == Notification::WeatherNotification) {
+		// Weather notifications, we handle differently.
+		WeatherNotification* weather = static_cast<WeatherNotification*>(notification);
+		_weather = weather;
+		_watch->updateWeather(weather);
+		return; // And do not display it the usual way
 	}
 
-	return notifications;
+	QDateTime oldThreshold = QDateTime::currentDateTime().addSecs(-_oldNotificationThreshold);
+	if (notification->dateTime() < oldThreshold) {
+		return; // Do not care about notifications that old...
+	}
+
+	if (_pendingNotifications.isEmpty()) {
+		_pendingNotifications.enqueue(notification);
+		nextNotification();
+	} else if (type == Notification::CallNotification) {
+		// Oops, priority!!!!
+		_pendingNotifications.prepend(notification);
+		nextNotification();
+	} else {
+		_pendingNotifications.enqueue(notification);
+	}
+}
+
+void WatchServer::nextNotification()
+{
+	if (!_watch->isConnected()) return;
+	if (!_pendingNotifications.empty()) {
+		Notification *n = _pendingNotifications.head();
+		if (_currentWatchlet && _currentWatchletActive) {
+			deactivateCurrentWatchlet();
+		}
+		_watch->displayNotification(n);
+	} else if (_currentWatchlet) {
+		reactivateCurrentWatchlet();
+	} else {
+		goToIdle();
+	}
 }
 
 void WatchServer::runWatchlet(Watchlet *watchlet)
@@ -182,11 +234,33 @@ void WatchServer::syncTime()
 
 uint WatchServer::getNotificationCount(Notification::Type type)
 {
-	uint count = 0;
-	foreach (Notification* n, _notifications[type]) {
-		count += n->count();
+	return _notifications->fullCountByType(type);
+}
+
+void WatchServer::removeNotification(Notification::Type type, Notification *n)
+{
+	// Warning: This function might be called with n being deleted.
+	_notifications->remove(type, n);
+	_notificationCounts.remove(n);
+
+	_watch->updateNotificationCount(type, getNotificationCount(type));
+
+	if (!_pendingNotifications.isEmpty() && _pendingNotifications.head() == n) {
+		qDebug() << "removing top notification";
+		_pendingNotifications.removeAll(n);
+		nextNotification();
+	} else {
+		_pendingNotifications.removeAll(n);
 	}
-	return count;
+	if (type == Notification::WeatherNotification) {
+		WeatherNotification* w = static_cast<WeatherNotification*>(n);
+		if (_weather == w) {
+			_weather = 0;
+		}
+	}
+
+	// No longer interested in this notification
+	disconnect(n, 0, this, 0);
 }
 
 void WatchServer::goToIdle()
@@ -242,61 +316,6 @@ void WatchServer::handleWatchButtonPress(int button)
 	}
 }
 
-void WatchServer::postNotification(Notification *notification)
-{
-	const Notification::Type type = notification->type();
-	_notifications[type].append(notification);
-	_notificationCounts[notification] = notification->count();
-
-	connect(notification, SIGNAL(changed()), SLOT(handleNotificationChanged()));
-	connect(notification, SIGNAL(dismissed()), SLOT(handleNotificationDismissed()));
-	connect(notification, SIGNAL(destroyed()), SLOT(handleNotificationDestroyed()));
-
-	qDebug() << "notification received" << notification->title() << "(" << notification->count() << ")";
-
-	_watch->updateNotificationCount(type, getNotificationCount(type));
-
-	if (type == Notification::WeatherNotification) {
-		// Weather notifications, we handle differently.
-		WeatherNotification* weather = static_cast<WeatherNotification*>(notification);
-		_weather = weather;
-		_watch->updateWeather(weather);
-		return; // And do not display it the usual way
-	}
-
-	QDateTime oldThreshold = QDateTime::currentDateTime().addSecs(-_oldNotificationThreshold);
-	if (notification->dateTime() < oldThreshold) {
-		return; // Do not care about notifications that old...
-	}
-
-	if (_pendingNotifications.isEmpty()) {
-		_pendingNotifications.enqueue(notification);
-		nextNotification();
-	} else if (type == Notification::CallNotification) {
-		// Oops, priority!!!!
-		_pendingNotifications.prepend(notification);
-		nextNotification();
-	} else {
-		_pendingNotifications.enqueue(notification);
-	}
-}
-
-void WatchServer::nextNotification()
-{
-	if (!_watch->isConnected()) return;
-	if (!_pendingNotifications.empty()) {
-		Notification *n = _pendingNotifications.head();
-		if (_currentWatchlet && _currentWatchletActive) {
-			deactivateCurrentWatchlet();
-		}
-		_watch->displayNotification(n);
-	} else if (_currentWatchlet) {
-		reactivateCurrentWatchlet();
-	} else {
-		goToIdle();
-	}
-}
-
 void WatchServer::handleNotificationChanged()
 {
 	QObject *obj = sender();
@@ -346,29 +365,8 @@ void WatchServer::handleNotificationDismissed()
 	if (obj) {
 		Notification* n = static_cast<Notification*>(obj);
 		const Notification::Type type = n->type();
-		_notifications[type].removeOne(n);
-		_notificationCounts.remove(n);
-
 		qDebug() << "notification dismissed" << n->title() << "(" << n->count() << ")";
-
-		_watch->updateNotificationCount(type, getNotificationCount(type));
-
-		if (!_pendingNotifications.isEmpty() && _pendingNotifications.head() == n) {
-			qDebug() << "removing top notification";
-			_pendingNotifications.removeAll(n);
-			nextNotification();
-		} else {
-			_pendingNotifications.removeAll(n);
-		}
-		if (type == Notification::WeatherNotification) {
-			WeatherNotification* w = static_cast<WeatherNotification*>(n);
-			if (_weather == w) {
-				_weather = 0;
-			}
-		}
-
-		// No longer interested in this notification
-		disconnect(n, 0, this, 0);
+		removeNotification(type, n);
 	}
 }
 
@@ -380,30 +378,8 @@ void WatchServer::handleNotificationDestroyed()
 		// Cannot call any methods of n; it is a dangling pointer now.
 		if (_notificationCounts.contains(n)) {
 			qWarning() << "Notification destroyed without being dismissed!";
-			_notificationCounts.remove(n);
-
-			for (int i = 0; i < Notification::TypeCount; i++) {
-				Notification::Type type = static_cast<Notification::Type>(i);
-				if (_notifications[type].contains(n)) {
-					_notifications[type].removeAll(n);
-					_watch->updateNotificationCount(type, getNotificationCount(type));
-
-					if (type == Notification::WeatherNotification) {
-						WeatherNotification* w = static_cast<WeatherNotification*>(n);
-						if (_weather == w) {
-							_weather = 0;
-						}
-					}
-				}
-			}
-
-			if (!_pendingNotifications.isEmpty() && _pendingNotifications.head() == n) {
-				qDebug() << "removing top notification";
-				_pendingNotifications.removeAll(n);
-				nextNotification();
-			} else {
-				_pendingNotifications.removeAll(n);
-			}
+			Notification::Type type = _notifications->getTypeOfDeletedNotification(n);
+			removeNotification(type, n);
 		}
 	}
 }

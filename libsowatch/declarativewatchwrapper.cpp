@@ -23,19 +23,6 @@ bool DeclarativeWatchWrapper::active() const
 	return _active;
 }
 
-QList<QObject*> DeclarativeWatchWrapper::notifications() const
-{
-	// TODO: Figure out a better way for this; QAbstractListModel, etc.
-	QList<Notification*> nl = _server->liveNotifications();
-	QList<QObject*> ol;
-	foreach (Notification* n, nl) {
-		QObject * o = n;
-		ol.append(o);
-	}
-	qDebug() << "notifications to declarative: " << ol;
-	return ol;
-}
-
 void DeclarativeWatchWrapper::vibrate(int msecs)
 {
 	if (_active) {

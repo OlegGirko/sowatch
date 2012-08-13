@@ -17,15 +17,12 @@ class SOWATCH_EXPORT DeclarativeWatchWrapper : public QObject
     Q_OBJECT
 	Q_PROPERTY(QString model READ model CONSTANT)
 	Q_PROPERTY(bool active READ active NOTIFY activeChanged)
-	Q_PROPERTY(QList<QObject*> notifications READ notifications NOTIFY notificationsChanged)
 
 public:
 	explicit DeclarativeWatchWrapper(WatchServer *server, Watch *watch, QObject *parent = 0);
 
 	QString model() const;
 	bool active() const;
-
-	QList<QObject*> notifications() const;
 
 public slots:
 	void vibrate(int msecs);

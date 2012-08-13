@@ -8,6 +8,9 @@ TestNotification::TestNotification(Type type, const QString &title, const QStrin
       _time(QDateTime::currentDateTime()),
       _title(title), _body(body)
 {
+	const int high = 30000, low = 10000;
+	int rand = qrand() % ((high + 1) - low) + low;
+	QTimer::singleShot(rand, this, SIGNAL(dismissed()));
 }
 
 Notification::Type TestNotification::type() const
@@ -44,5 +47,3 @@ void TestNotification::dismiss()
 {
 	deleteLater(); // We do not want to keep those around.
 }
-
-

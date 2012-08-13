@@ -18,7 +18,7 @@ MWPage {
 		anchors.right: parent.right
 		anchors.bottom: parent.bottom
 		clip: true
-		model: watch.notifications
+		model: notifications
 
 		delegate: Rectangle {
 			id: notifDelegate
@@ -30,14 +30,14 @@ MWPage {
 				width: parent.width
 				MWLabel {
 					width: parent.width
-					text: model.modelData.title
+					text: title
 					wrapMode: Text.WrapAtWordBoundaryOrAnywhere
 					color: notifDelegate.selected ? "white" : "black"
 					font.pointSize: 12
 				}
 				MWLabel {
 					width: parent.width
-					text: model.modelData.body
+					text: body
 					wrapMode: Text.WrapAtWordBoundaryOrAnywhere
 					color: notifDelegate.selected ? "white" : "black"
 				}
@@ -56,7 +56,7 @@ MWPage {
 
 	Connections {
 		target: watch
-		onButtonPressed : {
+		onButtonPressed: {
 			switch (button) {
 			case 1:
 				notifs.scrollUp();
@@ -64,6 +64,22 @@ MWPage {
 			case 2:
 				notifs.scrollDown();
 				break;
+			}
+		}
+	}
+
+	Connections {
+		target: notifications
+		onRowsInserted: {
+			if (!watch.active) {
+				// Always position into the topmost notification if
+				// user is not looking at this list
+				notifs.scrollTop();
+			}
+		}
+		onRowsRemoved: {
+			if (!watch.active) {
+				notifs.scrollTop();
 			}
 		}
 	}

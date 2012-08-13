@@ -23,7 +23,9 @@ DeclarativeWatchlet::DeclarativeWatchlet(WatchServer* server, const QString& id)
 
 	if (!_registered) {
 		qmlRegisterUncreatableType<DeclarativeWatchWrapper>("com.javispedro.sowatch", 1, 0,
-			"Watch", "Watch is only available via the 'watch' object");
+			"Watch", "Watch is only available via the 'watch' context property");
+		qmlRegisterUncreatableType<NotificationsModel>("com.javispedro.sowatch", 1, 0,
+			"NotificationsModel", "NotificationsModel is only available via the 'notifications' context property");
 		qmlRegisterType<ConfigKey>();
 		qmlRegisterType<GConfKey>("com.javispedro.sowatch", 1, 0, "GConfKey");
 		_registered = true;
@@ -40,6 +42,8 @@ DeclarativeWatchlet::DeclarativeWatchlet(WatchServer* server, const QString& id)
 
 	_wrapper = new DeclarativeWatchWrapper(server, server->watch(), this);
 	_engine->rootContext()->setContextProperty("watch", _wrapper);
+	_engine->rootContext()->setContextProperty("notifications",
+	                                           const_cast<NotificationsModel*>(server->notifications()));
 }
 
 DeclarativeWatchlet::~DeclarativeWatchlet()
