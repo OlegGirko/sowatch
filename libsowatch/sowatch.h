@@ -8,7 +8,6 @@
 
 #include "watch.h"
 #include "watchserver.h"
-#include "watchsimulator.h"
 #include "watchscanner.h"
 #include "watchplugininterface.h"
 

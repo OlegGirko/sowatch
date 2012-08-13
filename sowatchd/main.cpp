@@ -21,6 +21,7 @@ int main(int argc, char *argv[])
 	QApplication::setOrganizationDomain("com.javispedro.sowatch");
 	QApplication::setOrganizationName("sowatch");
 	QApplication::setApplicationName("sowatchd");
+	QApplication::setQuitOnLastWindowClosed(false);
 
 	sowatch::daemon = new Daemon(&app);
 	new DaemonAdaptor(sowatch::daemon);

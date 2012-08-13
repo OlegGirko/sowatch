@@ -1,6 +1,7 @@
 #include <QtCore/QDebug>
 #include <QtDeclarative/QtDeclarative>
 #include "watchserver.h"
+#include "watch.h"
 #include "gconfkey.h"
 #include "declarativewatchwrapper.h"
 #include "declarativewatchlet.h"
@@ -17,6 +18,8 @@ DeclarativeWatchlet::DeclarativeWatchlet(WatchServer* server, const QString& id)
 	_wrapper(0)
 {
 	setScene(new QGraphicsScene(this));
+	scene()->setItemIndexMethod(QGraphicsScene::NoIndex);
+	scene()->setStickyFocus(true);
 
 	if (!_registered) {
 		qmlRegisterUncreatableType<DeclarativeWatchWrapper>("com.javispedro.sowatch", 1, 0,
@@ -27,7 +30,13 @@ DeclarativeWatchlet::DeclarativeWatchlet(WatchServer* server, const QString& id)
 	}
 
 	_engine = new QDeclarativeEngine(this);
+#if !defined(QT_NO_DEBUG)
+	QString qmlDir = QDir::current().absoluteFilePath(SOWATCH_QML_DIR);
+	qDebug() << "Using debug QML import path: " << qmlDir;
 	_engine->addImportPath(SOWATCH_QML_DIR);
+#else
+	_engine->addImportPath(SOWATCH_QML_DIR);
+#endif
 
 	_wrapper = new DeclarativeWatchWrapper(server, server->watch(), this);
 	_engine->rootContext()->setContextProperty("watch", _wrapper);
@@ -80,6 +89,19 @@ QDeclarativeItem* DeclarativeWatchlet::rootObject()
 
 void DeclarativeWatchlet::activate()
 {
+	// Now we certainly know the watch's area, so it is a good moment to
+	// resize the root object if needed.
+	if (_item) {
+		Watch *watch = this->watch();
+		if (!qFuzzyCompare(watch->width(), _item->width())) {
+			qDebug() << "Resizing root object to width" << watch->width();
+			_item->setWidth(watch->width());
+		}
+		if (!qFuzzyCompare(watch->height(), _item->height())) {
+			qDebug() << "Resizing root object to height" << watch->width();
+			_item->setHeight(watch->height());
+		}
+	}
 	GraphicsWatchlet::activate();
 	_wrapper->activate();
 }
@@ -99,7 +121,6 @@ void DeclarativeWatchlet::setRootObject(QDeclarativeItem *item)
 	}
 
 	_item = item;
-	// TODO Resize _item
 	scene()->addItem(_item);
 }
 

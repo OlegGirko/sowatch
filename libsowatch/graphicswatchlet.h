@@ -20,12 +20,15 @@ public:
 	QGraphicsScene* scene();
 	void setScene(QGraphicsScene* scene);
 
-	static const int frameDelay = 25;
-	static const int busyFrameDelay = 50;
+	QRectF sceneRect() const;
+	QRect viewportRect() const;
 
 protected:
 	void activate();
 	void deactivate();
+
+	static const int frameDelay = 25;
+	static const int busyFrameDelay = 50;
 
 	QGraphicsScene* _scene;
 	QTimer _frameTimer;

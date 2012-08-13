@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>MetaWatchSimulatorForm</class>
- <widget class="QWidget" name="MetaWatchSimulatorForm">
+ <class>MetaWatchDigitalSimulatorForm</class>
+ <widget class="QWidget" name="MetaWatchDigitalSimulatorForm">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -11,29 +11,47 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MetaWatch-Digital Simulator</string>
+   <string>MetaWatch Digital Simulator</string>
   </property>
   <layout class="QHBoxLayout" name="horizontalLayout">
    <item>
     <layout class="QVBoxLayout" name="btnsLeft">
      <item>
-      <widget class="QPushButton" name="btnA">
+      <widget class="QPushButton" name="btnF">
+       <property name="maximumSize">
+        <size>
+         <width>50</width>
+         <height>16777215</height>
+        </size>
+       </property>
        <property name="text">
-        <string>A</string>
+        <string>F</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="btnB">
+      <widget class="QPushButton" name="btnE">
+       <property name="maximumSize">
+        <size>
+         <width>50</width>
+         <height>16777215</height>
+        </size>
+       </property>
        <property name="text">
-        <string>B</string>
+        <string>E</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="btnC">
+      <widget class="QPushButton" name="btnD">
+       <property name="maximumSize">
+        <size>
+         <width>50</width>
+         <height>16777215</height>
+        </size>
+       </property>
        <property name="text">
-        <string>C</string>
+        <string>D</string>
        </property>
       </widget>
      </item>
@@ -58,23 +76,41 @@
    <item>
     <layout class="QVBoxLayout" name="btnsRight">
      <item>
-      <widget class="QPushButton" name="btnD">
+      <widget class="QPushButton" name="btnA">
+       <property name="maximumSize">
+        <size>
+         <width>50</width>
+         <height>16777215</height>
+        </size>
+       </property>
        <property name="text">
-        <string>D</string>
+        <string>A</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="btnE">
+      <widget class="QPushButton" name="btnB">
+       <property name="maximumSize">
+        <size>
+         <width>50</width>
+         <height>16777215</height>
+        </size>
+       </property>
        <property name="text">
-        <string>E</string>
+        <string>B</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="btnF">
+      <widget class="QPushButton" name="btnC">
+       <property name="maximumSize">
+        <size>
+         <width>50</width>
+         <height>16777215</height>
+        </size>
+       </property>
        <property name="text">
-        <string>F</string>
+        <string>C</string>
        </property>
       </widget>
      </item>
@@ -87,7 +123,7 @@
   <connection>
    <sender>btnA</sender>
    <signal>pressed()</signal>
-   <receiver>MetaWatchSimulatorForm</receiver>
+   <receiver>MetaWatchDigitalSimulatorForm</receiver>
    <slot>btnAPressed()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -103,7 +139,7 @@
   <connection>
    <sender>btnA</sender>
    <signal>released()</signal>
-   <receiver>MetaWatchSimulatorForm</receiver>
+   <receiver>MetaWatchDigitalSimulatorForm</receiver>
    <slot>btnAReleased()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -119,7 +155,7 @@
   <connection>
    <sender>btnB</sender>
    <signal>pressed()</signal>
-   <receiver>MetaWatchSimulatorForm</receiver>
+   <receiver>MetaWatchDigitalSimulatorForm</receiver>
    <slot>btnBPressed()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -135,7 +171,7 @@
   <connection>
    <sender>btnB</sender>
    <signal>released()</signal>
-   <receiver>MetaWatchSimulatorForm</receiver>
+   <receiver>MetaWatchDigitalSimulatorForm</receiver>
    <slot>btnBReleased()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -151,7 +187,7 @@
   <connection>
    <sender>btnC</sender>
    <signal>pressed()</signal>
-   <receiver>MetaWatchSimulatorForm</receiver>
+   <receiver>MetaWatchDigitalSimulatorForm</receiver>
    <slot>btnCPressed()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -167,7 +203,7 @@
   <connection>
    <sender>btnC</sender>
    <signal>released()</signal>
-   <receiver>MetaWatchSimulatorForm</receiver>
+   <receiver>MetaWatchDigitalSimulatorForm</receiver>
    <slot>btnCReleased()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -183,7 +219,7 @@
   <connection>
    <sender>btnD</sender>
    <signal>pressed()</signal>
-   <receiver>MetaWatchSimulatorForm</receiver>
+   <receiver>MetaWatchDigitalSimulatorForm</receiver>
    <slot>btnDPressed()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -199,7 +235,7 @@
   <connection>
    <sender>btnD</sender>
    <signal>released()</signal>
-   <receiver>MetaWatchSimulatorForm</receiver>
+   <receiver>MetaWatchDigitalSimulatorForm</receiver>
    <slot>btnDReleased()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -215,7 +251,7 @@
   <connection>
    <sender>btnE</sender>
    <signal>pressed()</signal>
-   <receiver>MetaWatchSimulatorForm</receiver>
+   <receiver>MetaWatchDigitalSimulatorForm</receiver>
    <slot>btnEPressed()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -231,7 +267,7 @@
   <connection>
    <sender>btnE</sender>
    <signal>released()</signal>
-   <receiver>MetaWatchSimulatorForm</receiver>
+   <receiver>MetaWatchDigitalSimulatorForm</receiver>
    <slot>btnEReleased()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -247,7 +283,7 @@
   <connection>
    <sender>btnF</sender>
    <signal>pressed()</signal>
-   <receiver>MetaWatchSimulatorForm</receiver>
+   <receiver>MetaWatchDigitalSimulatorForm</receiver>
    <slot>btnFPressed()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -263,7 +299,7 @@
   <connection>
    <sender>btnF</sender>
    <signal>released()</signal>
-   <receiver>MetaWatchSimulatorForm</receiver>
+   <receiver>MetaWatchDigitalSimulatorForm</receiver>
    <slot>btnFReleased()</slot>
    <hints>
     <hint type="sourcelabel">

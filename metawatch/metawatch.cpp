@@ -109,13 +109,14 @@ MetaWatch::MetaWatch(ConfigKey* settings, QObject* parent) :
 
 	_connectTimer->setSingleShot(true);
 	_connectAlignedTimer->setSingleShot(true);
-	connect(_connectTimer, SIGNAL(timeout()), SLOT(retryConnect()));
-	connect(_connectAlignedTimer, SIGNAL(timeout()), SLOT(retryConnect()));
+	connect(_connectTimer, SIGNAL(timeout()), SLOT(timedReconnect()));
+	connect(_connectAlignedTimer, SIGNAL(timeout()), SLOT(timedReconnect()));
 
 	_sendTimer->setInterval(DelayBetweenMessages);
 	connect(_sendTimer, SIGNAL(timeout()), SLOT(timedSend()));
 
-	retryConnect();
+	// Do an initial connection attempt
+	_connectTimer->start(100);
 }
 
 MetaWatch::~MetaWatch()
@@ -249,7 +250,7 @@ void MetaWatch::displayNotification(Notification *notification)
 		_idleTimer->stop();
 	} else {
 		_ringTimer->stop();
-		setVibrateMode(true, RingLength, RingLength, 2);
+		// XXX setVibrateMode(true, RingLength, RingLength, 2);
 		_idleTimer->start();
 	}
 }
@@ -320,6 +321,22 @@ quint16 MetaWatch::calcCrc(const Message& msg)
 	data.replace(4, msgSize, msg.data);
 
 	return calcCrc(data, msgSize + 4);
+}
+
+void MetaWatch::retryConnect()
+{
+	delete _socket;
+	_socket = new QBluetoothSocket(QBluetoothSocket::RfcommSocket);
+
+	connect(_socket, SIGNAL(connected()), SLOT(socketConnected()));
+	connect(_socket, SIGNAL(disconnected()), SLOT(socketDisconnected()));
+	connect(_socket, SIGNAL(readyRead()), SLOT(socketData()));
+	connect(_socket, SIGNAL(error(QBluetoothSocket::SocketError)),
+			SLOT(socketError(QBluetoothSocket::SocketError)));
+	connect(_socket, SIGNAL(stateChanged(QBluetoothSocket::SocketState)),
+			SLOT(socketState(QBluetoothSocket::SocketState)));
+
+	_socket->connectToService(_address, 1, QIODevice::ReadWrite | QIODevice::Unbuffered);
 }
 
 void MetaWatch::send(const Message &msg)
@@ -754,20 +771,9 @@ void MetaWatch::socketState(QBluetoothSocket::SocketState error)
 	qDebug() << "socket is in" << error;
 }
 
-void MetaWatch::retryConnect()
+void MetaWatch::timedReconnect()
 {
-	delete _socket;
-	_socket = new QBluetoothSocket(QBluetoothSocket::RfcommSocket);
-
-	connect(_socket, SIGNAL(connected()), SLOT(socketConnected()));
-	connect(_socket, SIGNAL(disconnected()), SLOT(socketDisconnected()));
-	connect(_socket, SIGNAL(readyRead()), SLOT(socketData()));
-	connect(_socket, SIGNAL(error(QBluetoothSocket::SocketError)),
-			SLOT(socketError(QBluetoothSocket::SocketError)));
-	connect(_socket, SIGNAL(stateChanged(QBluetoothSocket::SocketState)),
-			SLOT(socketState(QBluetoothSocket::SocketState)));
-
-	_socket->connectToService(_address, 1, QIODevice::ReadWrite | QIODevice::Unbuffered);
+	retryConnect();
 }
 
 void MetaWatch::timedSend()

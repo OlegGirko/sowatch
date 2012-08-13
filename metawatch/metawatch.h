@@ -198,8 +198,11 @@ protected:
 	static quint16 calcCrc(const QByteArray& data, int size);
 	static quint16 calcCrc(const Message& msg);
 
+	/** Attempt a connection to the watch. */
+	virtual void retryConnect();
+
 	/** Sends a message to the watch. Does not block. */
-	void send(const Message& msg);
+	virtual void send(const Message& msg);
 	/** Sends a message to the watch if a message of the same type is not
 	 *  already queued. Does not block.
 	 */
@@ -237,7 +240,7 @@ private slots:
 	void socketData();
 	void socketError(QBluetoothSocket::SocketError error);
 	void socketState(QBluetoothSocket::SocketState error);
-	void retryConnect();
+	void timedReconnect();
 	void timedSend();
 	void timedRing();
 

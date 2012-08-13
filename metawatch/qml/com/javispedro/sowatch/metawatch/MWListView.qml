@@ -4,10 +4,13 @@ ListView {
 	id: list
 
 	property bool selectable: true
+	property bool indicator: true
 
 	interactive: false
 	highlightFollowsCurrentItem: false
+	keyNavigationWraps: false
 	boundsBehavior: Flickable.StopAtBounds
+	flickableDirection: Flickable.VerticalFlick
 
 	property real currentItemTop: currentItem !== null ? currentItem.y - contentY : 0
 	property real currentItemBottom: currentItem !== null ? currentItemTop + currentItem.height : 0
@@ -44,8 +47,12 @@ ListView {
 				return;
 			}
 			if (currentIndex >= 0 && currentItemTop > 0) {
+				var prevContentY = contentY;
 				// If the previous item is visible, highlight it
 				decrementCurrentIndex();
+				// ListView will "smoothtly scroll the list" even if hightlightFollowsCurrentItem is false,
+				// so we have to add the following ugly workaround:
+				contentY = prevContentY;
 			}
 			if (currentItemTop <= 0) {
 				// If the previous item now is still not visible, scroll
@@ -57,6 +64,32 @@ ListView {
 					contentY = newContentY;
 				}
 			}
+		}
+	}
+
+	Rectangle {
+		id: indicatorContainer
+		visible: list.indicator && (list.contentHeight > list.height)
+		anchors.top: parent.top
+		anchors.right: parent.right
+		anchors.bottom: parent.bottom
+		width: 4
+
+		color: "white"
+
+		Rectangle {
+			id: indicatorRect
+
+			property int minHeight: 10
+
+			anchors.right: parent.right
+			anchors.left: parent.left
+			anchors.leftMargin: 1
+
+			y: (list.contentY / list.contentHeight) * indicatorContainer.height
+			height: Math.max(minHeight, (list.height / list.contentHeight) * indicatorContainer.height)
+
+			color: "black"
 		}
 	}
 }

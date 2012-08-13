@@ -16,7 +16,6 @@ GraphicsWatchlet::GraphicsWatchlet(WatchServer* server, const QString& id) :
 
 GraphicsWatchlet::~GraphicsWatchlet()
 {
-
 }
 
 QGraphicsScene* GraphicsWatchlet::scene()
@@ -36,27 +35,55 @@ void GraphicsWatchlet::setScene(QGraphicsScene *scene)
 	}
 }
 
-void GraphicsWatchlet::sceneChanged(const QList<QRectF> &region)
+QRectF GraphicsWatchlet::sceneRect() const
 {
-	foreach(const QRectF& r, region) {
-		_damaged += r.toRect();
+	if (_scene) {
+		return _scene->sceneRect();
+	} else {
+		return QRectF();
 	}
-	if (!_damaged.isEmpty()) {
-		_frameTimer.start(frameDelay);
+}
+
+QRect GraphicsWatchlet::viewportRect() const
+{
+	if (_active) {
+		const Watch *watch = this->watch();
+		return QRect(0, 0, watch->width(), watch->height());
+	} else {
+		return QRect();
+	}
+}
+
+void GraphicsWatchlet::sceneChanged(const QList<QRectF> &rects)
+{
+	if (_active) {
+		// Only consider scene updates if the watchlet is active
+		QRect viewport = viewportRect();
+		foreach(const QRectF& frect, rects) {
+			QRect rect = frect.toAlignedRect() & viewport;
+			_damaged += rect;
+		}
+
+		// Start frame timer if we got new data
+		if (!_damaged.isEmpty() && !_frameTimer.isActive()) {
+			_frameTimer.start(frameDelay);
+		}
 	}
 }
 
 void GraphicsWatchlet::frameTimeout()
 {
-	if (!_active) return; // Watchlet was ejected, do not draw.
+	// Do not draw if watchlet is not active
+	if (!_active) return;
+
 	if (watch()->busy()) {
+		// Watch is busy, delay this frame.
 		_frameTimer.start(busyFrameDelay);
 		return;
 	}
 
 	const QVector<QRect> rects = _damaged.rects();
 	QPainter p(watch());
-
 	foreach(const QRect& r, rects) {
 		_scene->render(&p, r, r, Qt::IgnoreAspectRatio);
 	}
@@ -66,14 +93,19 @@ void GraphicsWatchlet::frameTimeout()
 void GraphicsWatchlet::activate()
 {
 	Watchlet::activate();
-	// We have to assume that the watch has completely forgot about everything.
-	QRect area(0, 0, watch()->width(), watch()->height());
-	_damaged += area;
-	_scene->update(area);
+	// We have to assume that the watch has completely forgot about everything
+	// So assume the entire viewport is damaged
+	QRect viewport = viewportRect();
+	_damaged += viewport;
+	// This will emit sceneChanged and start the frame timer.
+	_scene->update(viewport);
 }
 
 void GraphicsWatchlet::deactivate()
 {
+	// Stop updates
 	_frameTimer.stop();
+	_damaged = QRegion();
+
 	Watchlet::deactivate();
 }

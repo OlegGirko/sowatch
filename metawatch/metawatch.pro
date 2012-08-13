@@ -12,25 +12,25 @@ maemo5 {
 MOBILITY += connectivity systeminfo
 
 SOURCES += metawatchplugin.cpp \
-    metawatchsimulatorform.cpp \
-    metawatchsimulator.cpp \
     metawatchpaintengine.cpp \
     metawatch.cpp \
     metawatchdigital.cpp \
     metawatchanalog.cpp \
-    metawatchscanner.cpp
+    metawatchscanner.cpp \
+    metawatchdigitalsimulator.cpp \
+    metawatchdigitalsimulatorform.cpp
 
 HEADERS += metawatchplugin.h \
-    metawatchsimulatorform.h \
-    metawatchsimulator.h \
     metawatchpaintengine.h \
     metawatch.h \
     metawatchdigital.h \
     metawatchanalog.h \
-    metawatchscanner.h
+    metawatchscanner.h \
+    metawatchdigitalsimulator.h \
+    metawatchdigitalsimulatorform.h
 
 FORMS += \
-	metawatchsimulatorform.ui
+    metawatchdigitalsimulatorform.ui
 
 res_files.files += res/graphics res/fonts
 qml_files.files += qml/com qml/metawatch-digital-config.qml

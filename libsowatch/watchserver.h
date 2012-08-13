@@ -28,6 +28,7 @@ public:
 	explicit WatchServer(Watch *watch, QObject *parent = 0);
 
 	Watch* watch();
+	const Watch* watch() const;
 
 	QString nextWatchletButton() const;
 	void setNextWatchletButton(const QString& value);

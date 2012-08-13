@@ -23,6 +23,9 @@ public:
 	WatchServer* server();
 	Watch* watch();
 
+	const WatchServer* server() const;
+	const Watch* watch() const;
+
 	Q_INVOKABLE QString id() const;
 	bool isActive() const;
 

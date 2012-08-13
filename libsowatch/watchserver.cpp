@@ -29,6 +29,11 @@ Watch* WatchServer::watch()
 	return _watch;
 }
 
+const Watch* WatchServer::watch() const
+{
+	return _watch;
+}
+
 QString WatchServer::nextWatchletButton() const
 {
 	if (_nextWatchletButton >= 0) {

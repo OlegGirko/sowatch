@@ -1,12 +1,7 @@
 import Qt 4.7
 import com.javispedro.sowatch.metawatch 1.0
 
-Rectangle {
-	width: 96
-	height: 96
-
-	color: "white"
-
+MWPage {
 	MWTitle {
 		id: title
 		anchors.top: parent.top
@@ -22,7 +17,9 @@ Rectangle {
 		anchors.left: parent.left
 		anchors.right: parent.right
 		anchors.bottom: parent.bottom
+		clip: true
 		model: watch.notifications
+
 		delegate: Rectangle {
 			id: notifDelegate
 			property bool selected: ListView.isCurrentItem
@@ -30,14 +27,16 @@ Rectangle {
 			height: childrenRect.height
 			color: ListView.isCurrentItem ? "black" : "white"
 			Column {
+				width: parent.width
 				MWLabel {
-					width: notifs.width
+					width: parent.width
 					text: model.modelData.title
 					wrapMode: Text.WrapAtWordBoundaryOrAnywhere
 					color: notifDelegate.selected ? "white" : "black"
+					font.pointSize: 12
 				}
-				MWSmallLabel {
-					width: notifs.width
+				MWLabel {
+					width: parent.width
 					text: model.modelData.body
 					wrapMode: Text.WrapAtWordBoundaryOrAnywhere
 					color: notifDelegate.selected ? "white" : "black"

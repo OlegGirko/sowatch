@@ -24,6 +24,16 @@ Watch* Watchlet::watch()
 	return _server->watch();
 }
 
+const WatchServer* Watchlet::server() const
+{
+	return _server;
+}
+
+const Watch* Watchlet::watch() const
+{
+	return _server->watch();
+}
+
 QString Watchlet::id() const
 {
 	return _id;

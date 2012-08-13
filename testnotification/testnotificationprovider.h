@@ -21,6 +21,7 @@ private slots:
 	void generateNotification();
 
 private:
+	static int _counter;
 	QTimer *_timer;
 };
 

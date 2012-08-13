@@ -4,18 +4,18 @@
 #include <QWidget>
 
 namespace Ui {
-	class MetaWatchSimulatorForm;
+	class MetaWatchDigitalSimulatorForm;
 }
 
 namespace sowatch {
 
-class MetaWatchSimulatorForm : public QWidget
+class MetaWatchDigitalSimulatorForm : public QWidget
 {
     Q_OBJECT
 
 public:
-    explicit MetaWatchSimulatorForm(QWidget *parent = 0);
-    ~MetaWatchSimulatorForm();
+    explicit MetaWatchDigitalSimulatorForm(QWidget *parent = 0);
+    ~MetaWatchDigitalSimulatorForm();
 
 	void refreshScreen(const QPixmap& screen);
 
@@ -38,7 +38,7 @@ protected slots:
 	void btnFReleased();
 
 private:
-    Ui::MetaWatchSimulatorForm *ui;
+    Ui::MetaWatchDigitalSimulatorForm *ui;
 };
 
 }

@@ -16,7 +16,6 @@ VERSION   = 1.0.0
 DEFINES += SOWATCH_LIBRARY
 
 SOURCES += \
-    watchsimulator.cpp \
     watchserver.cpp \
     watchpaintengine.cpp \
     watchlet.cpp \
@@ -34,10 +33,10 @@ SOURCES += \
     watchscanner.cpp \
     allwatchscanner.cpp \
     configkey.cpp \
-    gconfkey.cpp
+    gconfkey.cpp \
+    notificationsmodel.cpp
 
 HEADERS += \
-    watchsimulator.h \
     watchserver.h \
     watchpaintengine.h \
     watchlet.h \
@@ -57,7 +56,8 @@ HEADERS += \
     watchscanner.h \
     allwatchscanner.h \
     configkey.h \
-    gconfkey.h
+    gconfkey.h \
+    notificationsmodel.h
 
 install_headers.files = $$HEADERS
 

@@ -5,6 +5,9 @@
 
 using namespace sowatch;
 
+#define TRACE(x)
+//#define TRACE(x) x
+
 WatchPaintEngine::WatchPaintEngine()
 	: QPaintEngine(QPaintEngine::AllFeatures),
 	  _painter()
@@ -26,6 +29,7 @@ bool WatchPaintEngine::begin(QPaintDevice *pdev)
 	_hasBrush = false;
 	_clipEnabled = false;
 	_clipRegion = _area;
+	_transform = QTransform();
 
 	return _painter.begin(pdev);
 }
@@ -75,46 +79,51 @@ void WatchPaintEngine::damagePenStroke(const QLineF &line)
 
 void WatchPaintEngine::updateClipRegion(const QRegion& region, Qt::ClipOperation op)
 {
-	switch(op) {
+	QRegion mapped = _transform.map(region);
+	switch (op) {
 		case Qt::NoClip:
 			_clipEnabled = false;
 			_clipRegion = _area;
 			break;
 		case Qt::ReplaceClip:
 			_clipEnabled = true;
-			_clipRegion = region;
+			_clipRegion = mapped;
 			break;
 		case Qt::IntersectClip:
 			_clipEnabled = true;
-			_clipRegion &= region;
+			_clipRegion &= mapped;
 			break;
 		case Qt::UniteClip:
 			_clipEnabled = true;
-			_clipRegion |= region;
+			_clipRegion |= mapped;
 			break;
 	}
 }
 
 void WatchPaintEngine::drawEllipse(const QRectF &r)
 {
+	TRACE(qDebug() << __func__ << r);
 	damageRect(r);
 	_painter.drawEllipse(r);
 }
 
 void WatchPaintEngine::drawEllipse(const QRect &r)
 {
+	TRACE(qDebug() << __func__ << r);
 	damageRect(r);
 	_painter.drawEllipse(r);
 }
 
 void WatchPaintEngine::drawImage(const QRectF &r, const QImage &pm, const QRectF &sr, Qt::ImageConversionFlags flags)
 {
+	TRACE(qDebug() << __func__ << r);
 	damageRect(r);
 	_painter.drawImage(r, pm, sr, flags);
 }
 
 void WatchPaintEngine::drawLines(const QLineF *lines, int lineCount)
 {
+	TRACE(qDebug() << __func__ << lines << lineCount);
 	int i;
 	for (i = 0; i < lineCount; i++) {
 		const QLineF& line = lines[i];
@@ -125,6 +134,7 @@ void WatchPaintEngine::drawLines(const QLineF *lines, int lineCount)
 
 void WatchPaintEngine::drawLines(const QLine *lines, int lineCount)
 {
+	TRACE(qDebug() << __func__ << lines << lineCount);
 	int i;
 	for (i = 0; i < lineCount; i++) {
 		const QLine& line = lines[i];
@@ -135,6 +145,7 @@ void WatchPaintEngine::drawLines(const QLine *lines, int lineCount)
 
 void WatchPaintEngine::drawPath(const QPainterPath &path)
 {
+	TRACE(qDebug() << __func__ << path);
 	damageRect(path.boundingRect());
 	_painter.drawPath(path);
 }
@@ -193,6 +204,7 @@ void WatchPaintEngine::drawPolygon(const QPoint *points, int pointCount, Polygon
 
 void WatchPaintEngine::drawRects(const QRectF *rects, int rectCount)
 {
+	TRACE(qDebug() << __func__ << rects << rectCount);
 	int i;
 	for (i = 0; i < rectCount; i++) {
 		const QRectF& r = rects[i];
@@ -211,6 +223,7 @@ void WatchPaintEngine::drawRects(const QRectF *rects, int rectCount)
 
 void WatchPaintEngine::drawRects(const QRect *rects, int rectCount)
 {
+	TRACE(qDebug() << __func__ << rects << rectCount);
 	int i;
 	for (i = 0; i < rectCount; i++) {
 		const QRect& r = rects[i];
@@ -230,6 +243,7 @@ void WatchPaintEngine::drawRects(const QRect *rects, int rectCount)
 
 void WatchPaintEngine::drawTextItem(const QPointF &p, const QTextItem &textItem)
 {
+	TRACE(qDebug() << __func__ << p << textItem.text());
 	const qreal ascent = textItem.ascent();
 	const qreal descent = textItem.descent();
 	const qreal w = textItem.width();
@@ -239,6 +253,7 @@ void WatchPaintEngine::drawTextItem(const QPointF &p, const QTextItem &textItem)
 
 void WatchPaintEngine::drawTiledPixmap(const QRectF &r, const QPixmap &pixmap, const QPointF &s)
 {
+	TRACE(qDebug() << __func__ << r << pixmap << s);
 	damageRect(r);
 	_painter.drawTiledPixmap(r, pixmap, s);
 }
@@ -251,14 +266,26 @@ QPaintEngine::Type WatchPaintEngine::type() const
 void WatchPaintEngine::updateState(const QPaintEngineState &state)
 {
 	const QPaintEngine::DirtyFlags flags = state.state();
+
+	TRACE(qDebug() << __func__ << flags);
+
+	if (flags & QPaintEngine::DirtyTransform)
+	{
+		TRACE(qDebug() << " " << "DirtyTransform" << state.transform());
+		_transform = state.transform();
+		_painter.setTransform(_transform);
+	}
+
 	if (flags & QPaintEngine::DirtyBackground)
 	{
 		_painter.setBackground(state.backgroundBrush());
 	}
+
 	if (flags & QPaintEngine::DirtyBackgroundMode)
 	{
 		_painter.setBackgroundMode(state.backgroundMode());
 	}
+
 	if (flags & QPaintEngine::DirtyBrush)
 	{
 		QBrush brush = state.brush();
@@ -271,22 +298,26 @@ void WatchPaintEngine::updateState(const QPaintEngineState &state)
 	}
 	if (flags & QPaintEngine::DirtyClipEnabled)
 	{
+		TRACE(qDebug() << " " << "DirtyClipEnabled" << state.isClipEnabled());
 		_clipEnabled = state.isClipEnabled();
 		_painter.setClipping(_clipEnabled);
 	}
 	if (flags & QPaintEngine::DirtyClipPath)
 	{
+		TRACE(qDebug() << " " << "DirtyClipPath" << state.clipPath().boundingRect());
 		QRegion region = state.clipPath().boundingRect().toAlignedRect();
 		updateClipRegion(region, state.clipOperation());
 		_painter.setClipPath(state.clipPath(), state.clipOperation());
 	}
 	if (flags & QPaintEngine::DirtyClipRegion)
 	{
+		TRACE(qDebug() << " " << "DirtyClipRegion" << state.clipRegion());
 		updateClipRegion(state.clipRegion(), state.clipOperation());
 		_painter.setClipRegion(state.clipRegion(), state.clipOperation());
 	}
 	if (flags & QPaintEngine::DirtyCompositionMode)
 	{
+		TRACE(qDebug() << " " << "DirtyCompositionMode" << state.compositionMode());
 		_painter.setCompositionMode(state.compositionMode());
 	}
 	if (flags & QPaintEngine::DirtyFont)
@@ -304,9 +335,6 @@ void WatchPaintEngine::updateState(const QPaintEngineState &state)
 		_penWidth = pen.widthF();
 		_painter.setPen(pen);
 	}
-	if (flags & QPaintEngine::DirtyTransform)
-	{
-		_transform = state.transform();
-		_painter.setTransform(_transform);
-	}
+
+	TRACE(qDebug() << __func__ << "end");
 }

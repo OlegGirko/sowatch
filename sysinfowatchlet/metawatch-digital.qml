@@ -17,7 +17,7 @@ Rectangle {
 			icon.source: "icon.png"
 		}
 
-		MWSmallLabel {
+		MWLabel {
 			text: "Battery: " + batteryLevel + "%"
 		}
 
@@ -38,7 +38,7 @@ Rectangle {
 			}
 		}
 
-		MWSmallLabel {
+		MWLabel {
 			width: parent.width
 			text: "Connected to:"
 		}
