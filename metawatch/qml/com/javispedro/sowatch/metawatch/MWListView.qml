@@ -68,7 +68,7 @@ ListView {
 	}
 
 	Rectangle {
-		id: indicatorContainer
+		id: indicatorCont
 		visible: list.indicator && (list.contentHeight > list.height)
 		anchors.top: parent.top
 		anchors.right: parent.right
@@ -86,8 +86,8 @@ ListView {
 			anchors.left: parent.left
 			anchors.leftMargin: 1
 
-			y: (list.contentY / list.contentHeight) * indicatorContainer.height
-			height: Math.max(minHeight, (list.height / list.contentHeight) * indicatorContainer.height)
+			y: list.visibleArea.yPosition * indicatorCont.height
+			height: Math.max(minHeight, list.visibleArea.heightRatio * indicatorCont.height)
 
 			color: "black"
 		}
