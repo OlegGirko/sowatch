@@ -5,9 +5,11 @@ sowatch (0.4.0) unstable; urgency=low
   * Add GConfKey backend to ConfigKey.
   * Daemon now dynamically loads/unloads watches & watchlets as the
     settings change.
+  * MWListView now sports a scroll indicator and better scrolling logic.
+  * Using MetaWatch fonts for MetaWatch watchlets.
   * New Qt Messaging Framework based watchlet.
 
- -- Javier S. Pedro <maemo@javispedro.com>  Fri, 10 Aug 2012 17:46:00 +0200
+ -- Javier S. Pedro <maemo@javispedro.com>  Tue, 14 Aug 2012 01:46:11 +0200
 
 sowatch (0.3.1) unstable; urgency=low
 
