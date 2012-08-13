@@ -1,3 +1,5 @@
+#include <QtCore/QDebug>
+
 #include "qmsgwatchlet.h"
 
 QTM_USE_NAMESPACE

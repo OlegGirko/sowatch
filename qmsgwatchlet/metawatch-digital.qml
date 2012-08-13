@@ -18,6 +18,7 @@ MWPage {
 		anchors.left: parent.left
 		anchors.right: parent.right
 		anchors.bottom: parent.bottom
+		clip: true
 		model: MessageModel {
 			sortBy: MessageModel.Timestamp
 			sortOrder: MessageModel.DescendingOrder
@@ -36,22 +37,33 @@ MWPage {
 			limit: 20
 		}
 		delegate: Rectangle {
+			id: msgDelegate
 			property bool selected: ListView.isCurrentItem
-			width: list.width
+			width: parent.width
 			height: childrenRect.height
 			color: ListView.isCurrentItem ? "black" : "white"
-			Text {
-				width: 96
-				text: "<b>" + sender + "</b><br>" + subject
-				wrapMode: Text.WrapAtWordBoundaryOrAnywhere
-				color: parent.selected ? "white" : "black"
+			Column {
+				width: parent.width
+				MWLabel {
+					width: parent.width
+					text: sender
+					wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+					color: msgDelegate.selected ? "white" : "black"
+					font.pointSize: 12
+				}
+				MWLabel {
+					width: parent.width
+					text: subject
+					wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+					color: msgDelegate.selected ? "white" : "black"
+				}
 			}
 		}
 	}
 
 	Connections {
 		target: watch
-		onButtonPressed : {
+		onButtonPressed: {
 			switch (button) {
 			case 1:
 				list.scrollUp();
@@ -59,6 +71,11 @@ MWPage {
 			case 2:
 				list.scrollDown();
 				break;
+			}
+		}
+		onActiveChanged: {
+			if (watch.active) {
+				list.scrollTop();
 			}
 		}
 	}

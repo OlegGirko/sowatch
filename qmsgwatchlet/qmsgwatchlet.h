@@ -14,7 +14,7 @@ public:
 	explicit QMsgWatchlet(WatchServer* server);
 
 private:
-	QTM_PREPEND_NAMESPACE(QMessageService) _qms;
+	QtMobility::QMessageService *_qms;
 };
 
 }
