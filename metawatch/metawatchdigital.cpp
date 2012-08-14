@@ -144,8 +144,8 @@ void MetaWatchDigital::clear(Mode mode, bool black)
 void MetaWatchDigital::renderIdleScreen()
 {
 	QImage idle_call(QString(SOWATCH_RESOURCES_DIR "/metawatch/graphics/idle_call.bmp"));
-	QImage idle_sms(QString(SOWATCH_RESOURCES_DIR "/metawatch/graphics/idle_sms.bmp"));
-	QImage idle_mail(QString(SOWATCH_RESOURCES_DIR "/metawatch/graphics/idle_gmail.bmp"));
+	QImage idle_msg(QString(SOWATCH_RESOURCES_DIR "/metawatch/graphics/idle_msg.bmp"));
+	QImage idle_mail(QString(SOWATCH_RESOURCES_DIR "/metawatch/graphics/idle_mail.bmp"));
 	QPainter p;
 
 	_paintMode = IdleMode;
@@ -158,7 +158,7 @@ void MetaWatchDigital::renderIdleScreen()
 	p.drawLine(1, systemAreaHeight * 2 + 4, screenWidth - 2, systemAreaHeight * 2 + 4);
 
 	p.drawImage((32 * 0) + 4, systemAreaHeight * 2 + 7, idle_call);
-	p.drawImage((32 * 1) + 4, systemAreaHeight * 2 + 7, idle_sms);
+	p.drawImage((32 * 1) + 4, systemAreaHeight * 2 + 7, idle_msg);
 	p.drawImage((32 * 2) + 4, systemAreaHeight * 2 + 7, idle_mail);
 
 	p.end();

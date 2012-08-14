@@ -1,4 +1,5 @@
 #include <QtCore/QDebug>
+#include <QtCore/QTranslator>
 #include <QtGui/QApplication>
 #include <QtDBus/QDBusConnection>
 
@@ -13,6 +14,30 @@ namespace sowatch
 
 using namespace sowatch;
 
+static void setupLocalization(QApplication *app)
+{
+	const QString locale(QLocale::system().name());
+	QTranslator *translator;
+
+	// Set up main Qt translator first
+	translator = new QTranslator(app);
+	if (translator->load("qt_" + locale,
+	                     QLibraryInfo::location(QLibraryInfo::TranslationsPath))) {
+		app->installTranslator(translator);
+	} else {
+		delete translator;
+		qWarning() << "Could not load Qt translation for" << locale;
+	}
+
+	// Set up libsowatch translator
+	translator = new QTranslator(app);
+	if (translator->load("libsowatch_" + locale, SOWATCH_I18N_DIR)) {
+		app->installTranslator(translator);
+	} else {
+		qWarning() << "Could not load translation for" << locale;
+	}
+}
+
 int main(int argc, char *argv[])
 {
 	// Some plugins use QtGui functionality, so QApplication must be used
@@ -22,6 +47,8 @@ int main(int argc, char *argv[])
 	QApplication::setOrganizationName("sowatch");
 	QApplication::setApplicationName("sowatchd");
 	QApplication::setQuitOnLastWindowClosed(false);
+
+	setupLocalization(&app);
 
 	sowatch::daemon = new Daemon(&app);
 	new DaemonAdaptor(sowatch::daemon);

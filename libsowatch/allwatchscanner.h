@@ -4,7 +4,7 @@
 #include <QtCore/QObject>
 #include <QtCore/QList>
 
-#include <sowatch.h>
+#include "watchscanner.h"
 
 namespace sowatch
 {

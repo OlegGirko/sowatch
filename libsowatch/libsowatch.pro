@@ -59,13 +59,18 @@ HEADERS += \
     gconfkey.h \
     notificationsmodel.h
 
+TRANSLATIONS += libsowatch_en.ts libsowatch_es.ts
+
 install_headers.files = $$HEADERS
+install_translations.files = libsowatch*.qm
 
 install_headers.path = /usr/include/sowatch
 !isEmpty(MEEGO_VERSION_MAJOR)|maemo5 {
 	target.path = /opt/sowatch/lib
+	install_translations.path = /opt/sowatch/i18n
 } else {
 	target.path = /usr/lib
+	install_translations.path = /usr/share/sowatch/i18n
 }
 
-INSTALLS += install_headers target
+INSTALLS += install_headers install_translations target

@@ -1,3 +1,7 @@
+#include <QtCore/QDebug>
+
+#include "registry.h"
+#include "watchplugininterface.h"
 #include "allwatchscanner.h"
 
 using namespace sowatch;
