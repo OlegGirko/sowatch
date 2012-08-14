@@ -40,7 +40,7 @@ contains(MEEGO_EDITION,harmattan) {
 }
 
 # Debug only watchlets
-debug {
+debug_only {
 	SUBDIRS += testnotification
 	testnotification.depends = libsowatch
 }
