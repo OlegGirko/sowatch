@@ -250,7 +250,7 @@ void MetaWatch::displayNotification(Notification *notification)
 		_idleTimer->stop();
 	} else {
 		_ringTimer->stop();
-		// XXX setVibrateMode(true, RingLength, RingLength, 2);
+		setVibrateMode(true, RingLength, RingLength, 2);
 		_idleTimer->start();
 	}
 }
