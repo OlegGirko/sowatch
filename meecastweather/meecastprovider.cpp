@@ -20,7 +20,7 @@ MeeCastProvider::~MeeCastProvider()
 
 void MeeCastProvider::generateNotification()
 {
-	if (QFile::exists(MeeCastWeather::configFilePath())) {
+	if (QFile::exists(MeeCastWeather::configFilePath)) {
 		emit incomingNotification(new MeeCastWeather(this));
 	}
 }

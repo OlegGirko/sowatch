@@ -16,7 +16,7 @@ class MeeCastWeather : public WeatherNotification
 public:
 	explicit MeeCastWeather(QObject *parent = 0);
 
-	static QString configFilePath();
+	const static QLatin1String configFilePath;
 
 	Type type() const;
 	uint count() const;
@@ -33,17 +33,26 @@ public:
 
 private slots:
 	void fileChanged(const QString& path);
-	void update();
+	void parseConfigFile();
+	void parseStationFile();
+	void handleTimeout();
 
 private:
 	QFileSystemWatcher* _watcher;
 	QTimer* _timer;
 
-	bool _metric;
+	QString _stationFilePath;
+
+	bool _configFileChanged;
+	bool _stationFileChanged;
+
+	Unit _tempUnit;
+	QString _location;
+
 	QDateTime _lastUpdate;
-	QString _lastLocation;
 	int _lastTemp;
-	int _lastWxCode;
+	int _lastCode;
+	QString _lastText;
 
 };
 
