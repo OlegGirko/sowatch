@@ -71,6 +71,18 @@ void WatchServer::insertWatchlet(int position, Watchlet *watchlet)
 	_watchletIds[id] = watchlet;
 }
 
+void WatchServer::moveWatchlet(const Watchlet *watchlet, int to)
+{
+	const QString id = watchlet->id();
+	int index = _watchlets.indexOf(const_cast<Watchlet*>(watchlet));
+
+	Q_ASSERT(watchlet->_server == this);
+	Q_ASSERT(_watchletIds.contains(id));
+	Q_ASSERT(index >= 0);
+
+	_watchlets.move(index, to);
+}
+
 void WatchServer::removeWatchlet(const Watchlet *watchlet)
 {
 	const QString id = watchlet->id();

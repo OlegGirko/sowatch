@@ -35,6 +35,7 @@ public:
 
 	void addWatchlet(Watchlet *watchlet);
 	void insertWatchlet(int position, Watchlet *watchlet);
+	void moveWatchlet(const Watchlet *watchlet, int to);
 	void removeWatchlet(const Watchlet *watchlet);
 
 	void addProvider(NotificationProvider *provider);

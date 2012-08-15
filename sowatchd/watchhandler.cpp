@@ -73,42 +73,80 @@ QString WatchHandler::status() const
 	}
 }
 
-void WatchHandler::updateWatchlets()
+Watchlet* WatchHandler::createWatchlet(const QString &id)
 {
 	Registry *registry = Registry::registry();
+	WatchletPluginInterface *plugin = registry->getWatchletPlugin(id);
+	if (!plugin) {
+		qWarning() << "Unknown watchlet" << id;
+		return 0;
+	}
 
+	ConfigKey *subconfig = _config->getSubkey(id);
+	Watchlet* watchlet = plugin->getWatchlet(id, subconfig, _server);
+	delete subconfig;
+
+	return watchlet;
+}
+
+void WatchHandler::deleteWatchletAt(int index)
+{
+	const QString id = _watchlet_order[index];
+	Watchlet *watchlet = _watchlets[id];
+
+	_server->removeWatchlet(watchlet);
+	_watchlet_order.removeAt(index);
+	_watchlets.remove(id);
+
+	delete watchlet;
+}
+
+void WatchHandler::updateWatchlets()
+{
 	if (!_server) return;
 
 	QStringList newWatchlets = _config->value("watchlets").toStringList();
-	QStringList curWatchlets = _watchlet_order;
 
-	if (newWatchlets == curWatchlets) return; // Nothing to do
-
-	// TODO: Something better than removing all and readding
-	foreach (const QString& s, curWatchlets) {
-		Watchlet* watchlet = _watchlets[s];
-		_server->removeWatchlet(watchlet);
-		delete watchlet;
-	}
-
-	_watchlet_order.clear();
-	_watchlets.clear();
-
-	foreach (const QString& s, newWatchlets) {
-		WatchletPluginInterface *plugin = registry->getWatchletPlugin(s);
-		if (!plugin) {
-			qWarning() << "Unknown watchlet" << s;
-			continue;
+	// Try to do one operation at the time
+	// (e.g. move a watchlet or add/remove it).
+	// Find the first difference
+	int i;
+	for (i = 0; i < newWatchlets.size(); i++) {
+		// Precondition: newWatchlets and curWatchlets are equal in range 0..i-1
+		if (i >= _watchlet_order.size()) {
+			// We need to add this watchlet
+			const QString id = newWatchlets[i];
+			Watchlet *watchlet = createWatchlet(id);
+			_watchlet_order << id;
+			_watchlets[id] = watchlet;
+			_server->addWatchlet(watchlet);
+		} else if (newWatchlets[i] != _watchlet_order[i]) {
+			// Let's find out if this watchlet has been moved, or removed.
+			const QString id = _watchlet_order[i];
+			int j;
+			for (j = i; j < newWatchlets.size(); j++) {
+				if (id == newWatchlets[j]) {
+					break; // Found
+				}
+			}
+			if (j == _watchlet_order.size()) {
+				// It was not found, so it has been removed
+				deleteWatchletAt(i);
+			} else {
+				// It has been found at index j, it needs to moved.
+				_watchlet_order.move(i, j);
+				_server->moveWatchlet(_watchlets[id], j);
+			}
 		}
-		ConfigKey *subconfig = _config->getSubkey(s);
-		Watchlet* watchlet = plugin->getWatchlet(s, subconfig, _server);
-		_watchlet_order << s;
-		_watchlets[s] = watchlet;
-		_server->addWatchlet(watchlet);
-		delete subconfig;
+	}
+	while (i < _watchlet_order.size()) {
+		// These watchlets are to be unloaded
+		deleteWatchletAt(i);
 	}
 
-	qDebug() << "Watchlets reloaded: " << _watchlets.keys();
+	Q_ASSERT(newWatchlets == _watchlet_order);
+
+	qDebug() << "New watchlet order: " << _watchlet_order;
 }
 
 void WatchHandler::updateProviders()

@@ -22,6 +22,10 @@ public:
 signals:
 	void statusChanged();
 
+private:
+	Watchlet* createWatchlet(const QString& id);
+	void deleteWatchletAt(int index);
+
 private slots:
 	void updateWatchlets();
 	void updateProviders();
