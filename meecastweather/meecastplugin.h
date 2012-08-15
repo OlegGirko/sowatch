@@ -1,19 +1,19 @@
-#ifndef CKITCALLPLUGIN_H
-#define CKITCALLPLUGIN_H
+#ifndef MEECASTPLUGIN_H
+#define MEECASTPLUGIN_H
 
 #include <sowatch.h>
 
 namespace sowatch
 {
 
-class HarmAccuPlugin : public QObject, public NotificationPluginInterface
+class MeeCastPlugin : public QObject, public NotificationPluginInterface
 {
 	Q_OBJECT
 	Q_INTERFACES(sowatch::NotificationPluginInterface)
 
 public:
-	HarmAccuPlugin(QObject *parent = 0);
-	~HarmAccuPlugin();
+	MeeCastPlugin(QObject *parent = 0);
+	~MeeCastPlugin();
 
 	QStringList providers();
 	NotificationProviderInfo describeProvider(const QString &driver);
@@ -22,4 +22,4 @@ public:
 
 }
 
-#endif // CKITCALLPLUGIN_H
+#endif // MEECASTPLUGIN_H

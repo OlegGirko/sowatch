@@ -1,20 +1,22 @@
-#ifndef HARMACCUPROVIDER_H
-#define HARMACCUPROVIDER_H
+#ifndef MEECASTPROVIDER_H
+#define MEECASTPROVIDER_H
 
 #include <sowatch.h>
 
 namespace sowatch
 {
 
-class HarmAccuWeather;
+class MeeCastWeather;
 
-class HarmAccuProvider : public NotificationProvider
+class MeeCastProvider : public NotificationProvider
 {
     Q_OBJECT
 
 public:
-	explicit HarmAccuProvider(QObject *parent = 0);
-	~HarmAccuProvider();
+	explicit MeeCastProvider(QObject *parent = 0);
+	~MeeCastProvider();
+
+	static const QLatin1String myId;
 
 public slots:
 	void generateNotification();

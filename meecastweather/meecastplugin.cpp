@@ -1,37 +1,37 @@
-#include "harmaccuprovider.h"
-#include "harmaccuplugin.h"
+#include "meecastprovider.h"
+#include "meecastplugin.h"
 
 using namespace sowatch;
 
-HarmAccuPlugin::HarmAccuPlugin(QObject *parent) :
+MeeCastPlugin::MeeCastPlugin(QObject *parent) :
     QObject(parent)
 {
 }
 
-HarmAccuPlugin::~HarmAccuPlugin()
+MeeCastPlugin::~MeeCastPlugin()
 {
 }
 
-QStringList HarmAccuPlugin::providers()
+QStringList MeeCastPlugin::providers()
 {
 	QStringList providers;
-	providers << "harmaccu";
+	providers << MeeCastProvider::myId;
 	return providers;
 }
 
-NotificationPluginInterface::NotificationProviderInfo HarmAccuPlugin::describeProvider(const QString &driver)
+NotificationPluginInterface::NotificationProviderInfo MeeCastPlugin::describeProvider(const QString &driver)
 {
 	NotificationProviderInfo info;
-	if (driver != "harmaccu") return info;
-	info.name = "Accuweather";
+	if (driver != MeeCastProvider::myId) return info;
+	info.name = "MeeCast";
 	return info;
 }
 
-NotificationProvider* HarmAccuPlugin::getProvider(const QString& id, ConfigKey *settings, QObject *parent)
+NotificationProvider* MeeCastPlugin::getProvider(const QString& id, ConfigKey *settings, QObject *parent)
 {
 	Q_UNUSED(settings);
-	if (id != "harmaccu") return 0;
-	return new HarmAccuProvider(parent);
+	if (id != MeeCastProvider::myId) return 0;
+	return new MeeCastProvider(parent);
 }
 
-Q_EXPORT_PLUGIN2(harmaccuweather, HarmAccuPlugin)
+Q_EXPORT_PLUGIN2(meecastweather, MeeCastPlugin)

@@ -1,8 +1,7 @@
-TARGET = meecastweather
+TARGET   = meecastweather
 TEMPLATE = lib
 CONFIG   += plugin
-CONFIG += mobility
-MOBILITY += systeminfo
+QT       += xml
 
 SOURCES += meecastplugin.cpp meecastprovider.cpp meecastweather.cpp
 

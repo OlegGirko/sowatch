@@ -1,5 +1,5 @@
-#ifndef HARMACCUWEATHER_H
-#define HARMACCUWEATHER_H
+#ifndef MEECASTWEATHER_H
+#define MEECASTWEATHER_H
 
 #include <QtCore/QFileSystemWatcher>
 #include <QtCore/QTimer>
@@ -9,14 +9,14 @@
 namespace sowatch
 {
 
-class HarmAccuWeather : public WeatherNotification
+class MeeCastWeather : public WeatherNotification
 {
     Q_OBJECT
 
 public:
-	explicit HarmAccuWeather(QObject *parent = 0);
+	explicit MeeCastWeather(QObject *parent = 0);
 
-	static QSettings* getAccuweatherData();
+	static QString configFilePath();
 
 	Type type() const;
 	uint count() const;
@@ -49,4 +49,4 @@ private:
 
 }
 
-#endif // HARMACCUWEATHER_H
+#endif // MEECASTWEATHER_H

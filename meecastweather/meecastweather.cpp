@@ -1,18 +1,17 @@
-#include "harmaccuweather.h"
+#include <QtCore/QDir>
+#include <QtCore/QDebug>
+
+#include "meecastweather.h"
 
 using namespace sowatch;
 
-#define ACCUWEATHER_FILE_PATH "/home/user/.config/AccuWeather, Inc./awxapp.conf"
-
-HarmAccuWeather::HarmAccuWeather(QObject *parent) :
+MeeCastWeather::MeeCastWeather(QObject *parent) :
 	WeatherNotification(parent),
 	_watcher(new QFileSystemWatcher(this)),
 	_timer(new QTimer(this)),
 	_lastUpdate(QDateTime::fromTime_t(0))
 {
-	// This only works on Harmattan either way, so I guess
-	// hardcoding the path is OK.
-	_watcher->addPath(ACCUWEATHER_FILE_PATH);
+	_watcher->addPath(configFilePath());
 	connect(_watcher, SIGNAL(fileChanged(QString)), SLOT(fileChanged(QString)));
 
 	_timer->setInterval(5000);
@@ -23,32 +22,32 @@ HarmAccuWeather::HarmAccuWeather(QObject *parent) :
 	update();
 }
 
-QSettings* HarmAccuWeather::getAccuweatherData()
+QString MeeCastWeather::configFilePath()
 {
-	return new QSettings(ACCUWEATHER_FILE_PATH, QSettings::IniFormat);
+	return QDir::home().absoluteFilePath(".config/com.meecast.omweather/config.xml");
 }
 
-Notification::Type HarmAccuWeather::type() const
+Notification::Type MeeCastWeather::type() const
 {
 	return Notification::WeatherNotification;
 }
 
-uint HarmAccuWeather::count() const
+uint MeeCastWeather::count() const
 {
 	return 1;
 }
 
-QDateTime HarmAccuWeather::dateTime() const
+QDateTime MeeCastWeather::dateTime() const
 {
 	return _lastUpdate;
 }
 
-QString HarmAccuWeather::title() const
+QString MeeCastWeather::title() const
 {
 	return _lastLocation;
 }
 
-QString HarmAccuWeather::body() const
+QString MeeCastWeather::body() const
 {
 	switch (_lastWxCode) {
 	case 1:
@@ -131,7 +130,7 @@ QString HarmAccuWeather::body() const
 	}
 }
 
-WeatherNotification::WeatherType HarmAccuWeather::forecast()
+WeatherNotification::WeatherType MeeCastWeather::forecast()
 {
 	switch (_lastWxCode) {
 	case 1:
@@ -198,37 +197,36 @@ WeatherNotification::WeatherType HarmAccuWeather::forecast()
 	}
 }
 
-int HarmAccuWeather::temperature()
+int MeeCastWeather::temperature()
 {
 	return _lastTemp;
 }
 
-WeatherNotification::Unit HarmAccuWeather::temperatureUnits()
+WeatherNotification::Unit MeeCastWeather::temperatureUnits()
 {
 	return _metric ? Celsius : Fahrenheit;
 }
 
-void HarmAccuWeather::activate()
+void MeeCastWeather::activate()
 {
 	// Launch accuweather?
 }
 
-void HarmAccuWeather::dismiss()
+void MeeCastWeather::dismiss()
 {
 	// Do nothing
 }
 
-void HarmAccuWeather::fileChanged(const QString &path)
+void MeeCastWeather::fileChanged(const QString &path)
 {
 	Q_UNUSED(path);
-	qDebug() << "accuweather config file changed";
+	qDebug() << "meecast config file changed: " << path;
 	_timer->start();
 }
 
-void HarmAccuWeather::update()
+void MeeCastWeather::update()
 {
-	QSettings* s = getAccuweatherData();
-
+#if 0
 	qDebug() << "reading accuweather config file";
 
 	QDateTime lastUpdate = s->value("LastUpdate").toDateTime();
@@ -269,4 +267,5 @@ void HarmAccuWeather::update()
 	}
 
 	delete s;
+#endif
 }

@@ -1,5 +1,5 @@
-#ifndef CKITCALLPLUGIN_H
-#define CKITCALLPLUGIN_H
+#ifndef HARMACCUPLUGIN_H
+#define HARMACCUPLUGIN_H
 
 #include <sowatch.h>
 
@@ -22,4 +22,4 @@ public:
 
 }
 
-#endif // CKITCALLPLUGIN_H
+#endif // HARMACCUPLUGIN_H

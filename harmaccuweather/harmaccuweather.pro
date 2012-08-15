@@ -1,8 +1,6 @@
 TARGET = harmaccuweather
 TEMPLATE = lib
 CONFIG   += plugin
-CONFIG += mobility
-MOBILITY += systeminfo
 
 SOURCES += harmaccuplugin.cpp harmaccuprovider.cpp harmaccuweather.cpp
 

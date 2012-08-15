@@ -1,29 +1,26 @@
 #include <QtCore/QtDebug>
 #include <QtCore/QTimer>
-#include "harmaccuweather.h"
-#include "harmaccuprovider.h"
+#include "meecastweather.h"
+#include "meecastprovider.h"
 
 using namespace sowatch;
 
-HarmAccuProvider::HarmAccuProvider(QObject *parent) :
+const QLatin1String MeeCastProvider::myId("meecast");
+
+MeeCastProvider::MeeCastProvider(QObject *parent) :
 	NotificationProvider(parent)
 {
 	// Give some time to send the first notification
 	QTimer::singleShot(2000, this, SLOT(generateNotification()));
 }
 
-HarmAccuProvider::~HarmAccuProvider()
+MeeCastProvider::~MeeCastProvider()
 {
 }
 
-void HarmAccuProvider::generateNotification()
+void MeeCastProvider::generateNotification()
 {
-	QSettings* s = HarmAccuWeather::getAccuweatherData();
-	if (s->contains("LastUpdate")) {
-		qDebug() << "generating harmaccuweather notification";
-		emit incomingNotification(new HarmAccuWeather(this));
-	} else {
-		qWarning() << "Accuweather config file does not seem to exist";
+	if (QFile::exists(MeeCastWeather::configFilePath())) {
+		emit incomingNotification(new MeeCastWeather(this));
 	}
-	delete s;
 }
