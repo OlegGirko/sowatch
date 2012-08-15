@@ -28,11 +28,13 @@ contains(MEEGO_EDITION,harmattan) {
 	# Harmattan specific stuff
 	SUBDIRS += meegohandsetnotification ckitcallnotification harmaccuweather
 	SUBDIRS += qmafwwatchlet
+	SUBDIRS += meecastweather
 
 	meegohandsetnotification.depends = libsowatch
 	ckitcallnotification.depends = libsowatch
 	harmaccuweather.depends = libsowatch
     qmafwwatchlet.depends = libsowatch
+	meecastweather.depends = libsowatch
 } else:simulator {
 	# This notification provider builds almost everywhere so it's good enough as testcase
 	SUBDIRS += harmaccuweather
