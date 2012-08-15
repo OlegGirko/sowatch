@@ -27,8 +27,10 @@ public:
 	~MetaWatch();
 
 	static const int DelayBetweenMessages = 10;
+
+	static const int VibrateLength = 500;
 	static const int DelayBetweenRings = 2500;
-	static const int RingLength = 500;
+	static const int RingLength = 250;
 
 	enum MessageType {
 		NoMessage = 0,

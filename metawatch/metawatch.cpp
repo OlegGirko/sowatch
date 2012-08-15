@@ -250,7 +250,7 @@ void MetaWatch::displayNotification(Notification *notification)
 		_idleTimer->stop();
 	} else {
 		_ringTimer->stop();
-		setVibrateMode(true, RingLength, RingLength, 2);
+		setVibrateMode(true, VibrateLength, VibrateLength, 2);
 		_idleTimer->start();
 	}
 }
@@ -788,7 +788,7 @@ void MetaWatch::timedSend()
 
 void MetaWatch::timedRing()
 {
-	setVibrateMode(true, 250, 250, 3);
+	setVibrateMode(true, RingLength, RingLength, 3);
 }
 
 void MetaWatch::realNvalWrite(NvalValue value, int data)
