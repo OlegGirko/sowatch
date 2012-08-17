@@ -1,6 +1,7 @@
 #ifndef QMAPWATCHLETPLUGIN_H
 #define QMAPWATCHLETPLUGIN_H
 
+#include <QtLocation/QGeoServiceProvider>
 #include <sowatch.h>
 
 namespace sowatch
@@ -18,6 +19,11 @@ public:
 	QStringList watchlets();
 	WatchletInfo describeWatchlet(const QString &id);
 	Watchlet* getWatchlet(const QString &id, ConfigKey *config, WatchServer *server);
+
+	static QtMobility::QGeoServiceProvider * geoServiceProvider();
+
+private:
+	static QtMobility::QGeoServiceProvider *_provider;
 };
 
 }

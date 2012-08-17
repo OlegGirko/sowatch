@@ -1,23 +1,14 @@
 import QtQuick 1.0
 import QtMobility.location 1.2
+import com.javispedro.sowatch.metawatch 1.0
+import com.javispedro.sowatch.qmap 1.0
 
-Rectangle {
-	width: 96
-	height: 96
-
-	color: "white"
-
-	PositionSource {
-		id: pos
-		updateInterval: 5000
-		active: watch.active
-	}
-
-	Map {
+MWPage {
+	MapView {
 		id: map
 		anchors.fill: parent;
-		plugin : Plugin { name : "nokia" }
-		center: pos.position.coordinate
+		updateEnabled: watch.active
+		updateInterval: 5000;
 	}
 
 	Connections {

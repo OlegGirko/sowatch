@@ -11,6 +11,8 @@ class QMapWatchlet : public DeclarativeWatchlet
     Q_OBJECT
 public:
 	explicit QMapWatchlet(WatchServer* server);
+
+	static const QLatin1String myId;
 };
 
 }
