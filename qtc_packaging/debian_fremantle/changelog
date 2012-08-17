@@ -2,8 +2,11 @@ sowatch (0.4.1) unstable; urgency=low
 
   * Minor changes to MetaWatch icons.
   * Partial es localization for libsowatch.
+  * New nekowatchlet
+  * Plugin for MeeCast weather notifications.
+  * Improved Map watchlet.
 
- -- Javier S. Pedro <maemo@javispedro.com>  Wed, 15 Aug 2012 01:25:22 +0200
+ -- Javier S. Pedro <maemo@javispedro.com>  Fri, 17 Aug 2012 17:29:52 +0200
 
 sowatch (0.4.0) unstable; urgency=low
 

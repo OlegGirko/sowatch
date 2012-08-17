@@ -36,7 +36,7 @@ WatchletPluginInterface::WatchletInfo QMapWatchletPlugin::describeWatchlet(const
 {
 	WatchletInfo info;
 	if (id != QMapWatchlet::myId) return info;
-	info.name = "Moving map";
+	info.name = tr("Map");
 	info.icon = QUrl::fromLocalFile(SOWATCH_QML_DIR "/qmapwatchlet/icon.png");
 	return info;
 }
