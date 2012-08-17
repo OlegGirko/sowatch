@@ -12,7 +12,7 @@ do
 	if [[ $i =~ ^([a-z]+)[1-9].png ]]
 	then
 		stem=${BASH_REMATCH[1]}
-		output=atlas/$stem.png
+		output=$stem.png.tmp
 		if [[ $atlasfiles != *$output* ]]
 		then
 			montage $stem?.png -geometry 32x32 $output
@@ -22,11 +22,11 @@ do
 	fi
 done
 
-montage $atlasfiles -geometry 64x32+0+0 -gravity NorthWest -tile 1x atlas/atlas.png
+montage $atlasfiles -geometry 64x32+0+0 -gravity NorthWest -tile 1x atlas.png
 
 rm -f $atlasfiles
 
-echo $stems | tr ' ' '\n' > atlas/atlas.txt
+echo $stems | tr ' ' '\n' > atlas.txt
 
 exit 0
 
