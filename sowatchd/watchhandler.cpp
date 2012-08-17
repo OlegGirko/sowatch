@@ -117,9 +117,15 @@ void WatchHandler::updateWatchlets()
 			// We need to add this watchlet
 			const QString id = newWatchlets[i];
 			Watchlet *watchlet = createWatchlet(id);
-			_watchlet_order << id;
-			_watchlets[id] = watchlet;
-			_server->addWatchlet(watchlet);
+			if (watchlet) {
+				_watchlet_order << id;
+				_watchlets[id] = watchlet;
+				_server->addWatchlet(watchlet);
+			} else {
+				qWarning() << "Failed to load watchlet" << id;
+				newWatchlets.removeAt(i);
+				i--; // Retry
+			}
 		} else if (newWatchlets[i] != _watchlet_order[i]) {
 			// Let's find out if this watchlet has been moved, or removed.
 			const QString id = _watchlet_order[i];

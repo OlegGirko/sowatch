@@ -26,7 +26,7 @@ public:
 	explicit MetaWatch(ConfigKey *settings, QObject *parent = 0);
 	~MetaWatch();
 
-	static const int DelayBetweenMessages = 10;
+	static const int DelayBetweenMessages = 5;
 
 	static const int VibrateLength = 500;
 	static const int DelayBetweenRings = 2500;

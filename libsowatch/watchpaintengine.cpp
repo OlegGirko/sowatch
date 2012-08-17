@@ -5,8 +5,13 @@
 
 using namespace sowatch;
 
+#define ENABLE_TRACE 0
+
+#if ENABLE_TRACE
+#define TRACE(x) x
+#else
 #define TRACE(x)
-//#define TRACE(x) x
+#endif
 
 WatchPaintEngine::WatchPaintEngine()
 	: QPaintEngine(QPaintEngine::AllFeatures),
@@ -31,19 +36,26 @@ bool WatchPaintEngine::begin(QPaintDevice *pdev)
 	_clipRegion = _area;
 	_transform = QTransform();
 
+	TRACE(qDebug() << " -- BEGIN FRAME -----");
+
 	return _painter.begin(pdev);
 }
 
 bool WatchPaintEngine::end()
 {
+	TRACE(qDebug() << " -- END FRAME -------");
+	TRACE(qDebug() << _damaged << "------");
+
 	return _painter.end();
 }
 
 void WatchPaintEngine::damageMappedRect(const QRect &r)
 {
 	if (_clipEnabled) {
+		TRACE(qDebug() << "Damaging" << _clipRegion.intersected(r));
 		_damaged += _clipRegion.intersected(r);
 	} else {
+		TRACE(qDebug() << "Damaging" << r);
 		_damaged += r;
 	}
 }
@@ -152,12 +164,14 @@ void WatchPaintEngine::drawPath(const QPainterPath &path)
 
 void WatchPaintEngine::drawPixmap(const QRectF &r, const QPixmap &pm, const QRectF &sr)
 {
+	TRACE(qDebug() << __func__ << r << pm << sr);
 	damageRect(r);
 	_painter.drawPixmap(r, pm, sr);
 }
 
 void WatchPaintEngine::drawPoints(const QPointF *points, int pointCount)
 {
+	TRACE(qDebug() << __func__ << points);
 	int i;
 	for (i = 0; i < pointCount; i++) {
 		const QPointF& p = points[i];
@@ -169,6 +183,7 @@ void WatchPaintEngine::drawPoints(const QPointF *points, int pointCount)
 
 void WatchPaintEngine::drawPoints(const QPoint *points, int pointCount)
 {
+	TRACE(qDebug() << __func__ << points);
 	int i;
 	for (i = 0; i < pointCount; i++) {
 		const QPoint& p = points[i];
@@ -180,6 +195,7 @@ void WatchPaintEngine::drawPoints(const QPoint *points, int pointCount)
 
 void WatchPaintEngine::drawPolygon(const QPointF *points, int pointCount, PolygonDrawMode mode)
 {
+	TRACE(qDebug() << __func__ << points);
 	QPolygonF p(pointCount);
 	int i;
 	for (i = 0; i < pointCount; i++) {
@@ -192,6 +208,7 @@ void WatchPaintEngine::drawPolygon(const QPointF *points, int pointCount, Polygo
 
 void WatchPaintEngine::drawPolygon(const QPoint *points, int pointCount, PolygonDrawMode mode)
 {
+	TRACE(qDebug() << __func__ << points);
 	QPolygon p(pointCount);
 	int i;
 	for (i = 0; i < pointCount; i++) {

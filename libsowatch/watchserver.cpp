@@ -58,13 +58,16 @@ void WatchServer::setNextWatchletButton(const QString& value)
 
 void WatchServer::addWatchlet(Watchlet *watchlet)
 {
+	Q_ASSERT(watchlet);
 	insertWatchlet(_watchlets.size(), watchlet);
 }
 
 void WatchServer::insertWatchlet(int position, Watchlet *watchlet)
 {
-	const QString id = watchlet->id();
+	Q_ASSERT(watchlet);
 	Q_ASSERT(watchlet->_server == this);
+
+	const QString id = watchlet->id();
 	Q_ASSERT(!_watchletIds.contains(id));
 
 	_watchlets.insert(position, watchlet);

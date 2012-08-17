@@ -16,6 +16,10 @@ sysinfowatchlet.depends = libsowatch
 qmsgwatchlet.depends = libsowatch
 qmapwatchlet.depends = libsowatch
 
+# Less useful watchlets
+SUBDIRS += nekowatchlet
+nekowatchlet.depends = libsowatch
+
 unix {
 	SUBDIRS += sowatchd
 	SUBDIRS += sowatchui

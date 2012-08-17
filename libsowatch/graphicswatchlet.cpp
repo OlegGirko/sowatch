@@ -7,8 +7,10 @@
 
 using namespace sowatch;
 
-GraphicsWatchlet::GraphicsWatchlet(WatchServer* server, const QString& id) :
-	Watchlet(server, id), _scene(0), _frameTimer(), _damaged()
+GraphicsWatchlet::GraphicsWatchlet(WatchServer* server, const QString& id)
+    : Watchlet(server, id),
+      _scene(0), _frameTimer(),
+      _fullUpdateMode(false), _damaged()
 {
 	_frameTimer.setSingleShot(true);
 	connect(&_frameTimer, SIGNAL(timeout()), SLOT(frameTimeout()));
@@ -35,6 +37,16 @@ void GraphicsWatchlet::setScene(QGraphicsScene *scene)
 	}
 }
 
+bool GraphicsWatchlet::fullUpdateMode() const
+{
+	return _fullUpdateMode;
+}
+
+void GraphicsWatchlet::setFullUpdateMode(bool fullUpdateMode)
+{
+	_fullUpdateMode = fullUpdateMode;
+}
+
 QRectF GraphicsWatchlet::sceneRect() const
 {
 	if (_scene) {
@@ -56,12 +68,16 @@ QRect GraphicsWatchlet::viewportRect() const
 
 void GraphicsWatchlet::sceneChanged(const QList<QRectF> &rects)
 {
+	// Only consider scene updates if the watchlet is active
 	if (_active) {
-		// Only consider scene updates if the watchlet is active
 		QRect viewport = viewportRect();
-		foreach(const QRectF& frect, rects) {
-			QRect rect = frect.toAlignedRect() & viewport;
-			_damaged += rect;
+		if (_fullUpdateMode) {
+			_damaged += viewport;
+		} else {
+			foreach(const QRectF& frect, rects) {
+				QRect rect = frect.toAlignedRect() & viewport;
+				_damaged += rect;
+			}
 		}
 
 		// Start frame timer if we got new data

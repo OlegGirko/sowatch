@@ -13,12 +13,17 @@ namespace sowatch
 class SOWATCH_EXPORT GraphicsWatchlet : public Watchlet
 {
     Q_OBJECT
+	Q_PROPERTY(bool fullUpdateMode READ fullUpdateMode WRITE setFullUpdateMode)
+
 public:
 	explicit GraphicsWatchlet(WatchServer* server, const QString& id);
 	~GraphicsWatchlet();
 
 	QGraphicsScene* scene();
 	void setScene(QGraphicsScene* scene);
+
+	bool fullUpdateMode() const;
+	void setFullUpdateMode(bool fullUpdateMode);
 
 	QRectF sceneRect() const;
 	QRect viewportRect() const;
@@ -38,6 +43,7 @@ private slots:
 	void frameTimeout();
 
 private:
+	bool _fullUpdateMode;
 	QRegion _damaged;
 };
 
