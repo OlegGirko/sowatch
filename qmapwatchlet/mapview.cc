@@ -109,6 +109,7 @@ void MapView::setZoomLevel(qreal level)
 
 void MapView::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
+	Q_UNUSED(widget);
 	if (_mapData) {
 		// Render to an image first
 		const QSize size(_mapData->windowSize().toSize());
@@ -171,5 +172,6 @@ void MapView::handlePositionUpdate(const QGeoPositionInfo& info)
 
 void MapView::handleMapChanged(const QRectF &rect)
 {
+	Q_UNUSED(rect);
 	update(); // Always do full updates
 }
