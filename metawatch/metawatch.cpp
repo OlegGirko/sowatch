@@ -1,5 +1,4 @@
 #include <QtCore/QDebug>
-#include <QtCore/QDateTime>
 
 #include "metawatchpaintengine.h"
 #include "metawatch.h"
@@ -115,7 +114,7 @@ MetaWatch::MetaWatch(ConfigKey* settings, QObject* parent) :
 	_sendTimer->setInterval(DelayBetweenMessages);
 	connect(_sendTimer, SIGNAL(timeout()), SLOT(timedSend()));
 
-	// Do an initial connection attempt
+	// Do an initial connection attempt after a short delay
 	_connectTimer->start(100);
 }
 
