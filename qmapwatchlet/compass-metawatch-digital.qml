@@ -4,44 +4,39 @@ import com.javispedro.sowatch.metawatch 1.0
 import com.javispedro.sowatch.qmap 1.0
 
 MWPage {
-	MWTitle {
-		anchors.top: parent.top
-		anchors.left: parent.left
-		anchors.right: parent.right
-		text: qsTr("Trip computer")
-		icon.source: "trip-icon.png"
-	}
-
-	PositionSource {
-		id: gps
-		active: watch.active
-		updateInterval: 2000
-	}
 
 	function formatSpeed(speed) {
-		if (speed < 10) {
-			return speed.toFixed(1);
+		var kmh = speed * 3.6;
+		if (kmh < 0) {
+			return "";
+		} else if (kmh < 10) {
+			return kmh.toFixed(1) + " km/h";
 		} else {
-			return speed.toFixed(0);
+			return kmh.toFixed(0) + " km/h";
 		}
 	}
 
 	Column {
-		anchors.verticalCenter: parent.verticalCenter
-		MWLabel {
-			text: qsTr("Speed")
-		}
-		MWLabel {
-			id: speedLabel
-			text: gps.position.speedValid ? formatSpeed(gps.position.speed) : ""
+		anchors.top: parent.top
+		width: parent.width
+
+		CompassView {
+			anchors.horizontalCenter: parent.horizontalCenter
+			id: compass
+			updateEnabled: watch.active
+			updateInterval: 3000
+			width: 48
+			height: 48
 		}
 
-		MWLabel {
-			text: qsTr("Altitude")
+		Row {
+			MWLabel {
+				text: qsTr("Speed") + " "
+			}
+			MWLabel {
+				id: speedLabel
+				text: formatSpeed(compass.currentSpeed)
+			}
 		}
-	}
-
-	Column {
-
 	}
 }

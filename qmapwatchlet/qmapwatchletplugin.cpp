@@ -1,7 +1,8 @@
 #include "qmapwatchlet.h"
 #include "mapview.h"
+#include "compassview.h"
 #include "qmapwatchletplugin.h"
-#include "tripwatchlet.h"
+#include "compasswatchlet.h"
 
 using namespace sowatch;
 QTM_USE_NAMESPACE
@@ -18,6 +19,7 @@ QMapWatchletPlugin::QMapWatchletPlugin(QObject *parent) :
 		_provider = 0;
 	}
 	qmlRegisterType<MapView>("com.javispedro.sowatch.qmap", 1, 0, "MapView");
+	qmlRegisterType<CompassView>("com.javispedro.sowatch.qmap", 1, 0, "CompassView");
 }
 
 QMapWatchletPlugin::~QMapWatchletPlugin()
@@ -29,7 +31,7 @@ QMapWatchletPlugin::~QMapWatchletPlugin()
 QStringList QMapWatchletPlugin::watchlets()
 {
 	QStringList l;
-	l << QMapWatchlet::myId;
+	l << QMapWatchlet::myId << CompassWatchlet::myId;
 	return l;
 }
 
@@ -38,21 +40,23 @@ WatchletPluginInterface::WatchletInfo QMapWatchletPlugin::describeWatchlet(const
 	WatchletInfo info;
 	if (id == QMapWatchlet::myId) {
 		info.name = tr("Map");
-		info.icon = QUrl::fromLocalFile(SOWATCH_QML_DIR "/qmapwatchlet/icon.png");
-	} else if (id == TripWatchlet::myId) {
+		info.icon = QUrl::fromLocalFile(SOWATCH_QML_DIR "/qmapwatchlet/map-icon.png");
+	} else if (id == CompassWatchlet::myId) {
 		info.name = tr("Trip computer");
-		info.icon =
+		info.icon = QUrl::fromLocalFile(SOWATCH_QML_DIR "/qmapwatchlet/compass-icon.png");
 	}
-	if (id != ) return info;
-
 	return info;
 }
 
 Watchlet* QMapWatchletPlugin::getWatchlet(const QString &id, ConfigKey *config, WatchServer *server)
 {
 	Q_UNUSED(config);
-	if (id != QMapWatchlet::myId) return 0;
-	return new QMapWatchlet(server);
+	if (id == QMapWatchlet::myId) {
+		return new QMapWatchlet(server);
+	} else if (id == CompassWatchlet::myId) {
+		return new CompassWatchlet(server);
+	}
+	return 0;
 }
 
 QGeoServiceProvider *QMapWatchletPlugin::geoServiceProvider()

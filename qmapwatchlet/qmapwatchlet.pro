@@ -6,13 +6,13 @@ CONFIG   += mobility
 MOBILITY += location
 
 SOURCES += qmapwatchletplugin.cpp qmapwatchlet.cpp mapview.cpp \
-    compasswatchlet.cpp
+    compasswatchlet.cpp compassview.cpp
 
 HEADERS += qmapwatchletplugin.h qmapwatchlet.h mapview.h \
-    compasswatchlet.h
+    compasswatchlet.h compassview.h
 
-qml_files.files = map-metawatch-digital.qml map-icon.png map-arrow.png \
-	compass-metawatch-digital.qml compass-icon.png
+qml_files.files = map-metawatch-digital.qml map-icon.png arrow.png \
+	compass-metawatch-digital.qml compass-icon.png compass.png
 
 LIBS += -L$$OUT_PWD/../libsowatch/ -lsowatch
 INCLUDEPATH += $$PWD/../libsowatch
