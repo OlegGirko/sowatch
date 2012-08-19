@@ -3,6 +3,7 @@
 #include <QtGui/QLabel>
 #include <QtLocation/QGeoMapData>
 #include <QtLocation/QGraphicsGeoMap>
+#include <QtLocation/QGeoSearchManager>
 #include "qmapwatchletplugin.h"
 #include "mapview.h"
 
@@ -12,8 +13,10 @@ using namespace sowatch;
 MapView::MapView(QDeclarativeItem *parent) :
     QDeclarativeItem(parent),
     _enabled(false),
+    _arrow(SOWATCH_QML_DIR "/qmapwatchlet/arrow.png"),
     _mapData(0),
-    _pos(QGeoPositionInfoSource::createDefaultSource(this))
+    _posSource(QGeoPositionInfoSource::createDefaultSource(this)),
+    _searchArea(0), _searchReply(0)
 {
 	QGeoServiceProvider *provider = QMapWatchletPlugin::geoServiceProvider();
 	if (!provider) {
@@ -27,7 +30,7 @@ MapView::MapView(QDeclarativeItem *parent) :
 		_mapData->init();
 		_mapData->setMapType(QGraphicsGeoMap::StreetMap);
 
-		_mapData->setZoomLevel(10);
+		_mapData->setZoomLevel(12);
 
 		connect(_mapData, SIGNAL(zoomLevelChanged(qreal)), SIGNAL(zoomLevelChanged()));
 		connect(_mapData, SIGNAL(updateMapDisplay(QRectF)), SLOT(handleMapChanged(QRectF)));
@@ -35,10 +38,10 @@ MapView::MapView(QDeclarativeItem *parent) :
 		qWarning() << "No mapdata!";
 	}
 
-	if (_pos) {
-		connect(_pos, SIGNAL(positionUpdated(QGeoPositionInfo)),
+	if (_posSource) {
+		connect(_posSource, SIGNAL(positionUpdated(QGeoPositionInfo)),
 				SLOT(handlePositionUpdate(QGeoPositionInfo)));
-		_pos->lastKnownPosition();
+		_posSource->lastKnownPosition();
 	} else {
 		qWarning() << "No position source for moving map!";
 	}
@@ -49,6 +52,8 @@ MapView::MapView(QDeclarativeItem *parent) :
 MapView::~MapView()
 {
 	delete _mapData;
+	delete _searchReply;
+	delete _searchArea;
 }
 
 bool MapView::updateEnabled() const
@@ -58,13 +63,13 @@ bool MapView::updateEnabled() const
 
 void MapView::setUpdateEnabled(bool enabled)
 {
-	if (_pos && _enabled != enabled) {
+	if (_posSource && _enabled != enabled) {
 		if (enabled) {
 			qDebug() << "Start position updates";
-			_pos->startUpdates();
+			_posSource->startUpdates();
 		} else {
 			qDebug() << "Stop position updates";
-			_pos->stopUpdates();
+			_posSource->stopUpdates();
 		}
 		_enabled = enabled;
 
@@ -75,8 +80,8 @@ void MapView::setUpdateEnabled(bool enabled)
 
 int MapView::updateInterval() const
 {
-	if (_pos) {
-		return _pos->updateInterval();
+	if (_posSource) {
+		return _posSource->updateInterval();
 	} else {
 		return 0;
 	}
@@ -84,8 +89,8 @@ int MapView::updateInterval() const
 
 void MapView::setUpdateInterval(int msec)
 {
-	if (_pos) {
-		_pos->setUpdateInterval(msec);
+	if (_posSource) {
+		_posSource->setUpdateInterval(msec);
 		emit updateIntervalChanged();
 	}
 }
@@ -105,6 +110,11 @@ void MapView::setZoomLevel(qreal level)
 		_mapData->setZoomLevel(level);
 		qDebug() << "new zoom level" << level;
 	}
+}
+
+QString MapView::currentLocationName() const
+{
+	return _posName;
 }
 
 void MapView::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
@@ -151,7 +161,52 @@ void MapView::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, Q
 
 		// And render into the watch
 		painter->drawImage(0, 0, pixmap);
+
+		// Now render the arrow indicator
+		const int centerX = size.width() / 2, centerY = size.height() / 2;
+		painter->save();
+		painter->translate(centerX, centerY);
+		if (_pos.hasAttribute(QGeoPositionInfo::Direction)) {
+			painter->rotate(_pos.attribute(QGeoPositionInfo::Direction));
+		}
+		painter->drawImage(-_arrow.width() / 2, -_arrow.height() / 2, _arrow);
+		painter->restore();
 	}
+}
+
+void MapView::updateCurrentLocationName()
+{
+	if (_searchReply) {
+		qDebug() << "Search already in progress";
+		return;
+	}
+	QGeoServiceProvider *provider = QMapWatchletPlugin::geoServiceProvider();
+	if (!provider) {
+		qWarning() << "No geo service provider for map watchlet!";
+	}
+
+	// Lifetime of 'bounds' in call to reverseGeocode() is not specified anywhere.
+	// So we keep it "forever" until the next call to reverseGeocode().
+	// which is ... now.
+	delete _searchArea;
+
+	// Create the new bounds object.
+	if (_mapData) {
+		_searchArea = new QGeoBoundingBox(_mapData->viewport());
+	} else {
+		_searchArea = 0;
+	}
+
+	_posName.clear();
+
+	qDebug() << "Start request of current location";
+
+	QGeoSearchManager *manager = provider->searchManager();
+	_searchReply = manager->reverseGeocode(_pos.coordinate(), _searchArea);
+	connect(_searchReply, SIGNAL(finished()),
+	        SLOT(handleCurrentLocationNameSearchFinished()));
+	connect(_searchReply, SIGNAL(error(QGeoSearchReply::Error,QString)),
+	        SLOT(handleCurrentLocationNameSearchError(QGeoSearchReply::Error,QString)));
 }
 
 void MapView::geometryChanged(const QRectF &newGeometry, const QRectF &oldGeometry)
@@ -164,14 +219,55 @@ void MapView::geometryChanged(const QRectF &newGeometry, const QRectF &oldGeomet
 
 void MapView::handlePositionUpdate(const QGeoPositionInfo& info)
 {
+	_pos = info;
 	if (_mapData) {
-		qDebug() << "Got pos for map";
 		_mapData->setCenter(info.coordinate());
 	}
 }
 
 void MapView::handleMapChanged(const QRectF &rect)
 {
-	Q_UNUSED(rect);
-	update(); // Always do full updates
+	update(rect);
+}
+
+void MapView::handleCurrentLocationNameSearchFinished()
+{
+	if (_searchReply) {
+		if (_searchReply->error() == QGeoSearchReply::NoError) {
+			QList<QGeoPlace> places = _searchReply->places();
+			qDebug() << "Current location name search got " << places.size() << " results";
+			foreach (const QGeoPlace& place, places) {
+				QGeoAddress address = place.address();
+				qDebug() << "  " << address.street() << " - " << address.district() << " - " << address.city();
+			}
+			if (!places.isEmpty()) {
+				QGeoAddress address = places.first().address();
+				if (!address.street().isEmpty()) {
+					_posName = address.street();
+				} else if (!address.district().isEmpty()) {
+					_posName = address.district();
+				} else if (!address.city().isEmpty()) {
+					_posName = address.city();
+				} else {
+					_posName.clear();
+				}
+				qDebug() << "Current location name search finished:" << _posName;
+				emit currentLocationNameChanged();
+			}
+		} else {
+			qDebug() << "Current location name search finished with error:"
+			         << _searchReply->error();
+		}
+		_searchReply->deleteLater();
+		_searchReply = 0;
+	}
+}
+
+void MapView::handleCurrentLocationNameSearchError(QGeoSearchReply::Error error, const QString &errorString)
+{
+	qWarning() << "Current location name search error: " << errorString;
+	if (_searchReply) {
+		_searchReply->deleteLater();
+		_searchReply = 0;
+	}
 }

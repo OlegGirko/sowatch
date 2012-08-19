@@ -9,7 +9,7 @@ SOURCES += qmapwatchletplugin.cpp qmapwatchlet.cpp mapview.cc
 
 HEADERS += qmapwatchletplugin.h qmapwatchlet.h mapview.h
 
-qml_files.files = metawatch-digital.qml icon.png
+qml_files.files = metawatch-digital.qml icon.png arrow.png
 
 LIBS += -L$$OUT_PWD/../libsowatch/ -lsowatch
 INCLUDEPATH += $$PWD/../libsowatch
