@@ -1,6 +1,7 @@
 #include "qmapwatchlet.h"
 #include "mapview.h"
 #include "qmapwatchletplugin.h"
+#include "tripwatchlet.h"
 
 using namespace sowatch;
 QTM_USE_NAMESPACE
@@ -35,9 +36,15 @@ QStringList QMapWatchletPlugin::watchlets()
 WatchletPluginInterface::WatchletInfo QMapWatchletPlugin::describeWatchlet(const QString &id)
 {
 	WatchletInfo info;
-	if (id != QMapWatchlet::myId) return info;
-	info.name = tr("Map");
-	info.icon = QUrl::fromLocalFile(SOWATCH_QML_DIR "/qmapwatchlet/icon.png");
+	if (id == QMapWatchlet::myId) {
+		info.name = tr("Map");
+		info.icon = QUrl::fromLocalFile(SOWATCH_QML_DIR "/qmapwatchlet/icon.png");
+	} else if (id == TripWatchlet::myId) {
+		info.name = tr("Trip computer");
+		info.icon =
+	}
+	if (id != ) return info;
+
 	return info;
 }
 

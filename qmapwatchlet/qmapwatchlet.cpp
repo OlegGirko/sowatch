@@ -8,6 +8,6 @@ QMapWatchlet::QMapWatchlet(WatchServer* server) :
 	DeclarativeWatchlet(server, myId)
 {
 	setFullUpdateMode(true);
-	setSource(QUrl(SOWATCH_QML_DIR "/qmapwatchlet/" + server->watch()->model() + ".qml"));
+	setSource(QUrl(SOWATCH_QML_DIR "/qmapwatchlet/map-" + server->watch()->model() + ".qml"));
 }
 
