@@ -571,6 +571,10 @@ void MetaWatch::handleNvalOperationMessage(const Message& msg)
 {
 	Q_ASSERT(msg.type == NvalOperationResponse);
 
+	// Nval operation response packet format is:
+	//  2 bytes for id
+	//  Rest for contents
+
 	if (msg.data.size() < 2) {
 		qWarning() << "NVAL operation response too short";
 	}

@@ -38,6 +38,7 @@ public:
 		GetDeviceTypeResponse = 0x02,
 		GetInformationString = 0x03,
 		GetInformationStringResponse = 0x04,
+		DiagnosticLoopback = 0x05,
 		WriteOledBuffer = 0x10,
 		ChangeOledMode = 0x12,
 		WriteOledScrollBuffer = 0x13,
@@ -72,7 +73,9 @@ public:
 		LinkKey = 0x1,
 		IdleBufferConfiguration = 0x2,
 		TimeFormat = 0x2009,
-		DateFormat = 0x200a
+		DateFormat = 0x200a,
+		DisplaySeconds = 0x200b,
+		Language = 0x200c
 	};
 
 	enum Mode {
