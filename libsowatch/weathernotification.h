@@ -32,7 +32,13 @@ public:
 	virtual WeatherType forecast() = 0;
 	virtual int temperature() = 0;
 	virtual Unit temperatureUnits() = 0;
+
+	/** Quite useful helper function. */
+	static qreal convertTemperature(qreal temp, Unit from, Unit to);
+	static int convertTemperature(int temp, Unit from, Unit to);
 };
+
+
 
 }
 

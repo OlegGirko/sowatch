@@ -145,6 +145,11 @@ void MeeCastWeather::dismiss()
 	// Do nothing
 }
 
+int MeeCastWeather::convertTemperatureToUserUnit(int temp, Unit unit)
+{
+	return convertTemperature(temp, unit, _tempUnit);
+}
+
 void MeeCastWeather::fileChanged(const QString &path)
 {
 	qDebug() << "meecast config file changed: " << path;
@@ -207,7 +212,24 @@ void MeeCastWeather::parseStationFile()
 			qDebug() << "meecast reading weather info";
 
 			QDomElement root = doc.documentElement();
-			QDomNodeList list = root.elementsByTagName("period");
+			QDomNodeList list;
+			Unit tempUnit = _tempUnit;
+
+			list = root.elementsByTagName("units");
+			if (!list.isEmpty()) {
+				QDomElement units = list.at(0).toElement();
+				list = units.elementsByTagName("t");
+				if (!list.isEmpty()) {
+					QDomElement e = list.at(0).toElement();
+					if (e.text() == "C") {
+						tempUnit = Celsius;
+					} else if (e.text() == "F") {
+						tempUnit = Fahrenheit;
+					}
+				}
+			}
+
+			list = root.elementsByTagName("period");
 			for (int index = 0; index < list.size(); index++) {
 				QDomElement e = list.item(index).toElement();
 				if (e.attribute("current") == "true") {
@@ -223,6 +245,8 @@ void MeeCastWeather::parseStationFile()
 
 					int temp = e.firstChildElement("temperature").text().toInt();
 					qDebug() << "temp" << temp;
+					temp = convertTemperatureToUserUnit(temp, tempUnit);
+					qDebug() << " -> " << temp;
 					if (temp != _lastTemp) {
 						anythingChanged = true;
 						_lastTemp = temp;

@@ -31,6 +31,9 @@ public:
 	void activate();
 	void dismiss();
 
+private:
+	int convertTemperatureToUserUnit(int temp, Unit unit);
+
 private slots:
 	void fileChanged(const QString& path);
 	void parseConfigFile();
