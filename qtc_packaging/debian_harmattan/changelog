@@ -1,3 +1,11 @@
+sowatch (0.4.2) unstable; urgency=low
+
+  * Add an arrow pointer to the map watchlet.
+  * New Compass watchlet.
+  * Fix temperature conversion in MeeCast plugin.
+
+ -- Javier S. Pedro <maemo@javispedro.com>  Sat, 25 Aug 2012 20:23:44 +0200
+
 sowatch (0.4.1) unstable; urgency=low
 
   * Minor changes to MetaWatch icons.

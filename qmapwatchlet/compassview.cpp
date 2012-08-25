@@ -1,3 +1,5 @@
+#include <math.h>
+
 #include "qmapwatchletplugin.h"
 #include "compassview.h"
 
@@ -9,7 +11,7 @@ CompassView::CompassView(QDeclarativeItem *parent) :
     _enabled(false),
     _image(SOWATCH_QML_DIR "/qmapwatchlet/compass.png"),
     _posSource(QGeoPositionInfoSource::createDefaultSource(this)),
-    _direction(-1.0), _speed(-1.0), _altitude(-1.0)
+    _direction(-1.0), _speed(NAN), _altitude(NAN)
 {
 	if (_posSource) {
 		connect(_posSource, SIGNAL(positionUpdated(QGeoPositionInfo)),
@@ -106,7 +108,7 @@ void CompassView::handlePositionUpdate(const QGeoPositionInfo &info)
 		update();
 	}
 
-	qreal newSpeed = -1.0;
+	qreal newSpeed = NAN;
 	if (info.hasAttribute(QGeoPositionInfo::GroundSpeed)) {
 		newSpeed = info.attribute(QGeoPositionInfo::GroundSpeed);
 	}
@@ -114,5 +116,15 @@ void CompassView::handlePositionUpdate(const QGeoPositionInfo &info)
 	if (newSpeed != _speed) {
 		_speed = newSpeed;
 		emit currentSpeedChanged();
+	}
+
+	qreal newAlt = NAN;
+	if (info.hasAttribute(QGeoPositionInfo::VerticalAccuracy)) {
+		newAlt = info.coordinate().altitude();
+	}
+	qDebug() << "New altitude" << newAlt;
+	if (newAlt != _altitude) {
+		_altitude = newAlt;
+		emit currentAltitudeChanged();
 	}
 }
