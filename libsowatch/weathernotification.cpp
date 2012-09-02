@@ -15,6 +15,8 @@ qreal WeatherNotification::convertTemperature(qreal temp, Unit from, Unit to)
 		return temp * (9.0f/5.0f) + 32.0f;
 	} else if (from == Fahrenheit && to == Celsius) {
 		return (temp - 32.0f) * (5.0f/9.0f);
+	} else {
+		return 0.0f;
 	}
 }
 

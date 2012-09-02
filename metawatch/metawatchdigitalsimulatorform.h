@@ -1,7 +1,7 @@
 #ifndef METAWATCHSIMULATORFORM_H
 #define METAWATCHSIMULATORFORM_H
 
-#include <QWidget>
+#include <QtGui/QMainWindow>
 
 namespace Ui {
 	class MetaWatchDigitalSimulatorForm;
@@ -9,7 +9,7 @@ namespace Ui {
 
 namespace sowatch {
 
-class MetaWatchDigitalSimulatorForm : public QWidget
+class MetaWatchDigitalSimulatorForm : public QMainWindow
 {
     Q_OBJECT
 
@@ -23,7 +23,7 @@ signals:
 	void buttonPressed(int button);
 	void buttonReleased(int button);
 
-protected slots:
+private slots:
 	void btnAPressed();
 	void btnAReleased();
 	void btnBPressed();
@@ -36,6 +36,10 @@ protected slots:
 	void btnEReleased();
 	void btnFPressed();
 	void btnFReleased();
+
+	void on_actionCaptureScreen_triggered();
+
+	void on_actionQuit_triggered();
 
 private:
     Ui::MetaWatchDigitalSimulatorForm *ui;

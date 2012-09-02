@@ -19,10 +19,12 @@ MetaWatchDigitalSimulator::MetaWatchDigitalSimulator(ConfigKey *config, QObject 
 	_form->showNormal();
 	connect(_form, SIGNAL(buttonPressed(int)), SIGNAL(buttonPressed(int)));
 	connect(_form, SIGNAL(buttonReleased(int)), SIGNAL(buttonReleased(int)));
+	connect(_form, SIGNAL(destroyed()), SLOT(handleFormDestroyed()));
 }
 
 MetaWatchDigitalSimulator::~MetaWatchDigitalSimulator()
 {
+	_connected = false;
 	delete _form;
 }
 
@@ -101,7 +103,7 @@ void MetaWatchDigitalSimulator::vibrate(bool on)
 void MetaWatchDigitalSimulator::retryConnect()
 {
 	if (!_connected && _form) {
-		qDebug() << "connected";
+		qDebug() << "simulator connected";
 
 		_connected = true;
 		_currentMode = IdleMode;
@@ -117,4 +119,14 @@ void MetaWatchDigitalSimulator::send(const Message &msg)
 {
 	// Do not send messages
 	Q_UNUSED(msg);
+}
+
+void MetaWatchDigitalSimulator::handleFormDestroyed()
+{
+	if (_connected) {
+		_connected = false;
+		qDebug() << "simulator disconnected";
+		emit disconnected();
+		_form = 0;
+	}
 }

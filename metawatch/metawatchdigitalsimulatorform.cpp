@@ -1,10 +1,13 @@
+#include <QtCore/QDebug>
+#include <QtGui/QFileDialog>
+
 #include "metawatchdigitalsimulatorform.h"
 #include "ui_metawatchdigitalsimulatorform.h"
 
 using namespace sowatch;
 
 MetaWatchDigitalSimulatorForm::MetaWatchDigitalSimulatorForm(QWidget* parent) :
-    QWidget(parent),
+    QMainWindow(parent),
     ui(new Ui::MetaWatchDigitalSimulatorForm)
 {
     ui->setupUi(this);
@@ -79,4 +82,22 @@ void MetaWatchDigitalSimulatorForm::btnFPressed()
 void MetaWatchDigitalSimulatorForm::btnFReleased()
 {
 	emit buttonReleased(5);
+}
+
+void MetaWatchDigitalSimulatorForm::on_actionCaptureScreen_triggered()
+{
+	QString fileName = QFileDialog::getSaveFileName(this, tr("Save capture"), QString(), tr("Images (*.png)"));
+	if (fileName.isEmpty()) {
+		return;
+	}
+	if (!fileName.endsWith(".png")) {
+		fileName.append(".png");
+	}
+	qDebug() << "Saving to" << fileName;
+	ui->lblDisplay->pixmap()->save(fileName, "PNG");
+}
+
+void MetaWatchDigitalSimulatorForm::on_actionQuit_triggered()
+{
+    QApplication::quit();
 }

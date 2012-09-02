@@ -29,6 +29,9 @@ public:
 	void retryConnect();
 	void send(const Message& msg);
 
+private slots:
+	void handleFormDestroyed();
+
 private:
 	MetaWatchDigitalSimulatorForm* _form;
 	QPixmap _pixmap[3];

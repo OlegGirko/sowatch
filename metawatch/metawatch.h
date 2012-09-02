@@ -74,8 +74,7 @@ public:
 		IdleBufferConfiguration = 0x2,
 		TimeFormat = 0x2009,
 		DateFormat = 0x200a,
-		DisplaySeconds = 0x200b,
-		Language = 0x200c
+		DisplaySeconds = 0x200b
 	};
 
 	enum Mode {

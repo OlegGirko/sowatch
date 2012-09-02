@@ -368,6 +368,7 @@ uint MetaWatch::nvalSize(NvalValue value)
 		return 1;
 	case TimeFormat:
 	case DateFormat:
+	case DisplaySeconds:
 		return 1;
 	}
 	return 0;

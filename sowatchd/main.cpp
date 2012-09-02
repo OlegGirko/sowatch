@@ -4,13 +4,8 @@
 #include <QtDBus/QDBusConnection>
 
 #include <sowatch.h>
-#include "global.h"
+#include "daemon.h"
 #include "daemonadaptor.h"
-
-namespace sowatch
-{
-	Daemon* daemon;
-}
 
 using namespace sowatch;
 
@@ -48,16 +43,20 @@ int main(int argc, char *argv[])
 	QApplication::setApplicationName("sowatchd");
 	QApplication::setQuitOnLastWindowClosed(false);
 
+	// Load translators
 	setupLocalization(&app);
 
-	sowatch::daemon = new Daemon(&app);
-	new DaemonAdaptor(sowatch::daemon);
+	// Create the daemon object and D-Bus adaptor
+	Daemon daemon;
+	DaemonAdaptor adaptor(&daemon);
+
+	Q_UNUSED(adaptor);
 
 	QDBusConnection connection = QDBusConnection::sessionBus();
 	if (!connection.registerService("com.javispedro.sowatchd")) {
 		qCritical("Could not register D-Bus service");
 	}
-	if (!connection.registerObject("/com/javispedro/sowatch/daemon", sowatch::daemon)) {
+	if (!connection.registerObject("/com/javispedro/sowatch/daemon", &daemon)) {
 		qCritical("Could not register daemon object");
 	}
 
