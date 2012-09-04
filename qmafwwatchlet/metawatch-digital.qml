@@ -78,8 +78,9 @@ Rectangle {
 				anchors.bottom: parent.bottom
 				anchors.margins: 4
 
-				visible: volumeBar.visible
-				height: (volumeControl.volume * (parent.height - anchors.margins*2)) / (volumeControl.max - volumeControl.min)
+				height: volumeBar.visible ?
+					(volumeControl.volume * (parent.height - anchors.margins*2)) / (volumeControl.max - volumeControl.min) :
+					0; // Avoid unnecessary updates when not visible.
 
 				color: "white"
 			}

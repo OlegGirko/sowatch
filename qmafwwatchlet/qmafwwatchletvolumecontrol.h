@@ -44,8 +44,8 @@ private:
 
 private:
 	DBusConnection *_conn;
-	uint _curStep;
-	uint _maxStep;
+	int _curStep;
+	int _maxStep;
 };
 
 }

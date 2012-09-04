@@ -69,19 +69,34 @@ void QMafwWatchletVolumeControl::setVolume(int vol)
 	dbus_connection_send(_conn, msg, 0);
 
 	dbus_message_unref(msg);
+
+	if (vol != _curStep) {
+		_curStep = vol;
+		emit volumeChanged();
+	}
 }
 
 void QMafwWatchletVolumeControl::up()
 {
-	if (_curStep < _maxStep - 1) {
-		setVolume(_curStep + 1);
+	int increment = _maxStep / 10;
+	int newStep = _curStep + increment;
+	if (newStep >= _maxStep) {
+		newStep = _maxStep - 1;
+	}
+	if (newStep != _curStep) {
+		setVolume(newStep);
 	}
 }
 
 void QMafwWatchletVolumeControl::down()
 {
-	if (_curStep > 0) {
-		setVolume(_curStep - 1);
+	int increment = _maxStep / 10;
+	int newStep = _curStep - increment;
+	if (newStep < 0) {
+		newStep = 0;
+	}
+	if (newStep != _curStep) {
+		setVolume(newStep);
 	}
 }
 
@@ -135,7 +150,7 @@ void QMafwWatchletVolumeControl::_listenForSignal()
 
 void QMafwWatchletVolumeControl::_fetchValues()
 {
-	DBusMessage *msg, *reply;
+	DBusMessage *msg;
 	DBusError err;
 
 	dbus_error_init(&err);
@@ -205,12 +220,13 @@ void QMafwWatchletVolumeControl::handleFetchReply(DBusPendingCall *pending, void
 				quint32 value;
 				dbus_message_iter_get_basic(&iter_variant, &value);
 
-				if (strcmp(prop_name, "StepCount")) {
+				qDebug() << "MainVolume" << prop_name << value;
+
+				if (strcmp(prop_name, "StepCount") == 0) {
 					self->_maxStep = value;
-				} else if (strcmp(prop_name, "CurrentStep")) {
+				} else if (strcmp(prop_name, "CurrentStep") == 0) {
 					self->_curStep = value;
 				}
-				qDebug() << prop_name << value;
 			}
 
 			dbus_message_iter_next(&iter_dict);
@@ -229,6 +245,7 @@ void QMafwWatchletVolumeControl::handleFetchReply(DBusPendingCall *pending, void
 DBusHandlerResult QMafwWatchletVolumeControl::handleDBusSignal(DBusConnection *connection, DBusMessage *message, void *user_data)
 {
 	QMafwWatchletVolumeControl *self = static_cast<QMafwWatchletVolumeControl*>(user_data);
+	Q_UNUSED(connection);
 	if (dbus_message_is_signal(message, VOLUME_IF, "StepsUpdated")) {
 		DBusError err;
 		quint32 curStep, maxStep;
@@ -238,14 +255,18 @@ DBusHandlerResult QMafwWatchletVolumeControl::handleDBusSignal(DBusConnection *c
 		                          DBUS_TYPE_UINT32, &maxStep,
 		                          DBUS_TYPE_UINT32, &curStep,
 		                          DBUS_TYPE_INVALID)) {
-			if (self->_maxStep != maxStep) {
+			if (self->_maxStep != static_cast<int>(maxStep)) {
 				self->_maxStep = maxStep;
 				emit self->maxChanged();
 			}
-			if (self->_curStep != curStep) {
+			if (self->_curStep != static_cast<int>(curStep)) {
 				self->_curStep = curStep;
 				emit self->volumeChanged();
 			}
 		}
+
+		return DBUS_HANDLER_RESULT_HANDLED;
 	}
+
+	return DBUS_HANDLER_RESULT_NOT_YET_HANDLED;
 }

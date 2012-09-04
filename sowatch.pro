@@ -15,7 +15,7 @@ sysinfowatchlet.depends = libsowatch
 qmsgwatchlet.depends = libsowatch
 qmapwatchlet.depends = libsowatch
 
-# Less useful watchlets
+# Toy watchlets
 SUBDIRS += nekowatchlet
 nekowatchlet.depends = libsowatch
 
@@ -30,14 +30,14 @@ unix {
 contains(MEEGO_EDITION,harmattan) {
 	# Harmattan specific stuff
 	SUBDIRS += meegohandsetnotification ckitcallnotification harmaccuweather
-	SUBDIRS += qmafwwatchlet
 	SUBDIRS += meecastweather
+	SUBDIRS += qmafwwatchlet
 
 	meegohandsetnotification.depends = libsowatch
 	ckitcallnotification.depends = libsowatch
 	harmaccuweather.depends = libsowatch
-    qmafwwatchlet.depends = libsowatch
 	meecastweather.depends = libsowatch
+	qmafwwatchlet.depends = libsowatch
 } else:simulator {
 	# This notification provider builds almost everywhere so it's good enough as testcase
 	SUBDIRS += harmaccuweather
