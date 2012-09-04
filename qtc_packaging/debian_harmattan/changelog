@@ -1,3 +1,10 @@
+sowatch (0.4.3) unstable; urgency=low
+
+  * Improved volume controls in media player.
+  * Fix a potential crash on exit.
+
+ -- Javier S. Pedro <maemo@javispedro.com>  Tue, 04 Sep 2012 03:32:31 +0200
+
 sowatch (0.4.2) unstable; urgency=low
 
   * Add an arrow pointer to the map watchlet.
