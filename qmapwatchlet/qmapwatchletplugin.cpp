@@ -42,7 +42,7 @@ WatchletPluginInterface::WatchletInfo QMapWatchletPlugin::describeWatchlet(const
 		info.name = tr("Map");
 		info.icon = QUrl::fromLocalFile(SOWATCH_QML_DIR "/qmapwatchlet/map-icon.png");
 	} else if (id == CompassWatchlet::myId) {
-		info.name = tr("Trip computer");
+		info.name = tr("Compass");
 		info.icon = QUrl::fromLocalFile(SOWATCH_QML_DIR "/qmapwatchlet/compass-icon.png");
 	}
 	return info;

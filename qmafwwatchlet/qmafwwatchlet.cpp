@@ -1,6 +1,7 @@
 #include <MafwShared.h>
 
 #include "qmafwwatchletplayer.h"
+#include "qmafwwatchletvolumecontrol.h"
 #include "qmafwwatchlet.h"
 
 using namespace sowatch;
@@ -8,7 +9,8 @@ using namespace sowatch;
 QMafwWatchlet::QMafwWatchlet(WatchServer* server) :
 	DeclarativeWatchlet(server, "com.javispedro.sowatch.qmafw"),
 	_registry(MafwRegistry::instance()),
-	_player(new QMafwWatchletPlayer(this))
+	_player(new QMafwWatchletPlayer(this)),
+    _volumeControl(new QMafwWatchletVolumeControl(this))
 {
 	MafwShared* shared = MafwShared::instance();
 
@@ -21,6 +23,7 @@ QMafwWatchlet::QMafwWatchlet(WatchServer* server) :
 	connect(this, SIGNAL(deactivated()), _player, SLOT(deactivate()));
 
 	rootContext()->setContextProperty("player", _player);
+	rootContext()->setContextProperty("volumeControl", _volumeControl);
 	setSource(QUrl(SOWATCH_QML_DIR "/qmafwwatchlet/" + server->watch()->model() + ".qml"));
 }
 

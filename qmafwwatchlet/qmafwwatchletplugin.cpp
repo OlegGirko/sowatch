@@ -8,10 +8,6 @@ QMafwWatchletPlugin::QMafwWatchletPlugin(QObject *parent) :
 {
 }
 
-QMafwWatchletPlugin::~QMafwWatchletPlugin()
-{
-}
-
 QStringList QMafwWatchletPlugin::watchlets()
 {
 	QStringList l;
@@ -23,7 +19,7 @@ WatchletPluginInterface::WatchletInfo QMafwWatchletPlugin::describeWatchlet(cons
 {
 	WatchletInfo info;
 	if (id != "com.javispedro.sowatch.qmafw") return info;
-	info.name = "Music player";
+	info.name = tr("Music player");
 	info.icon = QUrl::fromLocalFile(SOWATCH_QML_DIR "/qmafwwatchlet/icon.png");
 	return info;
 }

@@ -38,16 +38,82 @@ Rectangle {
 		}
 	}
 
+	Rectangle {
+		id: volumeBar
+		width: 18
+
+		anchors.top: parent.top
+		anchors.bottom: parent.bottom
+		anchors.right: parent.right
+
+		color: "white"
+
+		visible: false
+
+		Image {
+			id: volumeIcon
+			anchors.top: parent.top
+			anchors.left: parent.left
+			anchors.leftMargin: 2
+
+			source: "volume.png"
+		}
+
+		Rectangle {
+			id: volumeBarBox
+
+			anchors.top: volumeIcon.bottom
+			anchors.left: parent.left
+			anchors.right: parent.right
+			anchors.bottom: parent.bottom
+			anchors.leftMargin: 2
+
+			color: "black"
+
+			Rectangle {
+				id: volumeBarThing
+
+				anchors.left: parent.left
+				anchors.right: parent.right
+				anchors.bottom: parent.bottom
+				anchors.margins: 4
+
+				visible: volumeBar.visible
+				height: (volumeControl.volume * (parent.height - anchors.margins*2)) / (volumeControl.max - volumeControl.min)
+
+				color: "white"
+			}
+		}
+
+		Timer {
+			id: autoHideTimer
+			interval: 3000
+			repeat: false
+			onTriggered: {
+				volumeBar.visible = false;
+			}
+		}
+
+		function show() {
+			volumeBar.visible = true;
+			autoHideTimer.restart();
+		}
+	}
+
 	Connections {
 		target: watch
 		onButtonPressed : {
 			switch(button) {
-			case 1:
-				player.volumeUp();
+			case 1: {
+				volumeControl.up();
+				volumeBar.show();
 				break;
-			case 2:
-				player.volumeDown();
+			}
+			case 2: {
+				volumeControl.down();
+				volumeBar.show();
 				break;
+			}
 			case 4:
 				player.playPause();
 				break;

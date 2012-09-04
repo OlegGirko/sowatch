@@ -4,16 +4,18 @@ TEMPLATE = lib
 CONFIG   += plugin
 QT       += dbus
 CONFIG   += link_pkgconfig
-PKGCONFIG += qmafw qmafw-shared
+PKGCONFIG += dbus-glib-1 qmafw qmafw-shared
 
 SOURCES += qmafwwatchlet.cpp \
     qmafwwatchletplugin.cpp \
-    qmafwwatchletplayer.cpp
+    qmafwwatchletplayer.cpp \
+    qmafwwatchletvolumecontrol.cc
 HEADERS += qmafwwatchlet.h \
     qmafwwatchletplugin.h \
-    qmafwwatchletplayer.h
+    qmafwwatchletplayer.h \
+    qmafwwatchletvolumecontrol.h
 
-qml_files.files = metawatch-digital.qml icon.png
+qml_files.files = metawatch-digital.qml icon.png volume.png
 
 LIBS += -L$$OUT_PWD/../libsowatch/ -lsowatch
 INCLUDEPATH += $$PWD/../libsowatch

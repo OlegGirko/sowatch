@@ -1,6 +1,7 @@
 #ifndef QMAFWPLUGIN_H
 #define QMAFWPLUGIN_H
 
+#include <QtDBus/QDBusConnection>
 #include <sowatch.h>
 
 namespace sowatch
@@ -13,7 +14,6 @@ class QMafwWatchletPlugin : public QObject, public WatchletPluginInterface
 
 public:
 	explicit QMafwWatchletPlugin(QObject *parent = 0);
-	~QMafwWatchletPlugin();
 
 	QStringList watchlets();
 	WatchletInfo describeWatchlet(const QString &id);

@@ -9,8 +9,7 @@ metawatch.depends = libsowatch
 
 # Some watchlets
 SUBDIRS += notificationswatchlet sysinfowatchlet
-SUBDIRS += qmsgwatchlet
-SUBDIRS += qmapwatchlet
+SUBDIRS += qmsgwatchlet qmapwatchlet
 notificationswatchlet.depends = libsowatch
 sysinfowatchlet.depends = libsowatch
 qmsgwatchlet.depends = libsowatch

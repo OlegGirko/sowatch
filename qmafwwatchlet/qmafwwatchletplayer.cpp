@@ -11,6 +11,8 @@
 
 using namespace sowatch;
 
+const QLatin1String QMafwWatchletPlayer::_volumeProp("volume");
+
 QMafwWatchletPlayer::QMafwWatchletPlayer(QMafwWatchlet* watchlet) :
 	QObject(watchlet),
 	_active(false),
@@ -102,15 +104,19 @@ void QMafwWatchletPlayer::previous()
 void QMafwWatchletPlayer::volumeUp()
 {
 	if (!_renderer) return;
-	QString prop("volume");
-	_renderer->mafwProperty(prop, qobject_cast<QObject*>(this), SLOT(doVolumeUp(QString,QVariant)));
+	QString prop(_volumeProp);
+	_renderer->mafwProperty(prop,
+	                        qobject_cast<QObject*>(this),
+	                        SLOT(doVolumeUp(QString,QVariant)));
 }
 
 void QMafwWatchletPlayer::volumeDown()
 {
 	if (!_renderer) return;
-	QString prop("volume");
-	_renderer->mafwProperty(prop, qobject_cast<QObject*>(this), SLOT(doVolumeDown(QString,QVariant)));
+	QString prop(_volumeProp);
+	_renderer->mafwProperty(prop,
+	                        qobject_cast<QObject*>(this),
+	                        SLOT(doVolumeDown(QString,QVariant)));
 }
 
 void QMafwWatchletPlayer::setRenderer(MafwRenderer * renderer)

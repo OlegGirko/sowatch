@@ -60,6 +60,8 @@ private:
 	QString _rendererArt;
 	QUrl _mediaArt;
 
+	static const QLatin1String _volumeProp;
+
 	void setRenderer(MafwRenderer*);
 	void reconnect();
 

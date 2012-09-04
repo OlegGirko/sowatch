@@ -9,6 +9,7 @@ namespace sowatch
 {
 
 class QMafwWatchletPlayer;
+class QMafwWatchletVolumeControl;
 
 class QMafwWatchlet : public DeclarativeWatchlet
 {
@@ -17,8 +18,9 @@ public:
 	explicit QMafwWatchlet(WatchServer* server);
 
 private:
-	MafwRegistry* _registry;
-	QMafwWatchletPlayer* _player;
+	MafwRegistry *_registry;
+	QMafwWatchletPlayer *_player;
+	QMafwWatchletVolumeControl *_volumeControl;
 
 private slots:
 	void handleRendererAdded(const QString & uuid);
