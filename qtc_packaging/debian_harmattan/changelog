@@ -1,3 +1,10 @@
+sowatch (0.4.4) unstable; urgency=low
+
+  * Updated to use gen2 protocol (still v1 UI)
+  * Disable connection timer if host Bluetooth is disabled
+
+ -- Javier S. Pedro <maemo@javispedro.com>  Thu, 28 Mar 2013 16:08:05 +0100
+
 sowatch (0.4.3) unstable; urgency=low
 
   * Improved volume controls in media player.
