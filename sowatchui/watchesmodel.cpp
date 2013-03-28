@@ -88,12 +88,14 @@ void WatchesModel::addFoundWatch(const QVariantMap &info)
 	QString name = base.arg("");
 	int num = 1;
 
+	// Create the setting keys in numerical order
+	// e.g. if watch1 is already existing, use watch2, etc.
 	while (existing.contains(name)) {
 		num++;
 		name = base.arg(num);
 	}
 
-	// Load the autodetected settings
+	// Load the autodetected settings into the new key
 	ConfigKey* newkey = _config->getSubkey(name);
 	foreach (const QString& key, info.keys()) {
 		newkey->set(key, info[key]);

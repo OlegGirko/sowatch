@@ -26,7 +26,7 @@ public:
 
 	void vibrate(bool on);
 
-	void retryConnect();
+	void connectToWatch();
 	void send(const Message& msg);
 
 private slots:

@@ -78,8 +78,8 @@ const quint16 MetaWatch::crcTable[256] = {
 #endif
 
 MetaWatch::MetaWatch(ConfigKey* settings, QObject* parent) :
-    Watch(parent),
-    _settings(settings->getSubkey(QString(), this)),
+	Watch(parent),
+	_settings(settings->getSubkey(QString(), this)),
 	_idleTimer(new QTimer(this)), _ringTimer(new QTimer(this)),
 	_watchTime(), _watchBattery(0), _watchBatteryAverage(0), _watchCharging(false),
 	_currentMode(IdleMode),	_paintMode(IdleMode),
@@ -87,9 +87,11 @@ MetaWatch::MetaWatch(ConfigKey* settings, QObject* parent) :
 	_connectRetries(0),	_connected(false),
 	_connectTimer(new QTimer(this)),
 	_connectAlignedTimer(new QSystemAlignedTimer(this)),
+	_localDev(new QBluetoothLocalDevice(this)),
 	_socket(0),
 	_sendTimer(new QTimer(this))
 {
+	// Read current device settings
 	connect(_settings, SIGNAL(subkeyChanged(QString)), SLOT(settingChanged(QString)));
 
 	_address = QBluetoothAddress(settings->value("address").toString());
@@ -99,6 +101,7 @@ MetaWatch::MetaWatch(ConfigKey* settings, QObject* parent) :
 
 	_buttonNames << "A" << "B" << "C" << "D" << "E" << "F";
 
+	// Configure timers (but do not turn them on yet)
 	_idleTimer->setInterval(_notificationTimeout * 1000);
 	_idleTimer->setSingleShot(true);
 	connect(_idleTimer, SIGNAL(timeout()), SIGNAL(idling()));
@@ -114,8 +117,17 @@ MetaWatch::MetaWatch(ConfigKey* settings, QObject* parent) :
 	_sendTimer->setInterval(DelayBetweenMessages);
 	connect(_sendTimer, SIGNAL(timeout()), SLOT(timedSend()));
 
-	// Do an initial connection attempt after a short delay
-	_connectTimer->start(100);
+	// Connect other signals
+	connect(_localDev, SIGNAL(hostModeStateChanged(QBluetoothLocalDevice::HostMode)), SLOT(localDevModeChanged(QBluetoothLocalDevice::HostMode)));
+
+	// Check to see if we can connect right away
+	if (_localDev->hostMode() != QBluetoothLocalDevice::HostPoweredOff) {
+		// Do an initial connection attempt after a short delay
+		// (To give time for other plugins to initialize, etc.)
+		scheduleConnect();
+	} else {
+		qDebug() << "Not starting MetaWatch connection because BT is off";
+	}
 }
 
 MetaWatch::~MetaWatch()
@@ -170,7 +182,7 @@ void MetaWatch::setDateTime(const QDateTime &dateTime)
 	msg.data[1] = date.year() & 0xFF;
 	msg.data[2] = date.month();
 	msg.data[3] = date.day();
-	// Qt week starts on Monday([1-7]), MW starts on Sunday([0-6]).
+	// Qt week starts on Monday([1-7]), MetaWatch week starts on Sunday([0-6]).
 	msg.data[4] = date.dayOfWeek() % 7;
 	msg.data[5] = time.hour();
 	msg.data[6] = time.minute();
@@ -322,9 +334,53 @@ quint16 MetaWatch::calcCrc(const Message& msg)
 	return calcCrc(data, msgSize + 4);
 }
 
-void MetaWatch::retryConnect()
+void MetaWatch::scheduleConnect()
 {
-	delete _socket;
+	if (_connected ||
+	        _connectAlignedTimer->isActive() || _connectTimer->isActive()) {
+		// Already connected or already scheduled to connect.
+		return;
+	}
+
+	_connectRetries = 0;
+	_connectTimer->start(100);
+}
+
+void MetaWatch::scheduleRetryConnect()
+{
+	if (_connected ||
+	        _connectAlignedTimer->isActive() || _connectTimer->isActive()) {
+		// Already connected or already scheduled to connect.
+		return;
+	}
+
+	int timeToNextRetry;
+	if (_connectRetries >= connectRetryTimesSize) {
+		timeToNextRetry = connectRetryTimes[connectRetryTimesSize - 1];
+	} else {
+		timeToNextRetry = connectRetryTimes[_connectRetries];
+		_connectRetries++; // Increase the number of connection attemps
+	}
+
+	qDebug() << "Backing off for" << timeToNextRetry << "seconds for next retry";
+	_connectAlignedTimer->start(timeToNextRetry / 2, timeToNextRetry * 2);
+	if (_connectAlignedTimer->lastError() != QSystemAlignedTimer::NoError) {
+		// Hopefully a future version of QSystemAlignedTimer implements this fallback
+		// For now, we have to do it ourselves.
+		qDebug() << "Note: using plain QTimer for retry";
+		_connectTimer->start(timeToNextRetry * 1000);
+	}
+}
+
+void MetaWatch::unscheduleConnect()
+{
+	_connectAlignedTimer->stop();
+	_connectTimer->stop();
+}
+
+void MetaWatch::connectToWatch()
+{
+	delete _socket; //Delete socket from previous connect if any.
 	_socket = new QBluetoothSocket(QBluetoothSocket::RfcommSocket);
 
 	connect(_socket, SIGNAL(connected()), SLOT(socketConnected()));
@@ -608,7 +664,8 @@ void MetaWatch::handleNvalOperationMessage(const Message& msg)
 		// Check if there's a pending write for this nval.
 		if (_nvals.contains(value)) {
 			int new_data = _nvals[value];
-			qDebug() << "nval" << hex << value << "currently =" << dec << data << "is pending write to =" << new_data;
+			qDebug() << "nval" << hex << value << "currently =" << dec << data
+			         << "is pending write to =" << new_data;
 			if (new_data != data) {
 				realNvalWrite(value, _nvals[value]);
 			} else {
@@ -706,6 +763,23 @@ void MetaWatch::settingChanged(const QString &key)
 	}
 }
 
+void MetaWatch::localDevModeChanged(QBluetoothLocalDevice::HostMode state)
+{
+	qDebug() << "Local bluetooth device mode changed to" << state;
+	if (state == QBluetoothLocalDevice::HostPoweredOff) {
+		// Host bluetooth was powered down
+		// Assume the socket has been disconnected
+		socketDisconnected();
+		// Cancel any pending connection attempts
+		unscheduleConnect();
+	} else {
+		// Host bluetooth might have been powered up
+		if (!_connected) {
+			scheduleConnect();
+		}
+	}
+}
+
 void MetaWatch::socketConnected()
 {
 	if (!_connected) {
@@ -734,6 +808,7 @@ void MetaWatch::socketConnected()
 
 void MetaWatch::socketDisconnected()
 {
+	// Signal disconnection if necessary
 	if (_connected) {
 		qDebug() << "disconnected";
 
@@ -744,19 +819,9 @@ void MetaWatch::socketDisconnected()
 		emit disconnected();
 	}
 
-	int timeToNextRetry;
-	if (_connectRetries >= connectRetryTimesSize) {
-		timeToNextRetry = connectRetryTimes[connectRetryTimesSize - 1];
-	} else {
-		timeToNextRetry = connectRetryTimes[_connectRetries];
-		_connectRetries++;
-	}
-	qDebug() << "Backing off for" << timeToNextRetry << "seconds for next retry";
-	_connectAlignedTimer->start(timeToNextRetry / 2, timeToNextRetry * 2);
-	if (_connectAlignedTimer->lastError() != QSystemAlignedTimer::NoError) {
-		// I would like to know why QtM couldn't _emulate_ here using a QTimer by itself.
-		qDebug() << "Note: using plain QTimer for retry";
-		_connectTimer->start(timeToNextRetry * 1000);
+	// Setup reconnection attempt if necessary
+	if (_localDev->hostMode() != QBluetoothLocalDevice::HostPoweredOff) {
+		scheduleRetryConnect();
 	}
 }
 
@@ -768,6 +833,8 @@ void MetaWatch::socketData()
 void MetaWatch::socketError(QBluetoothSocket::SocketError error)
 {
 	qWarning() << "Socket error:" << error;
+	// Seems that sometimes a disconnection event may not be generated.
+	socketDisconnected();
 }
 
 void MetaWatch::socketState(QBluetoothSocket::SocketState error)
@@ -777,7 +844,7 @@ void MetaWatch::socketState(QBluetoothSocket::SocketState error)
 
 void MetaWatch::timedReconnect()
 {
-	retryConnect();
+	connectToWatch();
 }
 
 void MetaWatch::timedSend()

@@ -6,15 +6,17 @@
 #include <QtCore/QSettings>
 #include <QtConnectivity/QBluetoothAddress>
 #include <QtConnectivity/QBluetoothSocket>
+#include <QtConnectivity/QBluetoothLocalDevice>
 #include <QtSystemInfo/QSystemAlignedTimer>
 #include <sowatch.h>
+
+namespace sowatch
+{
 
 using QTM_PREPEND_NAMESPACE(QBluetoothSocket);
 using QTM_PREPEND_NAMESPACE(QBluetoothAddress);
 using QTM_PREPEND_NAMESPACE(QSystemAlignedTimer);
-
-namespace sowatch
-{
+using QTM_PREPEND_NAMESPACE(QBluetoothLocalDevice);
 
 class MetaWatchPaintEngine;
 
@@ -138,6 +140,17 @@ public:
 	void ungrabButton(Mode mode, Button button);
 
 protected:
+	// Base watch protocol stuff
+	struct Message {
+		MessageType type;
+		quint8 options;
+		QByteArray data;
+		Message(MessageType ntype = NoMessage, QByteArray ndata = QByteArray(), quint8 noptions = 0) :
+			type(ntype), options(noptions), data(ndata)
+		{ }
+	};
+
+protected:
 	ConfigKey *_settings;
 
 	// Some configurable stuff.
@@ -159,12 +172,13 @@ protected:
 	short _watchBatteryAverage;
 	bool _watchCharging;
 	Mode _currentMode;
+	/** The mode where paint operations done using QPaintDevice go into */
 	Mode _paintMode;
 
 	// Required by QPaintDevice
 	mutable MetaWatchPaintEngine* _paintEngine;
 
-	/** The shadow framebuffers for each of the watch modes */
+	/** The framebuffers for each of the watch modes */
 	QImage _image[3];
 
 	// Timers to retry the connection when the watch is not found.
@@ -176,18 +190,9 @@ protected:
 	QSystemAlignedTimer* _connectAlignedTimer;
 
 	// Connection stuff
+	QBluetoothLocalDevice* _localDev;
 	QBluetoothAddress _address;
 	QBluetoothSocket* _socket;
-
-	// Base watch protocol stuff
-	struct Message {
-		MessageType type;
-		quint8 options;
-		QByteArray data;
-		Message(MessageType ntype = NoMessage, QByteArray ndata = QByteArray(), quint8 noptions = 0) :
-			type(ntype), options(noptions), data(ndata)
-		{ }
-	};
 
 	/** The "packets to be sent" asynchronous queue **/
 	QQueue<Message> _toSend;
@@ -202,8 +207,13 @@ protected:
 	static quint16 calcCrc(const QByteArray& data, int size);
 	static quint16 calcCrc(const Message& msg);
 
+	/** Reprime the connection retry timers. */
+	void scheduleConnect();
+	void scheduleRetryConnect();
+	void unscheduleConnect();
+
 	/** Attempt a connection to the watch. */
-	virtual void retryConnect();
+	virtual void connectToWatch();
 
 	/** Sends a message to the watch. Does not block. */
 	virtual void send(const Message& msg);
@@ -239,6 +249,7 @@ protected:
 
 private slots:
 	void settingChanged(const QString& key);
+	void localDevModeChanged(QBluetoothLocalDevice::HostMode state);
 	void socketConnected();
 	void socketDisconnected();
 	void socketData();

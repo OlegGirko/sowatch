@@ -100,7 +100,7 @@ void MetaWatchDigitalSimulator::vibrate(bool on)
 	qDebug() << "vibrate" << on;
 }
 
-void MetaWatchDigitalSimulator::retryConnect()
+void MetaWatchDigitalSimulator::connectToWatch()
 {
 	if (!_connected && _form) {
 		qDebug() << "simulator connected";

@@ -32,7 +32,6 @@ WatchHandler::WatchHandler(ConfigKey *config, QObject *parent)
 		return;
 	}
 
-
 	WatchPluginInterface *watchPlugin = registry->getWatchPlugin(driver);
 	if (!watchPlugin) {
 		qWarning() << "Invalid driver" << driver;

@@ -9,6 +9,7 @@
 namespace sowatch
 {
 
+/** Interface for a configuration key / tree */
 class SOWATCH_EXPORT ConfigKey : public QObject
 {
 	Q_OBJECT

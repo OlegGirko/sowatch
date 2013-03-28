@@ -4,11 +4,11 @@
 #include <sowatch.h>
 #include <QtConnectivity/QBluetoothServiceDiscoveryAgent>
 
-using QTM_PREPEND_NAMESPACE(QBluetoothServiceDiscoveryAgent);
-using QTM_PREPEND_NAMESPACE(QBluetoothServiceInfo);
-
 namespace sowatch
 {
+
+using QTM_PREPEND_NAMESPACE(QBluetoothServiceDiscoveryAgent);
+using QTM_PREPEND_NAMESPACE(QBluetoothServiceInfo);
 
 class MetaWatchScanner : public WatchScanner
 {

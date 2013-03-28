@@ -1,34 +1,52 @@
 TEMPLATE = subdirs
 
+# Please comment subdirectories you do not want to build as desired
+
 # Core library
+# This is mandatory. Depends on Qt and GConf.
 SUBDIRS = libsowatch
 
 # The MetaWatch driver plugin
+# Since this is the only watch plugin, it is mandatory.
+# Depends on Qt Mobility SystemInfo and Bluetooth.
 SUBDIRS += metawatch
 metawatch.depends = libsowatch
 
 # Some watchlets
-SUBDIRS += notificationswatchlet sysinfowatchlet
-SUBDIRS += qmsgwatchlet qmapwatchlet
+# This just shows a list of pending notifications and has no dependencies.
+SUBDIRS += notificationswatchlet
 notificationswatchlet.depends = libsowatch
+
+# This shows some values from Qt SystemInfo on the watch
+SUBDIRS += sysinfowatchlet
 sysinfowatchlet.depends = libsowatch
+
+# This shows some inbox messages using QtMobility
+SUBDIRS += qmsgwatchlet
 qmsgwatchlet.depends = libsowatch
+
+# This shows a map around the current position using QtMobility Mapping features
+SUBDIRS += qmapwatchlet
 qmapwatchlet.depends = libsowatch
 
 # Toy watchlets
+# Shows a cat running around. No dependencies.
 SUBDIRS += nekowatchlet
 nekowatchlet.depends = libsowatch
 
 unix {
+	# These use D-Bus for interprocess communication.
+	# The main daemon.
 	SUBDIRS += sowatchd
+	# Configuration interface.
 	SUBDIRS += sowatchui
 
 	sowatchd.depends = libsowatch
 	sowatchui.depends = libsowatch sowatchd
 }
 
+# Harmattan specific stuff
 contains(MEEGO_EDITION,harmattan) {
-	# Harmattan specific stuff
 	SUBDIRS += meegohandsetnotification ckitcallnotification harmaccuweather
 	SUBDIRS += meecastweather
 	SUBDIRS += qmafwwatchlet
@@ -38,10 +56,6 @@ contains(MEEGO_EDITION,harmattan) {
 	harmaccuweather.depends = libsowatch
 	meecastweather.depends = libsowatch
 	qmafwwatchlet.depends = libsowatch
-} else:simulator {
-	# This notification provider builds almost everywhere so it's good enough as testcase
-	SUBDIRS += harmaccuweather
-	harmaccuweather.depends = libsowatch
 }
 
 # Debug only watchlets
