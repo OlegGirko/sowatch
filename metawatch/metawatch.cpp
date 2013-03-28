@@ -849,10 +849,14 @@ void MetaWatch::timedReconnect()
 
 void MetaWatch::timedSend()
 {
+	// If there are packets to be sent...
 	if (_toSend.count() > 0) {
+		// Send the packets to the watch
 		realSend(_toSend.dequeue());
 	}
+	// If we sent all packets...
 	if (_toSend.count() == 0) {
+		// Stop the send timer to save battery
 		_sendTimer->stop();
 	}
 }
