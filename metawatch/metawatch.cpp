@@ -837,9 +837,9 @@ void MetaWatch::socketError(QBluetoothSocket::SocketError error)
 	socketDisconnected();
 }
 
-void MetaWatch::socketState(QBluetoothSocket::SocketState error)
+void MetaWatch::socketState(QBluetoothSocket::SocketState state)
 {
-	qDebug() << "socket is in" << error;
+	qDebug() << "socket is in" << state;
 }
 
 void MetaWatch::timedReconnect()
