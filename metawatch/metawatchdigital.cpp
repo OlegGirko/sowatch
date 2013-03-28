@@ -124,20 +124,17 @@ void MetaWatchDigital::update(Mode mode, const QList<QRect> &rects)
 	if (!_connected) return;
 	const QRect clipRect(0, 0, screenWidth, screenHeight);
 	QVector<bool> lines(screenHeight, false);
-	int highest = 0, lowest = screenHeight;
 
 	foreach (const QRect& rect, rects) {
 		QRect r = rect.intersect(clipRect);
 		for (int i = r.top(); i <= r.bottom(); i++) {
-			if (i < highest) highest = i;
-			if (i > lowest) lowest = i;
 			lines[i] = true;
 		}
 	}
 
 	updateLcdLines(mode, _image[mode], lines);
 	if (mode == _currentMode) {
-		updateLcdDisplay(mode, lowest, highest);
+		updateLcdDisplay(mode);
 	}
 }
 
