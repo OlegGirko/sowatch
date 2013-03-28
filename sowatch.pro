@@ -47,8 +47,15 @@ unix {
 
 # Harmattan specific stuff
 contains(MEEGO_EDITION,harmattan) {
-	SUBDIRS += meegohandsetnotification ckitcallnotification harmaccuweather
+	# Obtain notifications from the Meego Handset spec
+	SUBDIRS += meegohandsetnotification
+	# Obtain notifications of in-progress calls
+	SUBDIRS += ckitcallnotification
+	# Obtain weather information from the Harmattan weather app
+	SUBDIRS += harmaccuweather
+	# Obtain weather information from MeeCast
 	SUBDIRS += meecastweather
+	# Control the Harmattan music player
 	SUBDIRS += qmafwwatchlet
 
 	meegohandsetnotification.depends = libsowatch
@@ -59,7 +66,7 @@ contains(MEEGO_EDITION,harmattan) {
 }
 
 # Debug only watchlets
-debug_only {
+CONFIG(debug, debug|release) {
 	SUBDIRS += testnotification
 	testnotification.depends = libsowatch
 }
