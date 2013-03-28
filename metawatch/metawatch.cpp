@@ -923,12 +923,27 @@ void MetaWatch::realReceive(bool block)
 				/* Still not enough data available. */
 				return; /* Wait for more, if non blocking. */
 			}
-			char header[4];
+			static const int HEADER_SIZE = 4;
+			char header[HEADER_SIZE];
 
-			dataRead = _socket->read(header, 4);
-			if (dataRead < 4 || header[0] != 0x01) {
-				qWarning() << "TODO: Resync to start of frame";
+			dataRead = _socket->read(header, HEADER_SIZE);
+			if (dataRead < 4) {
+				qWarning() << "Short read";
 				return;
+			} else if (header[0] != 0x01) {
+				qWarning() << "Header not found, trying to recover";
+				// Let's try to find the header in one of the four bits we read
+				for (int i = 1; i < HEADER_SIZE; i++) {
+					if (header[i] == 0x01) {
+						// Header possibly found, try to recover by pushing
+						// the partial header back into the buffer and retrying
+						for (int j = HEADER_SIZE - 1; j >= i; j--) {
+							_socket->ungetChar(header[j]);
+						}
+					}
+				}
+				// In any case, try to repeat.
+				continue;
 			}
 
 			_partialReceived.type = static_cast<MessageType>(header[2]);
