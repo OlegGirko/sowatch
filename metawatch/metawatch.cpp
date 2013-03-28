@@ -7,6 +7,7 @@ using namespace sowatch;
 QTM_USE_NAMESPACE
 
 #define SINGLE_LINE_UPDATE 0
+#define PROTOCOL_DEBUG 1
 
 const char MetaWatch::btnToWatch[8] = {
 	0, 1, 2, 3, 5, 6, -1, -1
@@ -98,6 +99,9 @@ MetaWatch::MetaWatch(ConfigKey* settings, QObject* parent) :
 	_notificationTimeout = settings->value("notification-timeout", 15).toInt();
 	_24hMode = settings->value("24h-mode", false).toBool();
 	_dayMonthOrder = settings->value("day-month-order", false).toBool();
+	_showSeconds = settings->value("show-seconds", false).toBool();
+	_separationLines = false; // Seems to be v2 UI only
+	_autoBackligt = settings->value("auto-backlight", false).toBool();
 
 	_buttonNames << "A" << "B" << "C" << "D" << "E" << "F";
 
@@ -815,7 +819,9 @@ void MetaWatch::realSend(const Message &msg)
 	data[msgSize+4] = crc & 0xFF;
 	data[msgSize+5] = crc >> 8;
 
-	//qDebug() << "sending" << data.toHex();
+#if PROTOCOL_DEBUG
+	qDebug() << "sending" << data.toHex();
+#endif
 
 	_socket->write(data);
 }
@@ -838,10 +844,13 @@ void MetaWatch::realReceive(bool block)
 			char header[HEADER_SIZE];
 
 			dataRead = _socket->read(header, HEADER_SIZE);
+#if PROTOCOL_DEBUG
+			qDebug() << "received" << QByteArray(header, HEADER_SIZE).toHex();
+#endif
 			if (dataRead < 4) {
 				qWarning() << "Short read";
 				return;
-			} else if (header[0] != 0x01) {
+			} else if (header[0] != 0x01 || header[1] > 32) {
 				qWarning() << "Header not found, trying to recover";
 				// Let's try to find the header in one of the four bits we read
 				for (int i = 1; i < HEADER_SIZE; i++) {
@@ -884,6 +893,10 @@ void MetaWatch::realReceive(bool block)
 		quint16 realCrc = calcCrc(_partialReceived);
 		quint16 expectedCrc = tail[1] << 8 | (tail[0] & 0xFFU);
 		if (realCrc == expectedCrc) {
+#if PROTOCOL_DEBUG
+			qDebug() << "received" << _partialReceived.type << _partialReceived.options
+			         << _partialReceived.data.toHex();
+#endif
 			handleMessage(_partialReceived);
 		} else {
 			qWarning() << "CRC error?";
