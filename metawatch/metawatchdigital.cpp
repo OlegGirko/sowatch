@@ -104,8 +104,11 @@ void MetaWatchDigital::displayNotification(Notification *n)
 
 	// Render the notification and display it before invoking haptic feedback
 	_currentMode = NotificationMode;
+	changeMode(_currentMode);
+
 	renderNotification(n);
 
+	// This will trigger haptic feedback, etc.
 	MetaWatch::displayNotification(n);
 }
 
@@ -334,16 +337,18 @@ QImage MetaWatchDigital::iconForNotification(const Notification *n)
 void MetaWatchDigital::handleWatchConnected()
 {
 	// Grab all of the buttons that are of interest to us
-	// We do not grab the D button, as it triggers the LED.
-	grabButton(IdleMode, BtnA);
+	// We do not grab the F button, as it triggers the LED.
+	grabButton(IdleMode, BtnA); // Required for app-switch
+	grabButton(IdleMode, BtnB); // What does this do?
+	grabButton(IdleMode, BtnD); // Currently not supported
 	grabButton(NotificationMode, BtnA);
 	grabButton(NotificationMode, BtnB);
 	grabButton(NotificationMode, BtnC);
 	grabButton(ApplicationMode, BtnA);
 	grabButton(ApplicationMode, BtnB);
 	grabButton(ApplicationMode, BtnC);
+	grabButton(ApplicationMode, BtnD);
 	grabButton(ApplicationMode, BtnE);
-	grabButton(ApplicationMode, BtnF);
 
 	// Configure to show watch-rendered clock in idle screen
 	configureLcdIdleSystemArea(false);

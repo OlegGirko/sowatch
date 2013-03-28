@@ -67,7 +67,8 @@ public:
 		ReadBatteryVoltage = 0x56,
 		ReadBatteryVoltageResponse = 0x57,
 		ReadLightSensor = 0x58,
-		ReadLightSensorResponse = 0x59
+		ReadLightSensorResponse = 0x59,
+		ChangeMode = 0xa6
 	};
 
 	enum Mode {
@@ -229,6 +230,7 @@ protected:
 	void configureLcdIdleSystemArea(bool entireScreen);
 	void updateLcdDisplay(Mode mode, int startRow = 0, int numRows = 0);
 	void loadLcdTemplate(Mode mode, int templ);
+	void changeMode(Mode mode);
 	void enableButton(Mode mode, Button button, ButtonPress press);
 	void disableButton(Mode mode, Button button, ButtonPress press);
 

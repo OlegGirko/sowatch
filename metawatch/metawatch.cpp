@@ -245,6 +245,8 @@ void MetaWatch::displayIdleScreen()
 {
 	_currentMode = IdleMode;
 	_paintMode = IdleMode;
+	changeMode(_currentMode);
+
 	_ringTimer->stop();
 	_idleTimer->stop();
 	setVibrateMode(false, 0, 0, 0);
@@ -254,6 +256,8 @@ void MetaWatch::displayNotification(Notification *notification)
 {
 	_currentMode = NotificationMode;
 	_paintMode = NotificationMode;
+	changeMode(_currentMode);
+
 	if (notification->type() == Notification::CallNotification) {
 		timedRing();
 		_ringTimer->start();
@@ -269,6 +273,8 @@ void MetaWatch::displayApplication()
 {
 	_currentMode = ApplicationMode;
 	_paintMode = ApplicationMode;
+	changeMode(_currentMode);
+
 	_ringTimer->stop();
 	_idleTimer->stop();
 }
@@ -526,8 +532,13 @@ void MetaWatch::updateLcdDisplay(Mode mode, int startRow, int numRows)
 
 void MetaWatch::loadLcdTemplate(Mode mode, int templ)
 {
-	Message msg(LoadLcdTemplate, QByteArray(1, templ), mode & 0xF);
+	Message msg(LoadLcdTemplate, QByteArray(1, templ), mode & 0x3);
 	send(msg);
+}
+
+void MetaWatch::changeMode(Mode mode)
+{
+	send(Message(ChangeMode, QByteArray(), mode & 0x3));
 }
 
 void MetaWatch::enableButton(Mode mode, Button button, ButtonPress press)
@@ -692,14 +703,10 @@ void MetaWatch::settingChanged(const QString &key)
 		_notificationTimeout = _settings->value(key, 15).toInt();
 	} else if (key == "day-month-order") {
 		_dayMonthOrder = _settings->value(key, false).toBool();
-		if (isConnected()) {
-			updateWatchProperties();
-		}
+		if (isConnected()) updateWatchProperties();
 	} else if (key == "24h-mode") {
 		_24hMode = _settings->value(key, false).toBool();
-		if (isConnected()) {
-			updateWatchProperties();
-		}
+		if (isConnected()) updateWatchProperties();
 	}
 }
 
