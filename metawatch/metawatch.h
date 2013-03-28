@@ -227,7 +227,7 @@ protected:
 	void updateLcdLines(Mode mode, const QImage& image, int lineA, int lineB);
 	void updateLcdLines(Mode mode, const QImage& image, const QVector<bool>& lines);
 	void configureLcdIdleSystemArea(bool entireScreen);
-	void updateLcdDisplay(Mode mode, bool copy = true);
+	void updateLcdDisplay(Mode mode, int startRow = 0, int numRows = 0);
 	void loadLcdTemplate(Mode mode, int templ);
 	void enableButton(Mode mode, Button button, ButtonPress press);
 	void disableButton(Mode mode, Button button, ButtonPress press);

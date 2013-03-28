@@ -513,10 +513,14 @@ void MetaWatch::configureLcdIdleSystemArea(bool entireScreen)
 	send(msg);
 }
 
-void MetaWatch::updateLcdDisplay(Mode mode, bool copy)
+void MetaWatch::updateLcdDisplay(Mode mode, int startRow, int numRows)
 {
-	Message msg(UpdateLcdDisplay, QByteArray(),
-				(copy ? 0x10 : 0) | (mode & 0xF));
+	Message msg(UpdateLcdDisplay, QByteArray(), mode & 0x3);
+	if (startRow != 0 || numRows != 0) {
+		msg.data = QByteArray(2, 0);
+		msg.data[0] = startRow;
+		msg.data[1] = numRows;
+	}
 	send(msg);
 }
 
