@@ -152,7 +152,7 @@ protected:
 	bool _dayMonthOrder : 1;
 	bool _showSeconds : 1;
 	bool _separationLines : 1;
-	bool _autoBackligt : 1;
+	bool _autoBacklight : 1;
 
 	// Notifications: timers
 	QTimer* _idleTimer;

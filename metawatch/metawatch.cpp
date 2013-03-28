@@ -101,7 +101,7 @@ MetaWatch::MetaWatch(ConfigKey* settings, QObject* parent) :
 	_dayMonthOrder = settings->value("day-month-order", false).toBool();
 	_showSeconds = settings->value("show-seconds", false).toBool();
 	_separationLines = false; // Seems to be v2 UI only
-	_autoBackligt = settings->value("auto-backlight", false).toBool();
+	_autoBacklight = settings->value("auto-backlight", false).toBool();
 
 	_buttonNames << "A" << "B" << "C" << "D" << "E" << "F";
 
@@ -431,7 +431,7 @@ void MetaWatch::updateWatchProperties()
 		optBits |= 1 << 2;
 	if (_separationLines)
 		optBits |= 1 << 3;
-	if (_autoBackligt)
+	if (_autoBacklight)
 		optBits |= 1 << 4;
 
 	qDebug() << "Setting watch properties to" << optBits;
@@ -706,6 +706,12 @@ void MetaWatch::settingChanged(const QString &key)
 		if (isConnected()) updateWatchProperties();
 	} else if (key == "24h-mode") {
 		_24hMode = _settings->value(key, false).toBool();
+		if (isConnected()) updateWatchProperties();
+	} else if (key == "show-seconds") {
+		_showSeconds = _settings->value(key, false).toBool();
+		if (isConnected()) updateWatchProperties();
+	} else if (key == "auto-backlight") {
+		_autoBacklight = _settings->value(key, false).toBool();
 		if (isConnected()) updateWatchProperties();
 	}
 }
