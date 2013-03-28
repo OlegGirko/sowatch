@@ -409,38 +409,24 @@ void MetaWatch::sendIfNotQueued(const Message& msg)
 	send(msg);
 }
 
-uint MetaWatch::nvalSize(NvalValue value)
+void MetaWatch::updateWatchProperties()
 {
-	switch (value) {
-	case ReservedNval:
-	case LinkKey:
-		return 0;
-	case IdleBufferConfiguration:
-		return 1;
-	case TimeFormat:
-	case DateFormat:
-	case DisplaySeconds:
-		return 1;
-	}
-	return 0;
-}
+	quint8 optBits = 0;
 
-void MetaWatch::nvalWrite(NvalValue value, int data)
-{
-	uint id = static_cast<uint>(value);
-	int size = nvalSize(value);
-	Q_ASSERT(size > 0);
+	if (_24hMode)
+		optBits |= 1 << 0;
+	if (_dayMonthOrder)
+		optBits |= 1 << 1;
+	if (_showSeconds)
+		optBits |= 1 << 2;
+	if (_separationLines)
+		optBits |= 1 << 3;
+	if (_autoBackligt)
+		optBits |= 1 << 4;
 
-	// Do a read operation first to get the current value
-	// If the current value matches what we want, avoid rewriting it to flash.
-	Message msg(NvalOperation, QByteArray(3, 0), 1);
+	qDebug() << "Setting watch properties to" << optBits;
 
-	msg.data[0] = id & 0xFF;
-	msg.data[1] = id >> 8;
-	msg.data[2] = size;
-
-	_nvals[value] = data;
-	send(msg);
+	send(Message(PropertyOperation, QByteArray(), optBits));
 }
 
 void MetaWatch::setVibrateMode(bool enable, uint on, uint off, uint cycles)
@@ -459,7 +445,7 @@ void MetaWatch::setVibrateMode(bool enable, uint on, uint off, uint cycles)
 
 void MetaWatch::updateLcdLine(Mode mode, const QImage& image, int line)
 {
-	Message msg(WriteLcdBuffer, QByteArray(13, 0), (1 << 4) | (mode & 0xF));
+	Message msg(WriteLcdBuffer, QByteArray(13, 0), (1 << 4) | (mode & 0x3));
 	const char * scanLine = (const char *) image.constScanLine(line);
 
 	msg.data[0] = line;
@@ -470,7 +456,7 @@ void MetaWatch::updateLcdLine(Mode mode, const QImage& image, int line)
 
 void MetaWatch::updateLcdLines(Mode mode, const QImage& image, int lineA, int lineB)
 {
-	Message msg(WriteLcdBuffer, QByteArray(26, 0), mode & 0xF);
+	Message msg(WriteLcdBuffer, QByteArray(26, 0), mode & 0x3);
 	const char * scanLine = (const char *) image.constScanLine(lineA);
 
 	msg.data[0] = lineA;
@@ -575,8 +561,8 @@ void MetaWatch::handleMessage(const Message &msg)
 	case GetRealTimeClockResponse:
 		handleRealTimeClockMessage(msg);
 		break;
-	case NvalOperationResponse:
-		handleNvalOperationMessage(msg);
+	case PropertyOperationResponse:
+		handlePropertyOperationMessage(msg);
 		break;
 	case StatusChangeEvent:
 		handleStatusChangeMessage(msg);
@@ -619,78 +605,21 @@ void MetaWatch::handleRealTimeClockMessage(const Message &msg)
 	emit dateTimeChanged();
 }
 
-void MetaWatch::handleNvalOperationMessage(const Message& msg)
+void MetaWatch::handlePropertyOperationMessage(const Message& msg)
 {
-	Q_ASSERT(msg.type == NvalOperationResponse);
+	Q_ASSERT(msg.type == PropertyOperationResponse);
 
-	// Nval operation response packet format is:
-	//  2 bytes for id
-	//  Rest for contents
-
-	if (msg.data.size() < 2) {
-		qWarning() << "NVAL operation response too short";
-	}
-
-	uint id = ((msg.data[1] & 0xFF) << 8) | (msg.data[0] & 0xFF);
-	NvalValue value = static_cast<NvalValue>(id);
-
-	qDebug() << "nval operation response for value" << hex << value;
-
-	switch (msg.options) {
-	case 0: // Success
-	{
-		int got_size = msg.data.size() - 2;
-		int size = nvalSize(value);
-		if (got_size != size) {
-			qWarning() << "Unexpected NVAL size" << got_size;
-			return;
-		}
-		// Read it
-		int data;
-		switch (size) {
-		case 1:
-			data = msg.data[2];
-			break;
-		default:
-			qWarning() << "Yet to implement this nval size";
-			return;
-		}
-
-		// Check if there's a pending write for this nval.
-		if (_nvals.contains(value)) {
-			int new_data = _nvals[value];
-			qDebug() << "nval" << hex << value << "currently =" << dec << data
-			         << "is pending write to =" << new_data;
-			if (new_data != data) {
-				realNvalWrite(value, _nvals[value]);
-			} else {
-				qDebug() << " not rewriting it";
-			}
-			_nvals.remove(value);
-		}
-	}
-	break;
-	case 1: // Failure
-		qWarning() << "NVAL operation failed";
-		break;
-	case 0x9:
-		qWarning() << "NVAL operation failed: Identifier not found";
-		break;
-	case 0xA:
-		qWarning() << "NVAL operation failed: Operation failed";
-		break;
-	case 0xC:
-		qWarning() << "NVAL operation failed: Bad Item length";
-		break;
-	default:
-		qWarning() << "NVAL operation unknown response: " << msg.options;
-		break;
+	qDebug() << "got property operation result message";
+	if (msg.options != 0) {
+		qWarning() << "set property operation failed";
 	}
 }
 
 void MetaWatch::handleStatusChangeMessage(const Message &msg)
 {
-	Q_UNUSED(msg);
+	Q_ASSERT(msg.type == StatusChangeEvent);
+
+	// TODO: Maybe something could be done...
 	qDebug() << "got status change message";
 }
 
@@ -756,12 +685,12 @@ void MetaWatch::settingChanged(const QString &key)
 	} else if (key == "day-month-order") {
 		_dayMonthOrder = _settings->value(key, false).toBool();
 		if (isConnected()) {
-			nvalWrite(DateFormat, _dayMonthOrder ? 1 : 0);
+			updateWatchProperties();
 		}
 	} else if (key == "24h-mode") {
 		_24hMode = _settings->value(key, false).toBool();
 		if (isConnected()) {
-			nvalWrite(TimeFormat, _24hMode ? 1 : 0);
+			updateWatchProperties();
 		}
 	}
 }
@@ -796,8 +725,7 @@ void MetaWatch::socketConnected()
 		_paintMode = IdleMode;
 
 		// Configure the watch according to user preferences
-		nvalWrite(TimeFormat, _24hMode ? 1 : 0);
-		nvalWrite(DateFormat, _dayMonthOrder ? 1 : 0);
+		updateWatchProperties();
 
 		// Sync watch date & time
 		setDateTime(QDateTime::currentDateTime());
@@ -867,30 +795,6 @@ void MetaWatch::timedSend()
 void MetaWatch::timedRing()
 {
 	setVibrateMode(true, RingLength, RingLength, 3);
-}
-
-void MetaWatch::realNvalWrite(NvalValue value, int data)
-{
-	int size = nvalSize(value);
-	uint id = static_cast<uint>(value);
-	Message msg(NvalOperation, QByteArray(3 + size, 0), 2);
-
-	qDebug() << "nval" << hex << value << "will be written with" << dec << data;
-
-	msg.data[0] = id & 0xFF;
-	msg.data[1] = id >> 8;
-	msg.data[2] = size;
-
-	switch (size) {
-	case 1:
-		msg.data[3] = data & 0xFF;
-		break;
-	default:
-		qWarning() << "NVAL size not yet handled";
-		return;
-	}
-
-	send(msg);
 }
 
 void MetaWatch::realSend(const Message &msg)

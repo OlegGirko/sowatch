@@ -49,8 +49,8 @@ public:
 		SetRealTimeClock = 0x26,
 		GetRealTimeClock = 0x27,
 		GetRealTimeClockResponse = 0x28,
-		NvalOperation = 0x30,
-		NvalOperationResponse = 0x31,
+		PropertyOperation = 0x30,
+		PropertyOperationResponse = 0x31,
 		StatusChangeEvent = 0x33,
 		ButtonEvent = 0x34,
 		GeneralPurposePhone = 0x35,
@@ -70,19 +70,11 @@ public:
 		ReadLightSensorResponse = 0x59
 	};
 
-	enum NvalValue {
-		ReservedNval = 0,
-		LinkKey = 0x1,
-		IdleBufferConfiguration = 0x2,
-		TimeFormat = 0x2009,
-		DateFormat = 0x200a,
-		DisplaySeconds = 0x200b
-	};
-
 	enum Mode {
 		IdleMode = 0,
 		ApplicationMode = 1,
-		NotificationMode = 2
+		NotificationMode = 2,
+		MusicMode = 3 // Please note that the music mode is currently not used
 	};
 
 	enum Button {
@@ -157,6 +149,9 @@ protected:
 	short _notificationTimeout;
 	bool _24hMode : 1;
 	bool _dayMonthOrder : 1;
+	bool _showSeconds : 1;
+	bool _separationLines : 1;
+	bool _autoBackligt : 1;
 
 	// Notifications: timers
 	QTimer* _idleTimer;
@@ -202,20 +197,20 @@ protected:
 	QTimer* _sendTimer;
 	Message _partialReceived;
 
-	/** Pending nvals to be written once the read operation is finished. */
-	QMap<NvalValue, int> _nvals;
-
+	/** Used to calculate CRC */
 	static const quint8 bitRevTable[16];
 	static const quint16 crcTable[256];
 	static quint16 calcCrc(const QByteArray& data, int size);
 	static quint16 calcCrc(const Message& msg);
 
-	/** Reprime the connection retry timers. */
+	/** Start the initial connection attempt, reset failed connection timers. */
 	void scheduleConnect();
+	/** Schedule an new connection attempt, consider the current one failed. */
 	void scheduleRetryConnect();
+	/** Cancel any pending connection attempts. */
 	void unscheduleConnect();
 
-	/** Attempt a connection to the watch. */
+	/** Attempt a connection to the watch right now. */
 	virtual void connectToWatch();
 
 	/** Sends a message to the watch. Does not block. */
@@ -225,10 +220,8 @@ protected:
 	 */
 	void sendIfNotQueued(const Message& msg);
 
-	static uint nvalSize(NvalValue value);
-	void nvalWrite(NvalValue value, int data);
-
 	/* Some functions that wrap sending some watch messages. */
+	void updateWatchProperties();
 	void setVibrateMode(bool enable, uint on, uint off, uint cycles);
 	void updateLcdLine(Mode mode, const QImage& image, int line);
 	void updateLcdLines(Mode mode, const QImage& image, int lineA, int lineB);
@@ -242,7 +235,7 @@ protected:
 	void handleMessage(const Message& msg);
 	void handleDeviceTypeMessage(const Message& msg);
 	void handleRealTimeClockMessage(const Message& msg);
-	void handleNvalOperationMessage(const Message& msg);
+	void handlePropertyOperationMessage(const Message& msg);
 	void handleStatusChangeMessage(const Message& msg);
 	void handleButtonEventMessage(const Message& msg);
 	void handleBatteryVoltageMessage(const Message& msg);
@@ -263,7 +256,6 @@ private slots:
 	void timedRing();
 
 private:
-	void realNvalWrite(NvalValue value, int data);
 	void realSend(const Message& msg);
 	void realReceive(bool block);
 };
