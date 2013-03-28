@@ -9,17 +9,17 @@ TestNotificationProvider::TestNotificationProvider(QObject *parent) :
     NotificationProvider(parent),
     _timer(new QTimer(this))
 {
-	QTimer::singleShot(1000, this, SLOT(generateInitialNotification()));
-	QTimer::singleShot(1200, this, SLOT(generateNotification()));
-	QTimer::singleShot(1400, this, SLOT(generateNotification()));
-	QTimer::singleShot(1600, this, SLOT(generateNotification()));
-	QTimer::singleShot(1800, this, SLOT(generateNotification()));
-	QTimer::singleShot(2000, this, SLOT(generateNotification()));
-	QTimer::singleShot(2200, this, SLOT(generateNotification()));
-	QTimer::singleShot(2400, this, SLOT(generateInitialNotification()));
+	const int initial_delay = 2000;
+	const int burst_num = 0;
+	const int burst_delay = 500;
+	const int extra_delay = 100 * 1000;
+	QTimer::singleShot(initial_delay, this, SLOT(generateInitialNotification()));
+	for (int i = 0; i < burst_num; i++) {
+		QTimer::singleShot(initial_delay + burst_delay * (i+1), this, SLOT(generateNotification()));
+	}
 	connect(_timer, SIGNAL(timeout()), SLOT(generateNotification()));
-	_timer->setInterval(60000);
-	//_timer->start();
+	_timer->setInterval(extra_delay);
+	_timer->start();
 }
 
 TestNotificationProvider::~TestNotificationProvider()

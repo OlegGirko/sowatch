@@ -7,7 +7,7 @@ using namespace sowatch;
 QTM_USE_NAMESPACE
 
 #define SINGLE_LINE_UPDATE 0
-#define PROTOCOL_DEBUG 1
+#define PROTOCOL_DEBUG 0
 
 const char MetaWatch::btnToWatch[8] = {
 	0, 1, 2, 3, 5, 6, -1, -1
