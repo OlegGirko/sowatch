@@ -81,7 +81,7 @@ MetaWatch::MetaWatch(ConfigKey* settings, QObject* parent) :
 	Watch(parent),
 	_settings(settings->getSubkey(QString(), this)),
 	_idleTimer(new QTimer(this)), _ringTimer(new QTimer(this)),
-	_watchTime(), _watchBattery(0), _watchBatteryAverage(0), _watchCharging(false),
+	_watchTime(), _watchBattery(0), _watchCharging(false),
 	_currentMode(IdleMode),	_paintMode(IdleMode),
 	_paintEngine(0),
 	_connectRetries(0),	_connected(false),
@@ -210,12 +210,7 @@ void MetaWatch::queryBatteryLevel()
 
 int MetaWatch::batteryLevel() const
 {
-	// TODO This "estimation" is quite awful, could be way more accurate.
-	int level = (_watchBatteryAverage - 3500) / (4100-3500);
-	if (level < 0) level = 0;
-	if (level > 100) level = 100;
-
-	return level;
+	return _watchBattery;
 }
 
 void MetaWatch::queryCharging()
@@ -730,16 +725,24 @@ void MetaWatch::handleBatteryVoltageMessage(const Message &msg)
 		qWarning() << "Short battery voltage response:" << msg.data.size();
 		return;
 	}
-	_watchCharging = msg.data[1];
-	_watchBattery = ((msg.data[3] & 0xFF) << 8) | (msg.data[2] & 0xFF);
-	_watchBatteryAverage = ((msg.data[5] & 0xFF) << 8) | (msg.data[4] & 0xFF);
+	bool charging = msg.data[1];
+	unsigned char level = msg.data[2];
 
-	qDebug() << "got battery voltage" << _watchBattery << "mV "
-			 << "average" << _watchBatteryAverage << "mV "
+	qDebug() << "got battery level" << level << "% "
 			 << (_watchCharging ? "charging" : "discharging");
 
-	emit chargingChanged();
-	emit batteryLevelChanged();
+	// Just in case
+	if (level > 100) level = 100;
+
+	// Emit changed() signals as necessary
+	if (charging != _watchCharging) {
+		_watchCharging = charging;
+		emit chargingChanged();
+	}
+	if (level != _watchBattery) {
+		_watchBattery = level;
+		emit batteryLevelChanged();
+	}
 }
 
 void MetaWatch::settingChanged(const QString &key)

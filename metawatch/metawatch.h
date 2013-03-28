@@ -167,10 +167,13 @@ protected:
 	QStringList _buttonNames;
 
 	// Current watch state
+	/** The watch's currently displayed date & time. */
 	QDateTime _watchTime;
+	/** The current watch battery level (from 0 to 100). */
 	short _watchBattery;
-	short _watchBatteryAverage;
+	/** Whether the watch is currently charging. */
 	bool _watchCharging;
+	/** The watch's current display mode. */
 	Mode _currentMode;
 	/** The mode where paint operations done using QPaintDevice go into */
 	Mode _paintMode;
