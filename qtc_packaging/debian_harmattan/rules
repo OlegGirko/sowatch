@@ -49,8 +49,9 @@ install: build
 	dh_clean -k 
 	dh_installdirs
 
-	$(MAKE) INSTALL_ROOT="$(CURDIR)"/debian/sowatch install
-
+	$(MAKE) INSTALL_ROOT="$(CURDIR)/debian/sowatch" install
+	mkdir -p "$(CURDIR)/debian/sowatch-dev/usr"
+	mv "$(CURDIR)/debian/sowatch/usr/include" "$(CURDIR)/debian/sowatch-dev/usr"
 
 # Build architecture-independent files here.
 binary-indep: build install

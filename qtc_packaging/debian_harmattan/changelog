@@ -1,3 +1,9 @@
+sowatch (0.4.5) unstable; urgency=low
+
+  * Change button assignments for media player watchlet.
+
+ -- Javier S. Pedro <maemo@javispedro.com>  Fri, 29 Mar 2013 18:53:20 +0100
+
 sowatch (0.4.4) unstable; urgency=low
 
   * Updated to use gen2 protocol (still v1 UI)
