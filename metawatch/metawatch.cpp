@@ -514,8 +514,7 @@ void MetaWatch::updateLcdLines(Mode mode, const QImage& image, const QVector<boo
 
 void MetaWatch::configureLcdIdleSystemArea(bool entireScreen)
 {
-	Message msg(ConfigureLcdIdleBufferSize, QByteArray(26, 0));
-	msg.data[0] = entireScreen ? 1 : 0;
+	Message msg(ConfigureLcdIdleBufferSize, QByteArray(1, entireScreen ? 1 : 0));
 	send(msg);
 }
 
@@ -554,6 +553,9 @@ void MetaWatch::enableButton(Mode mode, Button button, ButtonPress press)
 	// We create a custom event code that allows us to know what
 	// the pressed button and the event code were.
 	msg.data[4] = 0x80 | ((press << 4) & 0x30) | (button & 0xF);
+
+	qDebug() << "enable button" << button << "(" << press << ")" <<
+	            "in mode" << mode << "to" << static_cast<unsigned char>(msg.data[4]);
 
 	send(msg);
 }
