@@ -41,7 +41,9 @@ public:
 	virtual void setDateTime(const QDateTime& dateTime) = 0;
 	/** Asynchronously queries battery date/time from the watch; once the
 	 *  query is finished, dateTimeChanged() will be signaled and dateTime()
-	 *  will return the updated value. */
+	 *  will return the updated value.
+	 *  This is not mandatory and returning currentDateTime() is just fine.
+     */
 	virtual void queryDateTime() = 0;
 	/** Gets the current date/time as last fetched from the watch. */
 	virtual QDateTime dateTime() const = 0;

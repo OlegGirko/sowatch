@@ -41,10 +41,6 @@ void DeclarativeWatchWrapper::activate()
 
 		// Emit the active signal
 		emit activeChanged();
-
-		// Since a notification currently causes the active watchlet to be deactivated,
-		// we can assume the notifications list only changes when we are deactivated.
-		emit notificationsChanged();
 	}
 }
 

@@ -32,7 +32,6 @@ signals:
 	void buttonReleased(int button);
 
 	void activeChanged();
-	void notificationsChanged();
 
 private:
 	WatchServer *_server;
