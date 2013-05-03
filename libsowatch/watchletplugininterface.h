@@ -22,6 +22,7 @@ public:
 	struct WatchletInfo {
 		QString name;
 		QUrl icon;
+		QUrl configQmlUrl;
 	};
 
 	virtual QStringList watchlets() = 0;

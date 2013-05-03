@@ -13,6 +13,7 @@ WatchletsModel::WatchletsModel(QObject *parent) :
 	roles[Qt::DisplayRole] = QByteArray("title");
 	roles[Qt::DecorationRole] = QByteArray("iconSource");
 	roles[NameRole] = QByteArray("name");
+	roles[ConfigQmlUrlRole] = QByteArray("configQmlUrl");
 	setRoleNames(roles);
 }
 
@@ -28,7 +29,6 @@ QString WatchletsModel::configKey() const
 
 void WatchletsModel::setConfigKey(const QString &configKey)
 {
-	qDebug() << "Set confgKey" << configKey;
 	QString oldConfigKey = this->configKey();
 	if (_config) {
 		delete _config;
@@ -73,6 +73,8 @@ QVariant WatchletsModel::data(const QModelIndex &index, int role) const
 		return QVariant::fromValue(_info[id].icon);
 	case NameRole:
 		return QVariant::fromValue(id);
+	case ConfigQmlUrlRole:
+		return QVariant::fromValue(_info[id].configQmlUrl);
 	}
 	return QVariant();
 }

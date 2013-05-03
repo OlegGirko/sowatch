@@ -15,7 +15,8 @@ public:
 	explicit WatchletsModel(QObject *parent = 0);
 
 	enum DataRoles {
-		NameRole = Qt::UserRole
+		NameRole = Qt::UserRole,
+		ConfigQmlUrlRole
 	};
 
 	QString configKey() const;

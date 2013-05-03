@@ -44,6 +44,7 @@ Page {
 	Menu {
 		id: watchletMenu
 		property string watchlet;
+		property url watchletConfigQmlUrl;
 		MenuLayout {
 			MenuItem {
 				text: qsTr("Move up")
@@ -52,6 +53,11 @@ Page {
 			MenuItem {
 				text: qsTr("Move down")
 				onClicked: watchletsModel.moveWatchletDown(watchletMenu.watchlet)
+			}
+			MenuItem {
+				text: qsTr("Configure watchlet...")
+				onClicked: pageStack.push(watchletMenu.watchletConfigQmlUrl, {'configKey': configKey})
+				visible: watchletMenu.watchletConfigQmlUrl != ""
 			}
 			MenuItem {
 				text: qsTr("Remove watchlet")
@@ -161,6 +167,7 @@ Page {
 				delegate: ListDelegate {
 					onClicked: {
 						watchletMenu.watchlet = model.name;
+						watchletMenu.watchletConfigQmlUrl = model.configQmlUrl;
 						watchletMenu.open();
 					}
 				}
