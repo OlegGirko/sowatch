@@ -1,5 +1,5 @@
 import QtQuick 1.0
-import QtMobility.messaging 1.1
+import QtMobility.organizer 1.1
 import com.javispedro.sowatch.metawatch 1.0
 
 MWPage {
@@ -8,7 +8,7 @@ MWPage {
 		anchors.top: parent.top
 		anchors.left: parent.left
 		anchors.right: parent.right
-		text: qsTr("Inbox")
+		text: qsTr("Calendar")
 		icon.source: "icon.png"
 	}
 
@@ -19,45 +19,77 @@ MWPage {
 		anchors.right: parent.right
 		anchors.bottom: parent.bottom
 		clip: true
-		model: MessageModel {
-			sortBy: MessageModel.Timestamp
-			sortOrder: MessageModel.DescendingOrder
-			filter: MessageIntersectionFilter {
-					MessageFilter {
-						type: MessageFilter.Type
-						comparator: MessageFilter.Equal
-						value: MessageFilter.Email
-					}
-					MessageFilter {
-						type: MessageFilter.StandardFolder
-						comparator: MessageFilter.Equal
-						value: MessageFilter.InboxFolder
-					}
-			}
-			limit: 20
+		model: OrganizerModel {
+			id: model
+			manager: "qtorganizer:mkcal"
 		}
 		delegate: Rectangle {
-			id: msgDelegate
+			id: itemDelegate
 			property bool selected: ListView.isCurrentItem
 			width: parent.width
 			height: childrenRect.height
 			color: ListView.isCurrentItem ? "black" : "white"
 			Column {
 				width: parent.width
+				visible: typeof display !== "undefined"
 				MWLabel {
 					width: parent.width
-					text: sender
+					text: typeof item !== "undefined" ? _formatEventTime(item) : ""
 					wrapMode: Text.WrapAtWordBoundaryOrAnywhere
-					color: msgDelegate.selected ? "white" : "black"
-					font.pointSize: 12
+					color: itemDelegate.selected ? "white" : "black"
+					font.family: "MetaWatch Large caps 8pt"
+					font.pixelSize: 8
 				}
 				MWLabel {
 					width: parent.width
-					text: subject
+					text: typeof display !== "undefined" ? display : ""
 					wrapMode: Text.WrapAtWordBoundaryOrAnywhere
-					color: msgDelegate.selected ? "white" : "black"
+					color: itemDelegate.selected ? "white" : "black"
+					font.pixelSize: 16
 				}
 			}
+		}
+	}
+
+	function update() {
+		var now = new Date();
+		var end = new Date(now.getFullYear(), now.getMonth() , now.getDate() + 7);
+
+		model.startPeriod = now;
+		model.endPeriod = end;
+		model.update();
+	}
+
+	function _isSameDay(date1, date2) {
+		return date1.getYear() === date2.getYear() &&
+				date1.getMonth() === date2.getMonth() &&
+				date1.getDate() === date2.getDate();
+	}
+
+	function _daysTo(date1, date2) {
+		var ms_per_day = 24 * 3600 * 1000;
+		var ts1 = date1.getTime();
+		var ts2 = date2.getTime();
+		var diff = ts2 - ts1;
+		return Math.round(diff / ms_per_day);
+	}
+
+	function _formatEventTime(item) {
+		var now = new Date();
+		var itemStart = item.itemStartTime;
+		var itemEnd = item.itemEndTime;
+		if (_isSameDay(now, itemStart) && _isSameDay(now, itemEnd)) {
+			return Qt.formatTime(itemStart) + " - " + Qt.formatTime(itemEnd);
+		} else if (_isSameDay(itemStart, itemEnd)) {
+			if (_daysTo(now, itemStart) < 7) {
+				return Qt.formatDate(itemStart, "dddd") + "\n" +
+						Qt.formatTime(itemStart) + " - " + Qt.formatTime(itemEnd);
+			}
+			return Qt.formatDate(itemStart) + "\n" +
+					Qt.formatTime(itemStart) + " - " + Qt.formatTime(itemEnd);
+		} else {
+			return Qt.formatDateTime(itemStart) + " -\n" +
+					Qt.formatDateTime(itemEnd);
 		}
 	}
 
@@ -75,6 +107,7 @@ MWPage {
 		}
 		onActiveChanged: {
 			if (watch.active) {
+				update();
 				list.scrollTop();
 			}
 		}

@@ -25,6 +25,10 @@ sysinfowatchlet.depends = libsowatch
 SUBDIRS += qmsgwatchlet
 qmsgwatchlet.depends = libsowatch
 
+# This shows some calendar appointments using QtMobility
+SUBDIRS += qorgwatchlet
+qorgwatchlet.depends = libsowatch
+
 # This shows a map around the current position using QtMobility Mapping features
 SUBDIRS += qmapwatchlet
 qmapwatchlet.depends = libsowatch

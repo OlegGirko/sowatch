@@ -1,12 +1,12 @@
-TARGET = qmsgwatchlet
+TARGET = qorgwatchlet
 TEMPLATE = lib
 CONFIG   += plugin
 CONFIG   += mobility
-MOBILITY += messaging
+MOBILITY += organizer
 
-SOURCES += qmsgwatchletplugin.cpp qmsgwatchlet.cpp
+SOURCES += qorgwatchletplugin.cpp qorgwatchlet.cpp
 
-HEADERS += qmsgwatchletplugin.h qmsgwatchlet.h
+HEADERS += qorgwatchletplugin.h qorgwatchlet.h
 
 qml_files.files = metawatch-digital.qml icon.png
 

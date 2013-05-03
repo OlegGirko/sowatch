@@ -1,11 +1,15 @@
 #include "qmsgwatchlet.h"
 #include "qmsgwatchletplugin.h"
 
+#include <QtMessaging/QMessageManager>
+
 using namespace sowatch;
+QTM_USE_NAMESPACE
 
 QMsgWatchletPlugin::QMsgWatchletPlugin(QObject *parent) :
     QObject(parent)
 {
+	qRegisterMetaType<QMessageManager::NotificationFilterIdSet>("QMessageManager::NotificationFilterIdSet");
 }
 
 QMsgWatchletPlugin::~QMsgWatchletPlugin()

@@ -1,19 +1,19 @@
-#ifndef QMSGWATCHLETPLUGIN_H
-#define QMSGWATCHLETPLUGIN_H
+#ifndef QORGWATCHLETPLUGIN_H
+#define QORGWATCHLETPLUGIN_H
 
 #include <sowatch.h>
 
 namespace sowatch
 {
 
-class QMsgWatchletPlugin : public QObject, public WatchletPluginInterface
+class QOrgWatchletPlugin : public QObject, public WatchletPluginInterface
 {
 	Q_OBJECT
 	Q_INTERFACES(sowatch::WatchletPluginInterface)
 
 public:
-	explicit QMsgWatchletPlugin(QObject *parent = 0);
-	~QMsgWatchletPlugin();
+	explicit QOrgWatchletPlugin(QObject *parent = 0);
+	~QOrgWatchletPlugin();
 
 	QStringList watchlets();
 	WatchletInfo describeWatchlet(const QString &id);
@@ -22,4 +22,4 @@ public:
 
 }
 
-#endif // QMSGWATCHLETPLUGIN_H
+#endif // QORWATCHLETPLUGIN_H

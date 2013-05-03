@@ -1,38 +1,43 @@
-#include "qmsgwatchlet.h"
-#include "qmsgwatchletplugin.h"
+#include "qorgwatchlet.h"
+#include "qorgwatchletplugin.h"
+
+#include <QtOrganizer/QOrganizerAbstractRequest>
 
 using namespace sowatch;
+QTM_USE_NAMESPACE
 
-QMsgWatchletPlugin::QMsgWatchletPlugin(QObject *parent) :
+QOrgWatchletPlugin::QOrgWatchletPlugin(QObject *parent) :
     QObject(parent)
 {
+	// Workaround a weird QtOrganizer issue
+	qRegisterMetaType<QOrganizerAbstractRequest::State>("QOrganizerAbstractRequest::State");
 }
 
-QMsgWatchletPlugin::~QMsgWatchletPlugin()
+QOrgWatchletPlugin::~QOrgWatchletPlugin()
 {
 }
 
-QStringList QMsgWatchletPlugin::watchlets()
+QStringList QOrgWatchletPlugin::watchlets()
 {
 	QStringList l;
-	l << "com.javispedro.sowatch.qmsg";
+	l << "com.javispedro.sowatch.qorg";
 	return l;
 }
 
-WatchletPluginInterface::WatchletInfo QMsgWatchletPlugin::describeWatchlet(const QString &id)
+WatchletPluginInterface::WatchletInfo QOrgWatchletPlugin::describeWatchlet(const QString &id)
 {
 	WatchletInfo info;
-	if (id != "com.javispedro.sowatch.qmsg") return info;
-	info.name = "Inbox";
-	info.icon = QUrl::fromLocalFile(SOWATCH_QML_DIR "/qmsgwatchlet/icon.png");
+	if (id != "com.javispedro.sowatch.qorg") return info;
+	info.name = "Calendar";
+	info.icon = QUrl::fromLocalFile(SOWATCH_QML_DIR "/qorgwatchlet/icon.png");
 	return info;
 }
 
-Watchlet* QMsgWatchletPlugin::getWatchlet(const QString &id, ConfigKey *config, WatchServer *server)
+Watchlet* QOrgWatchletPlugin::getWatchlet(const QString &id, ConfigKey *config, WatchServer *server)
 {
 	Q_UNUSED(config);
-	if (id != "com.javispedro.sowatch.qmsg") return 0;
-	return new QMsgWatchlet(server);
+	if (id != "com.javispedro.sowatch.qorg") return 0;
+	return new QOrgWatchlet(server);
 }
 
-Q_EXPORT_PLUGIN2(qmsgwatchlet, QMsgWatchletPlugin)
+Q_EXPORT_PLUGIN2(qmsgwatchlet, QOrgWatchletPlugin)

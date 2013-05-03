@@ -1,3 +1,10 @@
+sowatch (0.4.6) unstable; urgency=low
+
+  * New status bar for metawatch watchlets
+  * New Calendar watchlet
+
+ -- Javier S. Pedro <maemo@javispedro.com>  Sat, 04 May 2013 01:22:40 +0200
+
 sowatch (0.4.5) unstable; urgency=low
 
   * Change button assignments for media player watchlet.

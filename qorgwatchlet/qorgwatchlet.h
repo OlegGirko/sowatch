@@ -1,22 +1,18 @@
-#ifndef QMSGWATCHLET_H
-#define QMSGWATCHLET_H
+#ifndef QORGWATCHLET_H
+#define QORGWATCHLET_H
 
-#include <QtMessaging/QMessageService>
 #include <sowatch.h>
 
 namespace sowatch
 {
 
-class QMsgWatchlet : public DeclarativeWatchlet
+class QOrgWatchlet : public DeclarativeWatchlet
 {
     Q_OBJECT
 public:
-	explicit QMsgWatchlet(WatchServer* server);
-
-private:
-	QtMobility::QMessageService *_qms;
+	explicit QOrgWatchlet(WatchServer* server);
 };
 
 }
 
-#endif // QMSGWATCHLET_H
+#endif // QORGWATCHLET_H

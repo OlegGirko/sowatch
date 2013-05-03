@@ -31,6 +31,7 @@ DeclarativeWatchlet::DeclarativeWatchlet(WatchServer* server, const QString& id)
 		_registered = true;
 	}
 
+	// TODO: Share a single engine per watch server instead of this.
 	_engine = new QDeclarativeEngine(this);
 #if !defined(QT_NO_DEBUG)
 	QString qmlDir = QDir::current().absoluteFilePath(SOWATCH_QML_DIR);

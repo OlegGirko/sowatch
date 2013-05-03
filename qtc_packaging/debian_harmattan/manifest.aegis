@@ -5,6 +5,8 @@
 		<credential name="GID::users" />
 
 		<!-- Request a few additional tokens for watchlets to use. -->
+		<credential name="GRP::calendar" />
+		<credential name="GRP::metadata-users" />
 		<credential name="TrackerReadAccess" />
 		<credential name="Location" />
 
