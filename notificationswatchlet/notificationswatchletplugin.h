@@ -17,7 +17,7 @@ public:
 
 	QStringList watchlets();
 	WatchletInfo describeWatchlet(const QString &id);
-	Watchlet* getWatchlet(const QString& id, ConfigKey *settings, WatchServer* server);
+	Watchlet* getWatchlet(const QString& id, ConfigKey *settings, Watch* watch);
 };
 
 }

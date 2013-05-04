@@ -65,10 +65,12 @@ void WatchServer::addWatchlet(Watchlet *watchlet)
 void WatchServer::insertWatchlet(int position, Watchlet *watchlet)
 {
 	Q_ASSERT(watchlet);
-	Q_ASSERT(watchlet->_server == this);
+	Q_ASSERT(watchlet->watch() == _watch);
 
 	const QString id = watchlet->id();
 	Q_ASSERT(!_watchletIds.contains(id));
+
+	setWatchletProperties(watchlet);
 
 	_watchlets.insert(position, watchlet);
 	_watchletIds[id] = watchlet;
@@ -79,7 +81,7 @@ void WatchServer::moveWatchlet(const Watchlet *watchlet, int to)
 	const QString id = watchlet->id();
 	int index = _watchlets.indexOf(const_cast<Watchlet*>(watchlet));
 
-	Q_ASSERT(watchlet->_server == this);
+	Q_ASSERT(watchlet->watch() == _watch);
 	Q_ASSERT(_watchletIds.contains(id));
 	Q_ASSERT(index >= 0);
 
@@ -90,12 +92,14 @@ void WatchServer::removeWatchlet(const Watchlet *watchlet)
 {
 	const QString id = watchlet->id();
 
-	Q_ASSERT(watchlet->_server == this);
+	Q_ASSERT(watchlet->watch() == _watch);
 	Q_ASSERT(_watchletIds.contains(id));
 
 	if (_currentWatchlet == watchlet) {
 		closeWatchlet();
 	}
+
+	unsetWatchletProperties(const_cast<Watchlet*>(watchlet));
 
 	_watchlets.removeAll(const_cast<Watchlet*>(watchlet));
 	_watchletIds.remove(id);
@@ -177,7 +181,7 @@ void WatchServer::nextNotification()
 
 void WatchServer::runWatchlet(Watchlet *watchlet)
 {
-	Q_ASSERT(watchlet->_server == this);
+	Q_ASSERT(watchlet->watch() == _watch);
 	if (_currentWatchlet && _currentWatchletActive) {
 		deactivateCurrentWatchlet();
 	}
@@ -276,6 +280,18 @@ void WatchServer::removeNotification(Notification::Type type, Notification *n)
 
 	// No longer interested in this notification
 	disconnect(n, 0, this, 0);
+}
+
+void WatchServer::setWatchletProperties(Watchlet *watchlet)
+{
+	Q_ASSERT(watchlet->watch() == _watch);
+	watchlet->setNotificationsModel(_notifications);
+}
+
+void WatchServer::unsetWatchletProperties(Watchlet *watchlet)
+{
+	Q_ASSERT(watchlet->watch() == _watch);
+	watchlet->setNotificationsModel(0);
 }
 
 void WatchServer::goToIdle()

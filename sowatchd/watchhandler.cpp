@@ -82,7 +82,7 @@ Watchlet* WatchHandler::createWatchlet(const QString &id)
 	}
 
 	ConfigKey *subconfig = _config->getSubkey(id);
-	Watchlet* watchlet = plugin->getWatchlet(id, subconfig, _server);
+	Watchlet* watchlet = plugin->getWatchlet(id, subconfig, _watch);
 	delete subconfig;
 
 	return watchlet;

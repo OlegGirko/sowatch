@@ -1,14 +1,12 @@
 #include <QtCore/QDebug>
-#include "watchserver.h"
 #include "watch.h"
 #include "notification.h"
 #include "declarativewatchwrapper.h"
 
 using namespace sowatch;
 
-DeclarativeWatchWrapper::DeclarativeWatchWrapper(WatchServer* server, Watch* watch, QObject* parent) :
-	QObject(parent), _server(server), _watch(watch),
-	_active(false)
+DeclarativeWatchWrapper::DeclarativeWatchWrapper(Watch* watch, QObject* parent) :
+	QObject(parent), _watch(watch), _active(false)
 {
 
 }

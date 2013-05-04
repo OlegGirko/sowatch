@@ -17,7 +17,7 @@ class SOWATCH_EXPORT DeclarativeWatchlet : public GraphicsWatchlet
 {
     Q_OBJECT
 public:
-	DeclarativeWatchlet(WatchServer* server, const QString& id);
+	DeclarativeWatchlet(Watch* watch, const QString& id);
 	~DeclarativeWatchlet();
 
 	void setSource(const QUrl& url);
@@ -26,9 +26,10 @@ public:
 	QDeclarativeContext* rootContext();
 	QDeclarativeItem* rootObject();
 
-protected:
 	void activate();
 	void deactivate();
+
+	void setNotificationsModel(NotificationsModel *model);
 
 private:
 	void setRootObject(QDeclarativeItem* item);

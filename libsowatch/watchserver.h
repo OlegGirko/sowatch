@@ -96,6 +96,8 @@ private:
 	/** Remove a notification of a certain type. */
 	void removeNotification(Notification::Type type, Notification* n);
 
+	void setWatchletProperties(Watchlet *watchlet);
+	void unsetWatchletProperties(Watchlet *watchlet);
 	void deactivateCurrentWatchlet();
 	void reactivateCurrentWatchlet();
 	void goToIdle();

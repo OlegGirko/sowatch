@@ -2,9 +2,9 @@
 
 using namespace sowatch;
 
-NotificationsWatchlet::NotificationsWatchlet(WatchServer* server) :
-	DeclarativeWatchlet(server, "com.javispedro.sowatch.notifications")
+NotificationsWatchlet::NotificationsWatchlet(Watch* watch) :
+	DeclarativeWatchlet(watch, "com.javispedro.sowatch.notifications")
 {
-	setSource(QUrl(SOWATCH_QML_DIR "/notificationswatchlet/" + server->watch()->model() + ".qml"));
+	setSource(QUrl(SOWATCH_QML_DIR "/notificationswatchlet/" + watch->model() + ".qml"));
 }
 

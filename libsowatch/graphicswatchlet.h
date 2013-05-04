@@ -16,7 +16,7 @@ class SOWATCH_EXPORT GraphicsWatchlet : public Watchlet
 	Q_PROPERTY(bool fullUpdateMode READ fullUpdateMode WRITE setFullUpdateMode)
 
 public:
-	explicit GraphicsWatchlet(WatchServer* server, const QString& id);
+	explicit GraphicsWatchlet(Watch* watch, const QString& id);
 	~GraphicsWatchlet();
 
 	QGraphicsScene* scene();
@@ -28,10 +28,10 @@ public:
 	QRectF sceneRect() const;
 	QRect viewportRect() const;
 
-protected:
 	void activate();
 	void deactivate();
 
+protected:
 	static const int frameDelay = 25;
 	static const int busyFrameDelay = 50;
 

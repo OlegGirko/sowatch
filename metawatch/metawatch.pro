@@ -18,7 +18,8 @@ SOURCES += metawatchplugin.cpp \
     metawatchanalog.cpp \
     metawatchscanner.cpp \
     metawatchdigitalsimulator.cpp \
-    metawatchdigitalsimulatorform.cpp
+    metawatchdigitalsimulatorform.cpp \
+    metawatchdigitalfacewatchlet.cpp
 
 HEADERS += metawatchplugin.h \
     metawatchpaintengine.h \
@@ -27,7 +28,8 @@ HEADERS += metawatchplugin.h \
     metawatchanalog.h \
     metawatchscanner.h \
     metawatchdigitalsimulator.h \
-    metawatchdigitalsimulatorform.h
+    metawatchdigitalsimulatorform.h \
+    metawatchdigitalfacewatchlet.h
 
 FORMS += \
     metawatchdigitalsimulatorform.ui
@@ -51,3 +53,6 @@ DEPENDPATH += $$PWD/../libsowatch
 	qml_files.path = /usr/share/sowatch/qml
 }
 INSTALLS += target res_files qml_files
+
+OTHER_FILES += \
+    qml/metawatch-digital-watchface.qml

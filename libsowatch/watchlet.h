@@ -9,6 +9,7 @@ namespace sowatch
 
 class Watch;
 class WatchServer;
+class NotificationsModel;
 
 class SOWATCH_EXPORT Watchlet : public QObject
 {
@@ -17,17 +18,21 @@ class SOWATCH_EXPORT Watchlet : public QObject
 	Q_PROPERTY(bool active READ isActive NOTIFY activeChanged)
 
 public:
-	Watchlet(WatchServer *server, const QString& id);
+	Watchlet(Watch *watch, const QString& id);
 	~Watchlet();
 
-	WatchServer* server();
-	Watch* watch();
-
-	const WatchServer* server() const;
 	const Watch* watch() const;
+	Watch* watch();
 
 	QString id() const;
 	bool isActive() const;
+
+	// To be called by the WatchServer
+	virtual void activate();
+	virtual void deactivate();
+
+	// Some properties
+	virtual void setNotificationsModel(NotificationsModel *model);
 
 signals:
 	void activeChanged();
@@ -35,16 +40,11 @@ signals:
 	void deactivated();
 
 protected:
-	virtual void activate();
-	virtual void deactivate();
-
 	const QString _id;
 	bool _active;
 
 private:
-	WatchServer* _server;
-
-friend class WatchServer;
+	Watch* _watch;
 };
 
 }

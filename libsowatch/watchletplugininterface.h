@@ -12,7 +12,7 @@ namespace sowatch
 
 class ConfigKey;
 class Watchlet;
-class WatchServer;
+class Watch;
 
 class SOWATCH_EXPORT WatchletPluginInterface
 {
@@ -27,7 +27,7 @@ public:
 
 	virtual QStringList watchlets() = 0;
 	virtual WatchletInfo describeWatchlet(const QString& id) = 0;
-	virtual Watchlet* getWatchlet(const QString& id, ConfigKey *settings, WatchServer *server) = 0;
+	virtual Watchlet* getWatchlet(const QString& id, ConfigKey *settings, Watch *watch) = 0;
 };
 
 }

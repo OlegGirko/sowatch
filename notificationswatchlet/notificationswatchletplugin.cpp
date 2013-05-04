@@ -28,11 +28,11 @@ WatchletPluginInterface::WatchletInfo NotificationsWatchletPlugin::describeWatch
 	return info;
 }
 
-Watchlet* NotificationsWatchletPlugin::getWatchlet(const QString& driver, ConfigKey *settings, WatchServer *server)
+Watchlet* NotificationsWatchletPlugin::getWatchlet(const QString& driver, ConfigKey *settings, Watch *watch)
 {
 	Q_UNUSED(driver);
 	Q_UNUSED(settings);
-	return new NotificationsWatchlet(server);
+	return new NotificationsWatchlet(watch);
 }
 
 Q_EXPORT_PLUGIN2(notificationswatchlet, NotificationsWatchletPlugin)

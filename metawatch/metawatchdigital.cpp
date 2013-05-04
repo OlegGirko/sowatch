@@ -339,7 +339,7 @@ void MetaWatchDigital::handleWatchConnected()
 	// Grab all of the buttons that are of interest to us
 	// We do not grab the F button, as it triggers the LED.
 	grabButton(IdleMode, BtnA); // Required for app-switch
-	// TODO: Grabbing these buttons seems to break everything
+	// TODO: Grabbing these buttons seems to break everything since gen2 firmware.
 	//grabButton(IdleMode, BtnB); // What does this do?
 	//grabButton(IdleMode, BtnE); // Music mode is currently not supported
 	grabButton(ApplicationMode, BtnA);

@@ -10,8 +10,8 @@ using namespace sowatch;
 
 bool DeclarativeWatchlet::_registered = false;
 
-DeclarativeWatchlet::DeclarativeWatchlet(WatchServer* server, const QString& id) :
-	GraphicsWatchlet(server, id),
+DeclarativeWatchlet::DeclarativeWatchlet(Watch* watch, const QString& id) :
+	GraphicsWatchlet(watch, id),
 	_engine(0),
 	_component(0),
 	_item(0),
@@ -31,27 +31,26 @@ DeclarativeWatchlet::DeclarativeWatchlet(WatchServer* server, const QString& id)
 		_registered = true;
 	}
 
-	// A dynamic property on the WatchServer object is used to share a single
+	// A dynamic property on the Watch object is used to share a single
 	// DeclarativeEngine amongst all DeclarativeWatchlet instances.
-	QVariant serverEngine = server->property("declarativeEngine");
-	if (!serverEngine.isValid()) {
+	QVariant watchEngine = watch->property("declarativeEngine");
+	if (!watchEngine.isValid()) {
 		// Create the shared engine
 		qDebug() << "Starting QDeclarativeEngine";
-		_engine = new QDeclarativeEngine(server);
+		_engine = new QDeclarativeEngine(watch);
 		_engine->addImportPath(SOWATCH_QML_DIR);
 
 		// Set context properties that are shared by all watchlets here
-		_engine->rootContext()->setContextProperty("notifications",
-			const_cast<NotificationsModel*>(server->notifications()));
+		_engine->rootContext()->setContextProperty("notifications", 0);
 
-		server->setProperty("declarativeEngine", QVariant::fromValue(_engine));
+		watch->setProperty("declarativeEngine", QVariant::fromValue(_engine));
 	} else {
-		_engine = serverEngine.value<QDeclarativeEngine*>();
+		_engine = watchEngine.value<QDeclarativeEngine*>();
 	}
 
 	_context = new QDeclarativeContext(_engine, this);
 
-	_wrapper = new DeclarativeWatchWrapper(server, server->watch(), this);
+	_wrapper = new DeclarativeWatchWrapper(watch, this);
 	_context->setContextProperty("watch", _wrapper);
 }
 
@@ -123,6 +122,12 @@ void DeclarativeWatchlet::deactivate()
 {
 	_wrapper->deactivate();
 	GraphicsWatchlet::deactivate();
+}
+
+void DeclarativeWatchlet::setNotificationsModel(NotificationsModel *model)
+{
+	qDebug() << Q_FUNC_INFO;
+	_context->setContextProperty("notifications", model);
 }
 
 void DeclarativeWatchlet::setRootObject(QDeclarativeItem *item)
