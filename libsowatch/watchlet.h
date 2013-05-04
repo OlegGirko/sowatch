@@ -14,11 +14,11 @@ class SOWATCH_EXPORT Watchlet : public QObject
 {
     Q_OBJECT
 	Q_PROPERTY(QString id READ id CONSTANT)
-	Q_PROPERTY(bool isActive READ isActive NOTIFY activeChanged)
+	Q_PROPERTY(bool active READ isActive NOTIFY activeChanged)
 
 public:
-	explicit Watchlet(WatchServer *server, const QString& id);
-	virtual ~Watchlet();
+	Watchlet(WatchServer *server, const QString& id);
+	~Watchlet();
 
 	WatchServer* server();
 	Watch* watch();
@@ -26,7 +26,7 @@ public:
 	const WatchServer* server() const;
 	const Watch* watch() const;
 
-	Q_INVOKABLE QString id() const;
+	QString id() const;
 	bool isActive() const;
 
 signals:

@@ -31,20 +31,28 @@ DeclarativeWatchlet::DeclarativeWatchlet(WatchServer* server, const QString& id)
 		_registered = true;
 	}
 
-	// TODO: Share a single engine per watch server instead of this.
-	_engine = new QDeclarativeEngine(this);
-#if !defined(QT_NO_DEBUG)
-	QString qmlDir = QDir::current().absoluteFilePath(SOWATCH_QML_DIR);
-	qDebug() << "Using debug QML import path: " << qmlDir;
-	_engine->addImportPath(SOWATCH_QML_DIR);
-#else
-	_engine->addImportPath(SOWATCH_QML_DIR);
-#endif
+	// A dynamic property on the WatchServer object is used to share a single
+	// DeclarativeEngine amongst all DeclarativeWatchlet instances.
+	QVariant serverEngine = server->property("declarativeEngine");
+	if (!serverEngine.isValid()) {
+		// Create the shared engine
+		qDebug() << "Starting QDeclarativeEngine";
+		_engine = new QDeclarativeEngine(server);
+		_engine->addImportPath(SOWATCH_QML_DIR);
+
+		// Set context properties that are shared by all watchlets here
+		_engine->rootContext()->setContextProperty("notifications",
+			const_cast<NotificationsModel*>(server->notifications()));
+
+		server->setProperty("declarativeEngine", QVariant::fromValue(_engine));
+	} else {
+		_engine = serverEngine.value<QDeclarativeEngine*>();
+	}
+
+	_context = new QDeclarativeContext(_engine, this);
 
 	_wrapper = new DeclarativeWatchWrapper(server, server->watch(), this);
-	_engine->rootContext()->setContextProperty("watch", _wrapper);
-	_engine->rootContext()->setContextProperty("notifications",
-	                                           const_cast<NotificationsModel*>(server->notifications()));
+	_context->setContextProperty("watch", _wrapper);
 }
 
 DeclarativeWatchlet::~DeclarativeWatchlet()
@@ -140,7 +148,7 @@ void DeclarativeWatchlet::handleComponentStatus(QDeclarativeComponent::Status st
 		/* Nothing to do */
 		break;
 	case QDeclarativeComponent::Ready:
-		obj = _component->create();
+		obj = _component->create(_context);
 		if (_component->isError()) {
 			qWarning() << "QML has errors found while creating:";
 			qWarning() <<  _component->errors();
