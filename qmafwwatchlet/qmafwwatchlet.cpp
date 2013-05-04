@@ -6,7 +6,7 @@
 
 using namespace sowatch;
 
-QMafwWatchlet::QMafwWatchlet(WatchServer* server) :
+QMafwWatchlet::QMafwWatchlet(Watch* watch) :
 	DeclarativeWatchlet(server, "com.javispedro.sowatch.qmafw"),
 	_registry(MafwRegistry::instance()),
 	_player(new QMafwWatchletPlayer(this)),
@@ -22,8 +22,8 @@ QMafwWatchlet::QMafwWatchlet(WatchServer* server) :
 	connect(this, SIGNAL(activated()), _player, SLOT(activate()));
 	connect(this, SIGNAL(deactivated()), _player, SLOT(deactivate()));
 
-	rootContext()->setContextProperty("player", _player);
-	rootContext()->setContextProperty("volumeControl", _volumeControl);
+	context()->setContextProperty("player", _player);
+	context()->setContextProperty("volumeControl", _volumeControl);
 	setSource(QUrl(SOWATCH_QML_DIR "/qmafwwatchlet/" + server->watch()->model() + ".qml"));
 }
 

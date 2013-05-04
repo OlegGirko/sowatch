@@ -4,8 +4,8 @@
 
 using namespace sowatch;
 
-QOrgWatchlet::QOrgWatchlet(WatchServer* server) :
-	DeclarativeWatchlet(server, "com.javispedro.sowatch.qorg")
+QOrgWatchlet::QOrgWatchlet(Watch* watch) :
+	DeclarativeWatchlet(watch, "com.javispedro.sowatch.qorg")
 {
-	setSource(QUrl(SOWATCH_QML_DIR "/qorgwatchlet/" + server->watch()->model() + ".qml"));
+	setSource(QUrl(SOWATCH_QML_DIR "/qorgwatchlet/" + watch->model() + ".qml"));
 }

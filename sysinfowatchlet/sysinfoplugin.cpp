@@ -28,11 +28,11 @@ SysInfoPlugin::WatchletInfo SysInfoPlugin::describeWatchlet(const QString &id)
 	return info;
 }
 
-Watchlet* SysInfoPlugin::getWatchlet(const QString& id, ConfigKey *settings, WatchServer *server)
+Watchlet* SysInfoPlugin::getWatchlet(const QString& id, ConfigKey *settings, Watch *watch)
 {
 	Q_UNUSED(id);
 	Q_UNUSED(settings);
-	return new SysInfoWatchlet(server);
+	return new SysInfoWatchlet(watch);
 }
 
 Q_EXPORT_PLUGIN2(sysinfowatchlet, SysInfoPlugin)

@@ -48,13 +48,13 @@ WatchletPluginInterface::WatchletInfo QMapWatchletPlugin::describeWatchlet(const
 	return info;
 }
 
-Watchlet* QMapWatchletPlugin::getWatchlet(const QString &id, ConfigKey *config, WatchServer *server)
+Watchlet* QMapWatchletPlugin::getWatchlet(const QString &id, ConfigKey *config, Watch *watch)
 {
 	Q_UNUSED(config);
 	if (id == QMapWatchlet::myId) {
-		return new QMapWatchlet(server);
+		return new QMapWatchlet(watch);
 	} else if (id == CompassWatchlet::myId) {
-		return new CompassWatchlet(server);
+		return new CompassWatchlet(watch);
 	}
 	return 0;
 }

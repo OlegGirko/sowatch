@@ -22,8 +22,7 @@ public:
 
 	void setSource(const QUrl& url);
 
-	QDeclarativeEngine* engine();
-	QDeclarativeContext* rootContext();
+	QDeclarativeContext* context();
 	QDeclarativeItem* rootObject();
 
 	void activate();

@@ -32,11 +32,11 @@ WatchletPluginInterface::WatchletInfo QMsgWatchletPlugin::describeWatchlet(const
 	return info;
 }
 
-Watchlet* QMsgWatchletPlugin::getWatchlet(const QString &id, ConfigKey *config, WatchServer *server)
+Watchlet* QMsgWatchletPlugin::getWatchlet(const QString &id, ConfigKey *config, Watch *watch)
 {
 	Q_UNUSED(config);
 	if (id != "com.javispedro.sowatch.qmsg") return 0;
-	return new QMsgWatchlet(server);
+	return new QMsgWatchlet(watch);
 }
 
 Q_EXPORT_PLUGIN2(qmsgwatchlet, QMsgWatchletPlugin)

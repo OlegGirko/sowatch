@@ -18,7 +18,7 @@ public:
 
 	QStringList watchlets();
 	WatchletInfo describeWatchlet(const QString &id);
-	Watchlet* getWatchlet(const QString &id, ConfigKey *config, WatchServer *server);
+	Watchlet* getWatchlet(const QString &id, ConfigKey *config, Watch *watch);
 
 	static QtMobility::QGeoServiceProvider * geoServiceProvider();
 

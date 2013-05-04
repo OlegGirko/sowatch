@@ -4,8 +4,8 @@ using namespace sowatch;
 
 const QLatin1String CompassWatchlet::myId("com.javispedro.sowatch.compass");
 
-CompassWatchlet::CompassWatchlet(WatchServer* server) :
-	DeclarativeWatchlet(server, myId)
+CompassWatchlet::CompassWatchlet(Watch* watch) :
+	DeclarativeWatchlet(watch, myId)
 {
-	setSource(QUrl(SOWATCH_QML_DIR "/qmapwatchlet/compass-" + server->watch()->model() + ".qml"));
+	setSource(QUrl(SOWATCH_QML_DIR "/qmapwatchlet/compass-" + watch->model() + ".qml"));
 }

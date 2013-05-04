@@ -10,7 +10,7 @@ class QOrgWatchlet : public DeclarativeWatchlet
 {
     Q_OBJECT
 public:
-	explicit QOrgWatchlet(WatchServer* server);
+	explicit QOrgWatchlet(Watch* watch);
 };
 
 }

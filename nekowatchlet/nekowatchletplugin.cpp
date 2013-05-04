@@ -28,11 +28,11 @@ WatchletPluginInterface::WatchletInfo NekoWatchletPlugin::describeWatchlet(const
 	return info;
 }
 
-Watchlet* NekoWatchletPlugin::getWatchlet(const QString& driver, ConfigKey *settings, WatchServer *server)
+Watchlet* NekoWatchletPlugin::getWatchlet(const QString& driver, ConfigKey *settings, Watch *watch)
 {
 	Q_UNUSED(driver);
 	Q_UNUSED(settings);
-	return new NekoWatchlet(server);
+	return new NekoWatchlet(watch);
 }
 
 Q_EXPORT_PLUGIN2(notificationswatchlet, NekoWatchletPlugin)
