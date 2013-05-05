@@ -22,10 +22,13 @@ DeclarativeWatchlet::DeclarativeWatchlet(Watch* watch, const QString& id) :
 	scene()->setStickyFocus(true);
 
 	if (!_registered) {
+		qRegisterMetaType<Notification::Type>("Notification::Type");
 		qmlRegisterUncreatableType<DeclarativeWatchWrapper>("com.javispedro.sowatch", 1, 0,
 			"Watch", "Watch is only available via the 'watch' context property");
 		qmlRegisterUncreatableType<NotificationsModel>("com.javispedro.sowatch", 1, 0,
 			"NotificationsModel", "NotificationsModel is only available via the 'notifications' context property");
+		qmlRegisterUncreatableType<Notification>("com.javispedro.sowatch", 1, 0,
+			"Notification", "Notification is an abstract class");
 		qmlRegisterType<ConfigKey>();
 		qmlRegisterType<GConfKey>("com.javispedro.sowatch", 1, 0, "GConfKey");
 		_registered = true;
@@ -121,7 +124,6 @@ void DeclarativeWatchlet::deactivate()
 
 void DeclarativeWatchlet::setNotificationsModel(NotificationsModel *model)
 {
-	qDebug() << Q_FUNC_INFO;
 	_context->setContextProperty("notifications", model);
 }
 

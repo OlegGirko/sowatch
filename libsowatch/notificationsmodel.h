@@ -11,6 +11,7 @@ namespace sowatch
 class NotificationsModel : public QAbstractListModel
 {
 	Q_OBJECT
+
 public:
 	explicit NotificationsModel(QObject *parent = 0);
 
@@ -27,10 +28,17 @@ public:
 	void remove(Notification *n);
 	void remove(Notification::Type type, Notification *n);
 
-	int fullCount() const;
-	int fullCountByType(Notification::Type type) const;
+	Q_INVOKABLE int fullCount() const;
+	Q_INVOKABLE int fullCountByType(Notification::Type type) const;
+	Q_INVOKABLE int fullCountByType(int type) const; // See QTBUG-26415
+
+	Q_INVOKABLE Notification* getMostRecentByType(Notification::Type type) const;
+	Q_INVOKABLE Notification* getMostRecentByType(int type) const;
 
 	Notification::Type getTypeOfDeletedNotification(Notification *n) const;
+
+signals:
+	void modelChanged();
 
 private:
 	int getOffsetForType(Notification::Type type) const;

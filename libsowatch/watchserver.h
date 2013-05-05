@@ -56,9 +56,15 @@ public slots:
 	void postNotification(Notification *notification);
 	void nextNotification();
 
+	/** Run the selected watchlet (set it as active, but not as current). */
 	void runWatchlet(Watchlet* watchlet);
-	void runWatchlet(const QString& id);
+	/** Run the selected watchlet and set it as the current.
+	    If the watch is disconnected, a notification arrives, etc. */
+	void openWatchlet(Watchlet* watchlet);
+	void openWatchlet(const QString& id);
+	/** Close the active watchlet (and return back to the current watc) */
 	void closeWatchlet();
+	/** Close the active watchlet, advance the current watchlet carousel and open it */
 	void nextWatchlet();
 
 	void syncTime();

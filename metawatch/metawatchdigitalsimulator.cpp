@@ -24,6 +24,9 @@ MetaWatchDigitalSimulator::MetaWatchDigitalSimulator(ConfigKey *config, QObject 
 
 	// Show the form
 	_form->showNormal();
+
+	// Schedule a connection even if BT is off or anything like that.
+	scheduleConnect();
 }
 
 MetaWatchDigitalSimulator::~MetaWatchDigitalSimulator()

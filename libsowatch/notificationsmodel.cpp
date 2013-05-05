@@ -56,6 +56,8 @@ void NotificationsModel::add(Notification *n)
 	_list[type].append(n);
 	endInsertRows();
 
+	emit modelChanged();
+
 	connect(n, SIGNAL(changed()), SLOT(handleNotificationChanged()));
 }
 
@@ -77,6 +79,8 @@ void NotificationsModel::remove(Notification::Type type, Notification *n)
 	beginRemoveRows(QModelIndex(), index, index);
 	_list[type].removeAt(subindex);
 	endRemoveRows();
+
+	emit modelChanged();
 }
 
 int NotificationsModel::fullCount() const
@@ -95,6 +99,28 @@ int NotificationsModel::fullCountByType(Notification::Type type) const
 		count += n->count();
 	}
 	return count;
+}
+
+int NotificationsModel::fullCountByType(int type) const
+{
+	Q_ASSERT(type >= 0 && type < Notification::TypeCount);
+	return fullCountByType(static_cast<Notification::Type>(type));
+}
+
+Notification* NotificationsModel::getMostRecentByType(Notification::Type type) const
+{
+	if (!_list[type].empty()) {
+		// TODO Actually get the most recent (sort by date)
+		return _list[type].first();
+	} else {
+		return 0;
+	}
+}
+
+Notification* NotificationsModel::getMostRecentByType(int type) const
+{
+	Q_ASSERT(type >= 0 && type < Notification::TypeCount);
+	return getMostRecentByType(static_cast<Notification::Type>(type));
 }
 
 Notification::Type NotificationsModel::getTypeOfDeletedNotification(Notification *n) const
@@ -154,5 +180,6 @@ void NotificationsModel::handleNotificationChanged()
 		const int index = getIndexForNotification(n);
 
 		emit dataChanged(createIndex(index, 0), createIndex(index, 0));
+		emit modelChanged();
 	}
 }

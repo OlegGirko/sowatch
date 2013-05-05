@@ -65,10 +65,13 @@ void WatchServer::setIdleWatchlet(Watchlet *watchlet)
 {
 	if (_idleWatchlet) {
 		removeWatchlet(_idleWatchlet);
+		unsetWatchletProperties(_idleWatchlet);
 	}
 	_idleWatchlet = watchlet;
 	if (watchlet) {
 		_watchletIds[watchlet->id()] = watchlet;
+		setWatchletProperties(_idleWatchlet);
+		// TODO Possibly activate this watchlet now if we are on the idle screen.
 	}
 }
 
@@ -81,11 +84,12 @@ void WatchServer::setNotificationWatchlet(Watchlet *watchlet)
 {
 	if (_notificationWatchlet) {
 		removeWatchlet(_notificationWatchlet);
+		unsetWatchletProperties(_notificationWatchlet);
 	}
 	_notificationWatchlet = watchlet;
 	if (watchlet) {
 		_watchletIds[watchlet->id()] = watchlet;
-		// TODO Possibly activate this watchlet now if we are on the idle screen.
+		setWatchletProperties(_notificationWatchlet);
 	}
 }
 
@@ -218,16 +222,27 @@ void WatchServer::runWatchlet(Watchlet *watchlet)
 	if (_activeWatchlet) {
 		deactivateActiveWatchlet();
 	}
+	if (_watch->isConnected()) {
+		activateWatchlet(watchlet);
+	}
+}
+
+void WatchServer::openWatchlet(Watchlet *watchlet)
+{
+	Q_ASSERT(watchlet->watch() == _watch);
+	if (_activeWatchlet) {
+		deactivateActiveWatchlet();
+	}
 	_currentWatchlet = watchlet;
 	if (_watch->isConnected()) {
 		activateCurrentWatchlet();
 	}
 }
 
-void WatchServer::runWatchlet(const QString& id)
+void WatchServer::openWatchlet(const QString& id)
 {
 	Q_ASSERT(_watchletIds.contains(id));
-	runWatchlet(_watchletIds[id]);
+	openWatchlet(_watchletIds[id]);
 }
 
 void WatchServer::closeWatchlet()
@@ -291,7 +306,7 @@ void WatchServer::nextWatchlet()
 		closeWatchlet();
 	} else {
 		Watchlet* watchlet = _watchlets.at(_currentWatchletIndex);
-		runWatchlet(watchlet);
+		openWatchlet(watchlet);
 	}
 }
 
@@ -306,7 +321,9 @@ void WatchServer::syncTime()
 
 uint WatchServer::getNotificationCount(Notification::Type type)
 {
-	return _notifications->fullCountByType(type);
+	// TODO: deprecate
+	return 0;
+	//return _notifications->fullCountByType(type);
 }
 
 void WatchServer::removeNotification(Notification::Type type, Notification *n)

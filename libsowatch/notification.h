@@ -73,5 +73,6 @@ signals:
 }
 
 QML_DECLARE_TYPE(sowatch::Notification)
+QML_DECLARE_TYPE(sowatch::Notification::Type)
 
 #endif // SOWATCH_NOTIFICATION_H
