@@ -22,7 +22,13 @@ public:
 	struct WatchletInfo {
 		QString name;
 		QUrl icon;
+		bool hidden;
 		QUrl configQmlUrl;
+
+		inline WatchletInfo() :
+		    hidden(false)
+		{
+		}
 	};
 
 	virtual QStringList watchlets() = 0;

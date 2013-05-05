@@ -149,7 +149,7 @@ void WatchletsModel::reload()
 	if (_unadded) {
 		qDebug() << "Listing unadded watchlets from" << all;
 		foreach (const QString& s, all) {
-			if (!_enabled.contains(s)) {
+			if (!_info[s].hidden && !_enabled.contains(s)) {
 				_list.append(s);
 			}
 		}

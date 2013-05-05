@@ -11,6 +11,8 @@ class MetaWatchFaceWatchlet : public DeclarativeWatchlet
     Q_OBJECT
 public:
 	explicit MetaWatchFaceWatchlet(Watch* watch);
+
+	static const QLatin1String myId;
 };
 
 }

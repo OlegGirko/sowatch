@@ -94,10 +94,10 @@ private:
 	/** We store a currently live weather forecast. */
 	WeatherNotification* _weather;
 
-	/** Current watchlet. */
+	/** Active watchlet is the one that has "focus" right now. */
+	Watchlet* _activeWatchlet;
+	/** Current watchlet is the app watchlet (not idle, not notification) that is current in the carrousel. */
 	Watchlet* _currentWatchlet;
-	/** Is the current watchlet active? */
-	bool _currentWatchletActive;
 	/** The current watchlet index if any, for use by nextWatchlet() */
 	int _currentWatchletIndex;
 
@@ -111,8 +111,9 @@ private:
 
 	void setWatchletProperties(Watchlet *watchlet);
 	void unsetWatchletProperties(Watchlet *watchlet);
-	void deactivateCurrentWatchlet();
-	void reactivateCurrentWatchlet();
+	void activateWatchlet(Watchlet *watchlet);
+	void deactivateActiveWatchlet();
+	void activateCurrentWatchlet();
 	void goToIdle();
 
 private slots:

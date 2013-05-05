@@ -146,6 +146,7 @@ void MetaWatchDigital::clear(Mode mode, bool black)
 
 void MetaWatchDigital::renderIdleScreen()
 {
+#if 0
 	QImage idle_call(QString(SOWATCH_RESOURCES_DIR "/metawatch/graphics/idle_call.bmp"));
 	QImage idle_msg(QString(SOWATCH_RESOURCES_DIR "/metawatch/graphics/idle_msg.bmp"));
 	QImage idle_mail(QString(SOWATCH_RESOURCES_DIR "/metawatch/graphics/idle_mail.bmp"));
@@ -169,10 +170,12 @@ void MetaWatchDigital::renderIdleScreen()
 
 	renderIdleWeather();
 	renderIdleCounts();
+#endif
 }
 
 void MetaWatchDigital::renderIdleWeather()
 {
+#if 0
 	_paintMode = IdleMode;
 	QFont sf("MetaWatch Small caps 8pt");
 	QFont lf("MetaWatch Large 16pt");
@@ -201,6 +204,7 @@ void MetaWatchDigital::renderIdleWeather()
 	}
 
 	_paintMode = _currentMode;
+#endif
 }
 
 QImage MetaWatchDigital::iconForWeather(WeatherNotification::WeatherType w)
@@ -225,6 +229,7 @@ QImage MetaWatchDigital::iconForWeather(WeatherNotification::WeatherType w)
 
 void MetaWatchDigital::renderIdleCounts()
 {
+#if 0
 	_paintMode = IdleMode;
 	QFont f("MetaWatch Large caps 8pt");
 	QString s;
@@ -248,6 +253,7 @@ void MetaWatchDigital::renderIdleCounts()
 	p.drawText(QRect((32 * 2) + 4, y, w, h), s.sprintf("%d", mails), opt);
 
 	_paintMode = _currentMode;
+#endif
 }
 
 void MetaWatchDigital::renderNotification(Notification *n)

@@ -4,7 +4,8 @@ TEMPLATE = subdirs
 
 # Core library
 # This is mandatory. Depends on Qt and GConf.
-SUBDIRS = libsowatch
+SUBDIRS = libsowatch \
+    metawatchwatchlets
 
 # The MetaWatch driver plugin
 # Since this is the only watch plugin, it is mandatory.

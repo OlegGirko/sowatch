@@ -16,10 +16,14 @@ MetaWatchDigitalSimulator::MetaWatchDigitalSimulator(ConfigKey *config, QObject 
 	_pixmap[IdleMode] = QPixmap(screenWidth, screenHeight);
 	_pixmap[ApplicationMode] = QPixmap(screenWidth, screenHeight);
 	_pixmap[NotificationMode] = QPixmap(screenWidth, screenHeight);
-	_form->showNormal();
+
+	// Connect form signals
 	connect(_form, SIGNAL(buttonPressed(int)), SIGNAL(buttonPressed(int)));
 	connect(_form, SIGNAL(buttonReleased(int)), SIGNAL(buttonReleased(int)));
 	connect(_form, SIGNAL(destroyed()), SLOT(handleFormDestroyed()));
+
+	// Show the form
+	_form->showNormal();
 }
 
 MetaWatchDigitalSimulator::~MetaWatchDigitalSimulator()
@@ -79,6 +83,13 @@ void MetaWatchDigitalSimulator::update(Mode mode, const QList<QRect> &rects)
 
 		p.drawImage(r, _image[mode], r);
 	}
+
+	if (mode == IdleMode) {
+		QRect systemArea(0, 0, screenWidth, systemAreaHeight);
+		p.fillRect(systemArea, Qt::BDiagPattern);
+		p.drawText(systemArea, Qt::AlignCenter, "System area");
+	}
+
 	p.end();
 
 	int totalRows = rows.count(true);

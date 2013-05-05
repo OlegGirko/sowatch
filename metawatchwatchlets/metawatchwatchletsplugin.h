@@ -1,0 +1,25 @@
+#ifndef METAWATCHWATCHLETSPLUGIN_H
+#define METAWATCHWATCHLETSPLUGIN_H
+
+#include <sowatch.h>
+
+namespace sowatch
+{
+
+class MetaWatchWatchletsPlugin : public QObject, public WatchletPluginInterface
+{
+	Q_OBJECT
+	Q_INTERFACES(sowatch::WatchletPluginInterface)
+
+public:
+	explicit MetaWatchWatchletsPlugin(QObject *parent = 0);
+	~MetaWatchWatchletsPlugin();
+
+	QStringList watchlets();
+	WatchletInfo describeWatchlet(const QString &id);
+	Watchlet* getWatchlet(const QString& id, ConfigKey *settings, Watch* watch);
+};
+
+}
+
+#endif // NEKOWATCHLETPLUGIN_H

@@ -57,6 +57,22 @@ WatchHandler::WatchHandler(ConfigKey *config, QObject *parent)
 	// Configure the server
 	_server->setNextWatchletButton(_config->value("next-watchlet-button").toString());
 
+	QString idle_watchlet_id = _config->value("idle-watchlet").toString();
+	if (!idle_watchlet_id.isEmpty()) {
+		Watchlet *watchlet = createWatchlet(idle_watchlet_id);
+		if (watchlet) {
+			_server->setIdleWatchlet(watchlet);
+		}
+	}
+
+	QString notif_watchlet_id = _config->value("notification-watchlet").toString();
+	if (!notif_watchlet_id.isEmpty()) {
+		Watchlet *watchlet = createWatchlet(notif_watchlet_id);
+		if (watchlet) {
+			_server->setNotificationWatchlet(watchlet);
+		}
+	}
+
 	updateProviders();
 	updateWatchlets();
 }
