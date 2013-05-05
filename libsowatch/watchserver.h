@@ -23,6 +23,8 @@ class SOWATCH_EXPORT WatchServer : public QObject
     Q_OBJECT
 	Q_PROPERTY(Watch* watch READ watch CONSTANT)
 	Q_PROPERTY(QString nextWatchletButton READ nextWatchletButton WRITE setNextWatchletButton)
+	Q_PROPERTY(Watchlet* idleWatchlet READ idleWatchlet WRITE setIdleWatchlet)
+	Q_PROPERTY(Watchlet* notificationWatchlet READ notificationWatchlet WRITE setNotificationWatchlet)
 
 public:
 	explicit WatchServer(Watch *watch, QObject *parent = 0);
@@ -32,6 +34,12 @@ public:
 
 	QString nextWatchletButton() const;
 	void setNextWatchletButton(const QString& value);
+
+	Watchlet *idleWatchlet();
+	void setIdleWatchlet(Watchlet *watchlet);
+
+	Watchlet *notificationWatchlet();
+	void setNotificationWatchlet(Watchlet *watchlet);
 
 	void addWatchlet(Watchlet *watchlet);
 	void insertWatchlet(int position, Watchlet *watchlet);
@@ -66,6 +74,11 @@ private:
 	int _nextWatchletButton;
 	/** The amount of seconds that have to pass for a notification to be considered "outdated" and not shown. */
 	int _oldNotificationThreshold;
+
+	/** The watchlet that is activated whenever the watch goes to the idle screen (optional). */
+	Watchlet *_idleWatchlet;
+	/** The watchlet that is used to display notifications (optional). */
+	Watchlet *_notificationWatchlet;
 
 	/** A list of watchlets, in order. */
 	QList<Watchlet*> _watchlets;

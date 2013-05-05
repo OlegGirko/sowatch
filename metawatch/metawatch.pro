@@ -19,7 +19,7 @@ SOURCES += metawatchplugin.cpp \
     metawatchscanner.cpp \
     metawatchdigitalsimulator.cpp \
     metawatchdigitalsimulatorform.cpp \
-    metawatchdigitalfacewatchlet.cpp
+    metawatchfacewatchlet.cpp
 
 HEADERS += metawatchplugin.h \
     metawatchpaintengine.h \
@@ -29,13 +29,14 @@ HEADERS += metawatchplugin.h \
     metawatchscanner.h \
     metawatchdigitalsimulator.h \
     metawatchdigitalsimulatorform.h \
-    metawatchdigitalfacewatchlet.h
+    metawatchfacewatchlet.h
 
 FORMS += \
     metawatchdigitalsimulatorform.ui
 
 res_files.files += res/graphics res/fonts
-qml_files.files += qml/com qml/metawatch-digital-config.qml
+qml_files.files += qml/com qml/metawatch-digital-config.qml \
+	qml/metawatch-digital-watchface.qml
 
 LIBS += -L$$OUT_PWD/../libsowatch/ -lsowatch
 

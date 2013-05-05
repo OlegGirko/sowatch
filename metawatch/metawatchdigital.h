@@ -31,6 +31,9 @@ public:
 	void update(Mode mode, const QList<QRect>& rects = QList<QRect>());
 
 protected:
+	void handleWatchConnected();
+
+private:
 	// Idle screen: notifications unread count
 	ushort _nMails, _nCalls, _nIms, _nSms, _nMms;
 	// Idle screen: weather information
@@ -38,8 +41,6 @@ protected:
 	QString _wBody;
 	short _wTemperature;
 	bool _wMetric;
-
-	void handleWatchConnected();
 
 	void renderIdleScreen();
 	void renderIdleWeather();
