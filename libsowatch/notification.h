@@ -13,8 +13,9 @@ namespace sowatch
 class SOWATCH_EXPORT Notification : public QObject
 {
 	Q_OBJECT
-	Q_ENUMS(Type)
+	Q_ENUMS(Type Priority)
 	Q_PROPERTY(Type type READ type CONSTANT)
+	Q_PROPERTY(Priority priority READ priority NOTIFY priorityChanged)
 	Q_PROPERTY(uint count READ count NOTIFY countChanged)
 	Q_PROPERTY(QDateTime dateTime READ dateTime NOTIFY dateTimeChanged)
 	Q_PROPERTY(QString displayTime READ displayTime NOTIFY displayTimeChanged STORED false)
@@ -36,10 +37,17 @@ public:
 		TypeCount
 	};
 
+	enum Priority {
+		Silent,
+		Normal,
+		Urgent
+	};
+
 	explicit Notification(QObject *parent = 0);
 	virtual ~Notification();
 
 	virtual Type type() const = 0;
+	virtual Priority priority() const;
 	virtual uint count() const = 0;
 	virtual QDateTime dateTime() const = 0;
 	virtual QString displayTime() const;
@@ -54,7 +62,7 @@ public slots:
 	virtual void dismiss() = 0;
 
 signals:
-	/* For the convenience of QML users */
+	void priorityChanged();
 	void countChanged();
 	void dateTimeChanged();
 	void displayTimeChanged();
@@ -74,5 +82,6 @@ signals:
 
 QML_DECLARE_TYPE(sowatch::Notification)
 QML_DECLARE_TYPE(sowatch::Notification::Type)
+QML_DECLARE_TYPE(sowatch::Notification::Priority)
 
 #endif // SOWATCH_NOTIFICATION_H

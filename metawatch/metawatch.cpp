@@ -228,19 +228,6 @@ bool MetaWatch::charging() const
 	return _watchCharging;
 }
 
-void MetaWatch::updateNotificationCount(Notification::Type type, int count)
-{
-	Q_UNUSED(type);
-	Q_UNUSED(count);
-	// Default implementation does nothing
-}
-
-void MetaWatch::updateWeather(WeatherNotification *weather)
-{
-	Q_UNUSED(weather);
-	// Default implementation does nothing
-}
-
 void MetaWatch::displayIdleScreen()
 {
 	_currentMode = IdleMode;

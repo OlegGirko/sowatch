@@ -20,9 +20,6 @@ public:
 
 	QString model() const;
 
-	void updateNotificationCount(Notification::Type type, int count);
-	void updateWeather(WeatherNotification *weather);
-
 	void displayIdleScreen();
 	void displayNotification(Notification *notification);
 	void displayApplication();
@@ -45,7 +42,6 @@ private:
 	void renderIdleScreen();
 	void renderIdleWeather();
 	QImage iconForWeather(WeatherNotification::WeatherType w);
-	void renderIdleCounts();
 
 	void renderNotification(Notification *n);
 	QImage iconForNotification(const Notification *n);

@@ -24,9 +24,9 @@ public:
 	QString title() const;
 	QString body() const;
 
-	WeatherType forecast();
-	int temperature();
-	Unit temperatureUnits();
+	WeatherType forecast() const;
+	int temperature() const;
+	Unit temperatureUnits() const;
 
 	void activate();
 	void dismiss();

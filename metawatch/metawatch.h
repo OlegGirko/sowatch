@@ -112,9 +112,6 @@ public:
 	void queryCharging();
 	bool charging() const;
 
-	void updateNotificationCount(Notification::Type type, int count);
-	void updateWeather(WeatherNotification *weather);
-
 	void displayIdleScreen();
 	void displayNotification(Notification *notification);
 	void displayApplication();

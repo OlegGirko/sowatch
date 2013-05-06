@@ -57,12 +57,6 @@ public:
 	virtual void queryCharging() = 0;
 	virtual bool charging() const = 0;
 
-	/** Tells the watch to update the unread notifications count, if visible. */
-	virtual void updateNotificationCount(Notification::Type type, int count) = 0;
-
-	/** Tells the watch to update the current weather forecast, if visible. */
-	virtual void updateWeather(WeatherNotification* weather) = 0;
-
 public slots:
 	/** Go back to the idle screen. */
 	virtual void displayIdleScreen() = 0;

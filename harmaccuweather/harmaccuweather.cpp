@@ -131,7 +131,7 @@ QString HarmAccuWeather::body() const
 	}
 }
 
-WeatherNotification::WeatherType HarmAccuWeather::forecast()
+WeatherNotification::WeatherType HarmAccuWeather::forecast() const
 {
 	switch (_lastWxCode) {
 	case 1:
@@ -198,12 +198,12 @@ WeatherNotification::WeatherType HarmAccuWeather::forecast()
 	}
 }
 
-int HarmAccuWeather::temperature()
+int HarmAccuWeather::temperature() const
 {
 	return _lastTemp;
 }
 
-WeatherNotification::Unit HarmAccuWeather::temperatureUnits()
+WeatherNotification::Unit HarmAccuWeather::temperatureUnits() const
 {
 	return _metric ? Celsius : Fahrenheit;
 }

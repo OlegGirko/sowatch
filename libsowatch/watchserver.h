@@ -97,8 +97,6 @@ private:
 	QQueue<Notification*> _pendingNotifications;
 	/** Stores the count of notifications hidden between each notification object. */
 	QMap<Notification*, uint> _notificationCounts;
-	/** We store a currently live weather forecast. */
-	WeatherNotification* _weather;
 
 	/** Active watchlet is the one that has "focus" right now. */
 	Watchlet* _activeWatchlet;
@@ -110,8 +108,6 @@ private:
 	/** Used for periodic watch time syncing. */
 	QTimer* _syncTimeTimer;
 
-	/** Counts all notifications from a given type. */
-	uint getNotificationCount(Notification::Type type);
 	/** Remove a notification of a certain type. */
 	void removeNotification(Notification::Type type, Notification* n);
 

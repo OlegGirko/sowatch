@@ -46,49 +46,6 @@ QString MetaWatchDigital::model() const
 	return "metawatch-digital";
 }
 
-void MetaWatchDigital::updateNotificationCount(Notification::Type type, int count)
-{
-	switch (type) {
-	case Notification::MissedCallNotification:
-		_nCalls = count;
-		break;
-	case Notification::EmailNotification:
-		_nMails = count;
-		break;
-	case Notification::ImNotification:
-		_nIms = count;
-		break;
-	case Notification::SmsNotification:
-		_nSms = count;
-		break;
-	case Notification::MmsNotification:
-		_nMms = count;
-		break;
-	default:
-		return; // Since this notification won't show up in idle screen, we do not redraw.
-		break;
-	}
-
-	if (isConnected()) {
-		renderIdleCounts();
-	}
-}
-
-void MetaWatchDigital::updateWeather(WeatherNotification *weather)
-{
-	if (weather) {
-		_wForecast = weather->forecast();
-		_wBody = weather->body();
-		_wTemperature = weather->temperature();
-		_wMetric = weather->temperatureUnits() == WeatherNotification::Celsius;
-	} else {
-		_wForecast = WeatherNotification::UnknownWeather;
-	}
-	if (isConnected()) {
-		renderIdleWeather();
-	}
-}
-
 void MetaWatchDigital::displayIdleScreen()
 {
 	qDebug() << "displaying idle screen";
@@ -146,31 +103,7 @@ void MetaWatchDigital::clear(Mode mode, bool black)
 
 void MetaWatchDigital::renderIdleScreen()
 {
-#if 0
-	QImage idle_call(QString(SOWATCH_RESOURCES_DIR "/metawatch/graphics/idle_call.bmp"));
-	QImage idle_msg(QString(SOWATCH_RESOURCES_DIR "/metawatch/graphics/idle_msg.bmp"));
-	QImage idle_mail(QString(SOWATCH_RESOURCES_DIR "/metawatch/graphics/idle_mail.bmp"));
-	QPainter p;
 
-	_paintMode = IdleMode;
-	p.begin(this);
-
-	p.fillRect(0, 0, screenWidth, screenHeight, Qt::white);
-
-	p.setPen(QPen(Qt::black, 1.0, Qt::DashLine));
-	p.drawLine(1, systemAreaHeight + 2, screenWidth - 2, systemAreaHeight + 2);
-	p.drawLine(1, systemAreaHeight * 2 + 4, screenWidth - 2, systemAreaHeight * 2 + 4);
-
-	p.drawImage((32 * 0) + 4, systemAreaHeight * 2 + 7, idle_call);
-	p.drawImage((32 * 1) + 4, systemAreaHeight * 2 + 7, idle_msg);
-	p.drawImage((32 * 2) + 4, systemAreaHeight * 2 + 7, idle_mail);
-
-	p.end();
-	_paintMode = _currentMode;
-
-	renderIdleWeather();
-	renderIdleCounts();
-#endif
 }
 
 void MetaWatchDigital::renderIdleWeather()
@@ -225,35 +158,6 @@ QImage MetaWatchDigital::iconForWeather(WeatherNotification::WeatherType w)
 	default:
 		return QImage();
 	}
-}
-
-void MetaWatchDigital::renderIdleCounts()
-{
-#if 0
-	_paintMode = IdleMode;
-	QFont f("MetaWatch Large caps 8pt");
-	QString s;
-	QPainter p(this);
-	QTextOption opt(Qt::AlignCenter);
-	const int y = systemAreaHeight * 2 + 26;
-	const int w = 24;
-	const int h = screenHeight - (y + 1);
-	const int mails = _nMails;
-	const int calls = _nCalls;
-	const int sms = _nSms + _nIms;
-
-	qDebug() << "unread counts" << calls << sms << mails;
-
-	f.setPixelSize(8); // Seems to be the only way to get the desired size.
-
-	p.setFont(f);
-	p.fillRect(QRect(0, y, screenWidth, h), Qt::white);
-	p.drawText(QRect((32 * 0) + 4, y, w, h), s.sprintf("%d", calls), opt);
-	p.drawText(QRect((32 * 1) + 4, y, w, h), s.sprintf("%d", sms), opt);
-	p.drawText(QRect((32 * 2) + 4, y, w, h), s.sprintf("%d", mails), opt);
-
-	_paintMode = _currentMode;
-#endif
 }
 
 void MetaWatchDigital::renderNotification(Notification *n)

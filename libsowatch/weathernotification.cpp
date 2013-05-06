@@ -7,6 +7,11 @@ WeatherNotification::WeatherNotification(QObject *parent) :
 {
 }
 
+Notification::Priority WeatherNotification::priority() const
+{
+	return Silent;
+}
+
 qreal WeatherNotification::convertTemperature(qreal temp, Unit from, Unit to)
 {
 	if (from == to) {

@@ -52,7 +52,7 @@ QString MeeCastWeather::body() const
 	return _lastText;
 }
 
-WeatherNotification::WeatherType MeeCastWeather::forecast()
+WeatherNotification::WeatherType MeeCastWeather::forecast() const
 {
 	switch (_lastCode) {
 	// Day versions
@@ -125,12 +125,12 @@ WeatherNotification::WeatherType MeeCastWeather::forecast()
 	}
 }
 
-int MeeCastWeather::temperature()
+int MeeCastWeather::temperature() const
 {
 	return _lastTemp;
 }
 
-WeatherNotification::Unit MeeCastWeather::temperatureUnits()
+WeatherNotification::Unit MeeCastWeather::temperatureUnits() const
 {
 	return _tempUnit;
 }
