@@ -45,7 +45,7 @@ void MetaWatchScanner::handleDiscoveredService(const QBluetoothServiceInfo &info
 			foundInfo["driver"] = QString("metawatch-digital");
 			foundInfo["next-watchlet-button"] = QString("A");
 			foundInfo["idle-watchlet"] = QString("com.javispedro.sowatch.metawatch.watchface");
-			foundInfo["notification-watchlet"] = QString("com.javispedro.sowatch.metawatch.notificationwatchlet");
+			foundInfo["notification-watchlet"] = QString("com.javispedro.sowatch.metawatch.notification");
 			emit watchFound(foundInfo);
 		}
 	}

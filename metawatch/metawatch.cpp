@@ -125,7 +125,8 @@ MetaWatch::MetaWatch(ConfigKey* settings, QObject* parent) :
 	connect(_localDev, SIGNAL(hostModeStateChanged(QBluetoothLocalDevice::HostMode)), SLOT(localDevModeChanged(QBluetoothLocalDevice::HostMode)));
 
 	// Check to see if we can connect right away
-	if (_localDev->hostMode() != QBluetoothLocalDevice::HostPoweredOff) {
+	if (_localDev->isValid() &&
+	        _localDev->hostMode() != QBluetoothLocalDevice::HostPoweredOff) {
 		// Do an initial connection attempt after a short delay
 		// (To give time for other plugins to initialize, etc.)
 		scheduleConnect();

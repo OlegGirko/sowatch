@@ -9,6 +9,7 @@ namespace sowatch
 
 class Watch;
 class WatchServer;
+class Notification;
 class NotificationsModel;
 
 class SOWATCH_EXPORT Watchlet : public QObject
@@ -33,6 +34,9 @@ public:
 
 	// Some properties
 	virtual void setNotificationsModel(NotificationsModel *model);
+
+	virtual bool handlesNotification(Notification* notification) const;
+	virtual void openNotification(Notification* notification);
 
 signals:
 	void activeChanged();

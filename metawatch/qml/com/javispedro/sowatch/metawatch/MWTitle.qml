@@ -27,6 +27,17 @@ Rectangle {
 	}
 
 	MWLabel {
+		id: status
+		anchors.top: parent.top
+		anchors.left: parent.left
+		anchors.leftMargin: 1
+		height: 8
+		font.family: "MetaWatch Large caps 8pt"
+		font.pixelSize: 8
+		text: ""
+	}
+
+	MWLabel {
 		id: time
 		anchors.right: parent.right
 		anchors.rightMargin: 1
@@ -40,6 +51,7 @@ Rectangle {
 	function updateStatusBar() {
 		var now = new Date
 		time.text = Qt.formatDate(now, "ddd") + " " + Qt.formatTime(now)
+		status.text = notifications.fullCount() > 0 ? "*" : ""
 	}
 
 	Timer {

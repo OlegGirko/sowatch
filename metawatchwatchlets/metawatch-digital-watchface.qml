@@ -5,13 +5,6 @@ import com.javispedro.sowatch.metawatch 1.0
 MWPage {
 	id: page
 
-	Connections {
-		target: watch
-		onActiveChanged: {
-			console.log("watchface is now " + (watch.active ? "active" : "inactive"))
-		}
-	}
-
 	Column {
 		Item {
 			id: systemArea
@@ -30,6 +23,7 @@ MWPage {
 		Item {
 			width: page.width
 			height: 30
+			// TODO Weather stuff.
 		}
 
 		Image {
@@ -107,23 +101,13 @@ MWPage {
 	function updateWeather() {
 		var weather = notifications.getMostRecentByType(Notification.WeatherNotification);
 		if (typeof weather !== "undefined") {
-			// TODO
+			// TODO Weather stuff
 		}
 	}
 
 	function update() {
 		updateUnreadCounts();
 		updateWeather();
-	}
-
-	Connections {
-		target: watch
-		onActiveChanged: {
-			if (watch.active) {
-				console.log("watchface active");
-				//updateUnreadCounts();
-			}
-		}
 	}
 
 	Connections {

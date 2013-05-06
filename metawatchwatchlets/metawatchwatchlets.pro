@@ -2,11 +2,13 @@ TARGET = metawatchwatchlets
 TEMPLATE = lib
 CONFIG   += plugin
 
-SOURCES += metawatchwatchletsplugin.cpp metawatchfacewatchlet.cpp
+SOURCES += metawatchwatchletsplugin.cpp \
+	metawatchfacewatchlet.cpp metawatchnotificationwatchlet.cpp
 
-HEADERS += metawatchwatchletsplugin.h metawatchfacewatchlet.h
+HEADERS += metawatchwatchletsplugin.h \
+	metawatchfacewatchlet.h metawatchnotificationwatchlet.h
 
-qml_files.files = metawatch-digital-watchface.qml
+qml_files.files = metawatch-digital-watchface.qml metawatch-digital-notification.qml
 
 LIBS += -L$$OUT_PWD/../libsowatch/ -lsowatch
 INCLUDEPATH += $$PWD/../libsowatch

@@ -96,7 +96,9 @@ int NotificationsModel::fullCountByType(Notification::Type type) const
 {
 	int count = 0;
 	Q_FOREACH(const Notification *n, _list[type]) {
-		count += n->count();
+		if (n->priority() != Notification::Silent) {
+			count += n->count();
+		}
 	}
 	return count;
 }

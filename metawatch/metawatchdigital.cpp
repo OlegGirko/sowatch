@@ -48,7 +48,7 @@ QString MetaWatchDigital::model() const
 
 void MetaWatchDigital::displayIdleScreen()
 {
-	qDebug() << "displaying idle screen";
+	qDebug() << "entering idle screen";
 	MetaWatch::displayIdleScreen();
 
 	// Usually, idle screen is kept updated, so we can flip it right away.
@@ -57,22 +57,13 @@ void MetaWatchDigital::displayIdleScreen()
 
 void MetaWatchDigital::displayNotification(Notification *n)
 {
-	qDebug() << "display notification" << n->title() << n->body();
-
-	// Render the notification and display it before invoking haptic feedback
-	_currentMode = NotificationMode;
-	changeMode(_currentMode);
-
-	renderNotification(n);
-
-	// This will trigger haptic feedback, etc.
+	qDebug() << "entering notification mode";
 	MetaWatch::displayNotification(n);
 }
 
 void MetaWatchDigital::displayApplication()
 {
 	qDebug() << "entering application mode";
-
 	MetaWatch::displayApplication();
 }
 

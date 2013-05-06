@@ -50,5 +50,17 @@ void Watchlet::deactivate()
 
 void Watchlet::setNotificationsModel(NotificationsModel *model)
 {
+	Q_UNUSED(model);
+}
 
+bool Watchlet::handlesNotification(Notification *notification) const
+{
+	Q_UNUSED(notification);
+	return false;
+}
+
+void Watchlet::openNotification(Notification *notification)
+{
+	Q_UNUSED(notification);
+	qDebug() << "Watchlet" << _id << "does not override openNotification()";
 }

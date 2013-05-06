@@ -205,6 +205,10 @@ void WatchServer::nextNotification()
 			deactivateActiveWatchlet();
 		}
 		_watch->displayNotification(n);
+		if (_notificationWatchlet) {
+			activateWatchlet(_notificationWatchlet);
+			_notificationWatchlet->openNotification(n);
+		}
 	} else if (_currentWatchlet) {
 		activateCurrentWatchlet();
 	} else {
@@ -335,7 +339,10 @@ void WatchServer::removeNotification(Notification::Type type, Notification *n)
 
 void WatchServer::goToIdle()
 {
-	Q_ASSERT(!_currentWatchlet && !_activeWatchlet);
+	Q_ASSERT(!_currentWatchlet);
+	if (_activeWatchlet) {
+		deactivateActiveWatchlet();
+	}
 	_watch->displayIdleScreen();
 	if (_idleWatchlet) {
 		activateWatchlet(_idleWatchlet);

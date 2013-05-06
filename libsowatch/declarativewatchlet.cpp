@@ -23,12 +23,15 @@ DeclarativeWatchlet::DeclarativeWatchlet(Watch* watch, const QString& id) :
 
 	if (!_registered) {
 		qRegisterMetaType<Notification::Type>("Notification::Type");
+		qRegisterMetaType<WeatherNotification::WeatherType>("WeatherNotification::WeatherType");
 		qmlRegisterUncreatableType<DeclarativeWatchWrapper>("com.javispedro.sowatch", 1, 0,
 			"Watch", "Watch is only available via the 'watch' context property");
 		qmlRegisterUncreatableType<NotificationsModel>("com.javispedro.sowatch", 1, 0,
 			"NotificationsModel", "NotificationsModel is only available via the 'notifications' context property");
 		qmlRegisterUncreatableType<Notification>("com.javispedro.sowatch", 1, 0,
 			"Notification", "Notification is an abstract class");
+		qmlRegisterUncreatableType<WeatherNotification>("com.javispedro.sowatch", 1, 0,
+			"WeatherNotification", "WeatherNotification is an abstract class");
 		qmlRegisterType<ConfigKey>();
 		qmlRegisterType<GConfKey>("com.javispedro.sowatch", 1, 0, "GConfKey");
 		_registered = true;
@@ -137,6 +140,34 @@ void DeclarativeWatchlet::setRootObject(QDeclarativeItem *item)
 
 	_item = item;
 	scene()->addItem(_item);
+}
+
+bool DeclarativeWatchlet::handlesNotification(Notification *notification) const
+{
+	if (_item) {
+		QVariant arg = QVariant::fromValue(notification);
+		QVariant result;
+		if (QMetaObject::invokeMethod(_item, "handlesNotification",
+									   Q_RETURN_ARG(QVariant, result),
+									   Q_ARG(QVariant, arg))) {
+			return result.toBool();
+		}
+	}
+
+	return false;
+}
+
+void DeclarativeWatchlet::openNotification(Notification *notification)
+{
+	if (_item) {
+		QVariant arg = QVariant::fromValue(notification);
+		QVariant result;
+		if (!QMetaObject::invokeMethod(_item, "openNotification",
+		                               Q_RETURN_ARG(QVariant, result),
+		                               Q_ARG(QVariant, arg))) {
+			qWarning() << "No openNotification method in QML root object";
+		}
+	}
 }
 
 void DeclarativeWatchlet::handleComponentStatus(QDeclarativeComponent::Status status)
