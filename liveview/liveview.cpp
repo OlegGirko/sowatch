@@ -10,6 +10,11 @@ LiveView::LiveView(ConfigKey* settings, QObject* parent) :
 
 }
 
+LiveView::~LiveView()
+{
+
+}
+
 QPaintEngine* LiveView::paintEngine() const
 {
 	return 0; // TODO
@@ -88,6 +93,16 @@ void LiveView::displayApplication()
 }
 
 void LiveView::vibrate(int msecs)
+{
+
+}
+
+void LiveView::setupBluetoothWatch()
+{
+
+}
+
+void LiveView::desetupBluetoothWatch()
 {
 
 }

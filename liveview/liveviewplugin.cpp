@@ -19,7 +19,7 @@ LiveViewPlugin::~LiveViewPlugin()
 QStringList LiveViewPlugin::drivers()
 {
 	QStringList d;
-	d << "livewview";
+	d << "liveview";
 	return d;
 }
 

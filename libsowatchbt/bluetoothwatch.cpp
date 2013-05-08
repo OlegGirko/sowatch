@@ -100,7 +100,6 @@ void BluetoothWatch::connectToWatch()
 
 	connect(_socket, SIGNAL(connected()), SLOT(handleSocketConnected()));
 	connect(_socket, SIGNAL(disconnected()), SLOT(handleSocketDisconnected()));
-	connect(_socket, SIGNAL(readyRead()), SLOT(handleSocketData()));
 	connect(_socket, SIGNAL(error(QBluetoothSocket::SocketError)),
 			SLOT(handleSocketError(QBluetoothSocket::SocketError)));
 	connect(_socket, SIGNAL(stateChanged(QBluetoothSocket::SocketState)),

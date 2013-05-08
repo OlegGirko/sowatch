@@ -11,6 +11,7 @@ HEADERS += daemon.h daemonadaptor.h watchhandler.h
 LIBS += -L$$OUT_PWD/../libsowatch/ -lsowatch
 INCLUDEPATH += $$PWD/../libsowatch
 DEPENDPATH += $$PWD/../libsowatch
+
 LIBS += -L$$OUT_PWD/../libsowatchbt/ -lsowatchbt
 INCLUDEPATH += $$PWD/../libsowatchbt
 DEPENDPATH += $$PWD/../libsowatchbt

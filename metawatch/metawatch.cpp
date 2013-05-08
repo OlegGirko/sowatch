@@ -269,6 +269,9 @@ void MetaWatch::setupBluetoothWatch()
 	_currentMode = IdleMode;
 	_paintMode = IdleMode;
 
+	connect(_socket, SIGNAL(readyRead()),
+	        SLOT(dataReceived()));
+
 	// Configure the watch according to user preferences
 	updateWatchProperties();
 
