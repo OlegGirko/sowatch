@@ -1,34 +1,3 @@
-/**
-
-This file is partially based on the work from Andrew de Quincey:
-
- Copyright (c) 2011, Andrew de Quincey
- All rights reserved.
-
- Redistribution and use in source and binary forms, with or without
- modification, are permitted provided that the following conditions are met:
-     * Redistributions of source code must retain the above copyright
-       notice, this list of conditions and the following disclaimer.
-     * Redistributions in binary form must reproduce the above copyright
-       notice, this list of conditions and the following disclaimer in the
-       documentation and/or other materials provided with the distribution.
-     * Neither the name of the organization nor the
-       names of its contributors may be used to endorse or promote products
-       derived from this software without specific prior written permission.
-
- THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
- DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-*/
-
 #ifndef LIVEVIEW_H
 #define LIVEVIEW_H
 
@@ -51,7 +20,7 @@ public:
 
 	QString model() const;
 	QStringList buttons() const;
-	bool isConnected() const;
+
 	bool busy() const;
 
 	void setDateTime(const QDateTime& dateTime);
@@ -71,11 +40,53 @@ public:
 	void vibrate(int msecs);
 
 protected:
+	static const int DelayBetweenMessages = 5;
+
+	enum MessageType {
+		NoMessage = 0,
+		GetDisplayProperties = 1,
+		GetDisplayPropertiesResponse = 2,
+		StandBy = 7,
+		StandByResponse = 8,
+		EnableLed = 40,
+		EnableLedResponse = 41,
+		Ack = 44,
+		GetSoftwareVersion = 68,
+		GetSoftwareVersionResponse = 69
+	};
+
+	struct Message {
+		MessageType type;
+		QByteArray data;
+		Message(MessageType ntype = NoMessage, QByteArray ndata = QByteArray()) :
+			type(ntype), data(ndata)
+		{ }
+	};
+
 	void setupBluetoothWatch();
 	void desetupBluetoothWatch();
 
+	void send(const Message& msg);
+
+	void updateDisplayProperties();
+	void updateSoftwareVersion();
+	void enableLed();
+
+	void handleMessage(const Message& msg);
+	void handleDisplayProperties(const Message& msg);
+
+private slots:
+	void handleDataReceived();
+	void handleSendTimerTick();
+
 private:
 	ConfigKey *_settings;
+
+	/** Message outbox queue. */
+	QQueue<Message> _sendingMsgs;
+	QTimer* _sendTimer;
+	/** Incomplete message that is being received. */
+	Message _receivingMsg;
 };
 
 }
