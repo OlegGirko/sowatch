@@ -4,7 +4,9 @@ using namespace sowatch;
 
 WatchHandler::WatchHandler(ConfigKey *config, QObject *parent)
     : QObject(parent),
-      _config(config->getSubkey("", this))
+      _config(config->getSubkey("", this)),
+      _watch(0),
+      _server(0)
 {
 	Registry *registry = Registry::registry();
 

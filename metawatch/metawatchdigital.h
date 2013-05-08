@@ -28,7 +28,7 @@ public:
 	void update(Mode mode, const QList<QRect>& rects = QList<QRect>());
 
 protected:
-	void handleWatchConnected();
+	void setupBluetoothWatch();
 
 private:
 	// Idle screen: notifications unread count

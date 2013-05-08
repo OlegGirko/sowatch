@@ -235,8 +235,10 @@ QImage MetaWatchDigital::iconForNotification(const Notification *n)
 	}
 }
 
-void MetaWatchDigital::handleWatchConnected()
+void MetaWatchDigital::setupBluetoothWatch()
 {
+	MetaWatch::setupBluetoothWatch(); // Call generic setup
+
 	// Grab all of the buttons that are of interest to us
 	// We do not grab the F button, as it triggers the LED.
 	grabButton(IdleMode, BtnA); // Required for app-switch

@@ -1,4 +1,4 @@
-TARGET = metawatchdriver
+TARGET = liveviewdriver
 TEMPLATE = lib
 CONFIG   += plugin
 QT       += gui
@@ -11,29 +11,12 @@ maemo5 {
 }
 MOBILITY += connectivity systeminfo
 
-SOURCES += metawatchplugin.cpp \
-    metawatchpaintengine.cpp \
-    metawatch.cpp \
-    metawatchdigital.cpp \
-    metawatchanalog.cpp \
-    metawatchscanner.cpp \
-    metawatchdigitalsimulator.cpp \
-    metawatchdigitalsimulatorform.cpp
-
-HEADERS += metawatchplugin.h \
-    metawatchpaintengine.h \
-    metawatch.h \
-    metawatchdigital.h \
-    metawatchanalog.h \
-    metawatchscanner.h \
-    metawatchdigitalsimulator.h \
-    metawatchdigitalsimulatorform.h
-
-FORMS += \
-    metawatchdigitalsimulatorform.ui
-
-res_files.files += res/graphics res/fonts
-qml_files.files += qml/com qml/metawatch-digital-config.qml
+SOURCES += liveviewplugin.cpp \
+    liveviewscanner.cpp \
+    liveview.cpp
+HEADERS += liveviewplugin.h \
+    liveviewscanner.h \
+    liveview.h
 
 LIBS += -L$$OUT_PWD/../libsowatch/ -lsowatch
 INCLUDEPATH += $$PWD/../libsowatch
@@ -53,4 +36,4 @@ DEPENDPATH += $$PWD/../libsowatchbt
 	res_files.path = /usr/share/sowatch/metawatch
 	qml_files.path = /usr/share/sowatch/qml
 }
-INSTALLS += target res_files qml_files
+INSTALLS += target

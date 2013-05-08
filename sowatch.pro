@@ -4,14 +4,20 @@ TEMPLATE = subdirs
 
 # Core library
 # This is mandatory. Depends on Qt and GConf.
-SUBDIRS = libsowatch \
-    metawatchwatchlets
+SUBDIRS = libsowatch
+
+SUBDIRS += libsowatchbt
+libsowatchbt.depends = libsowatch
 
 # The MetaWatch driver plugin
-# Since this is the only watch plugin, it is mandatory.
 # Depends on Qt Mobility SystemInfo and Bluetooth.
-SUBDIRS += metawatch
-metawatch.depends = libsowatch
+SUBDIRS += metawatch metawatchwatchlets
+metawatch.depends = libsowatch libsowatchbt
+metawatchwatchlets.depends = metawatch
+
+# LiveView driver plugin
+SUBDIRS += liveview
+liveview.depends = libsowatch libsowatchbt
 
 # Some watchlets
 # This just shows a list of pending notifications and has no dependencies.

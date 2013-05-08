@@ -7,23 +7,9 @@ QTM_USE_NAMESPACE
 using namespace sowatch;
 
 MetaWatchScanner::MetaWatchScanner(QObject *parent) :
-	WatchScanner(parent),
-	_agent(new QBluetoothServiceDiscoveryAgent(this))
+	BluetoothWatchScanner(parent)
 {
-	_agent->setUuidFilter(QBluetoothUuid::SerialPort);
-	connect(_agent, SIGNAL(finished()), this, SIGNAL(finished()));
-	connect(_agent, SIGNAL(serviceDiscovered(QBluetoothServiceInfo)),
-			this, SLOT(handleDiscoveredService(QBluetoothServiceInfo)));
-}
-
-void MetaWatchScanner::start()
-{
-	if (_agent->isActive()) {
-		_agent->stop();
-	}
-	_agent->start();
-	qDebug() << "started metawatch bluetooth scan";
-	emit started();
+	setUuidFilter(QBluetoothUuid::SerialPort);
 }
 
 void MetaWatchScanner::handleDiscoveredService(const QBluetoothServiceInfo &info)

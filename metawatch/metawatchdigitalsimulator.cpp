@@ -116,6 +116,8 @@ void MetaWatchDigitalSimulator::vibrate(bool on)
 
 void MetaWatchDigitalSimulator::connectToWatch()
 {
+	// Skip BluetoothWatch connection stuff
+
 	if (!_connected && _form) {
 		qDebug() << "simulator connected";
 
@@ -123,7 +125,7 @@ void MetaWatchDigitalSimulator::connectToWatch()
 		_currentMode = IdleMode;
 		_paintMode = IdleMode;
 
-		handleWatchConnected();
+		MetaWatchDigital::setupBluetoothWatch();
 
 		emit connected();
 	}

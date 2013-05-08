@@ -2,24 +2,16 @@
 #define METAWATCHSCANNER_H
 
 #include <sowatch.h>
-#include <QtConnectivity/QBluetoothServiceDiscoveryAgent>
+#include <sowatchbt.h>
 
 namespace sowatch
 {
 
-using QTM_PREPEND_NAMESPACE(QBluetoothServiceDiscoveryAgent);
-using QTM_PREPEND_NAMESPACE(QBluetoothServiceInfo);
-
-class MetaWatchScanner : public WatchScanner
+class MetaWatchScanner : public BluetoothWatchScanner
 {
 	Q_OBJECT
 public:
 	explicit MetaWatchScanner(QObject *parent = 0);
-
-	void start();
-
-private:
-	QBluetoothServiceDiscoveryAgent *_agent;
 
 private slots:
 	void handleDiscoveredService(const QBluetoothServiceInfo& info);

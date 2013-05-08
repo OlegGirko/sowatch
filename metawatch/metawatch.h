@@ -3,12 +3,12 @@
 
 #include <QtCore/QQueue>
 #include <QtCore/QTimer>
-#include <QtCore/QSettings>
 #include <QtConnectivity/QBluetoothAddress>
 #include <QtConnectivity/QBluetoothSocket>
 #include <QtConnectivity/QBluetoothLocalDevice>
 #include <QtSystemInfo/QSystemAlignedTimer>
 #include <sowatch.h>
+#include <sowatchbt.h>
 
 namespace sowatch
 {
@@ -20,7 +20,7 @@ using QTM_PREPEND_NAMESPACE(QBluetoothLocalDevice);
 
 class MetaWatchPaintEngine;
 
-class MetaWatch : public Watch
+class MetaWatch : public BluetoothWatch
 {
     Q_OBJECT
 
@@ -99,7 +99,7 @@ public:
 
 	QString model() const;
 	QStringList buttons() const;
-	bool isConnected() const;
+
 	bool busy() const;
 
 	void setDateTime(const QDateTime& dateTime);
@@ -177,39 +177,21 @@ protected:
 	/** The framebuffers for each of the watch modes */
 	QImage _image[3];
 
-	// Timers to retry the connection when the watch is not found.
-	static const int connectRetryTimesSize = 6;
-	static const int connectRetryTimes[connectRetryTimesSize];
-	short _connectRetries;
-	bool _connected;
-	QTimer* _connectTimer;
-	QSystemAlignedTimer* _connectAlignedTimer;
-
-	// Connection stuff
-	QBluetoothLocalDevice* _localDev;
-	QBluetoothAddress _address;
-	QBluetoothSocket* _socket;
-
 	/** The "packets to be sent" asynchronous queue **/
 	QQueue<Message> _toSend;
 	QTimer* _sendTimer;
 	Message _partialReceived;
 
-	/** Used to calculate CRC */
+	// Watch connect/disconnect handling
+	void setupBluetoothWatch();
+	void desetupBluetoothWatch();
+
+	// Message passing
+	/** Used to calculate CRC fields in message header */
 	static const quint8 bitRevTable[16];
 	static const quint16 crcTable[256];
 	static quint16 calcCrc(const QByteArray& data, int size);
 	static quint16 calcCrc(const Message& msg);
-
-	/** Start the initial connection attempt, reset failed connection timers. */
-	void scheduleConnect();
-	/** Schedule an new connection attempt, consider the current one failed. */
-	void scheduleRetryConnect();
-	/** Cancel any pending connection attempts. */
-	void unscheduleConnect();
-
-	/** Attempt a connection to the watch right now. */
-	virtual void connectToWatch();
 
 	/** Sends a message to the watch. Does not block. */
 	virtual void send(const Message& msg);
@@ -239,18 +221,9 @@ protected:
 	void handleButtonEventMessage(const Message& msg);
 	void handleBatteryVoltageMessage(const Message& msg);
 
-	/** To be overriden; should configure a newly connected watch. */
-	virtual void handleWatchConnected() = 0;
-
 private slots:
 	void settingChanged(const QString& key);
-	void localDevModeChanged(QBluetoothLocalDevice::HostMode state);
-	void socketConnected();
-	void socketDisconnected();
-	void socketData();
-	void socketError(QBluetoothSocket::SocketError error);
-	void socketState(QBluetoothSocket::SocketState error);
-	void timedReconnect();
+	void dataReceived();
 	void timedSend();
 	void timedRing();
 
