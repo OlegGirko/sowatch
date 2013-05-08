@@ -14,6 +14,8 @@ LiveView::LiveView(ConfigKey* settings, QObject* parent) :
 {
 	_sendTimer->setInterval(DelayBetweenMessages);
 	connect(_sendTimer, SIGNAL(timeout()), SLOT(handleSendTimerTick()));
+
+	_24hMode = settings->value("24h-mode", false).toBool();
 }
 
 LiveView::~LiveView()
@@ -122,6 +124,11 @@ void LiveView::send(const Message &msg)
 	}
 }
 
+void LiveView::sendResponse(MessageType type, ResponseType response)
+{
+	send(Message(type, QByteArray(0, static_cast<char>(response))));
+}
+
 void LiveView::updateDisplayProperties()
 {
 	static const char *software_version = "0.0.3";
@@ -135,15 +142,21 @@ void LiveView::updateSoftwareVersion()
 	send(Message(GetSoftwareVersion, QByteArray(1, 0)));
 }
 
-void LiveView::enableLed()
+void LiveView::enableLed(const QColor& color, int delay, int time)
 {
 	QByteArray data;
-	data.append(char(0xFF));
-	data.append(char(0xFF));
-	data.append(char(0x00));
-	data.append(char(0x64));
-	data.append(char(0x00));
-	data.append(char(0xFA));
+
+	quint16 rgb;
+	rgb |= ((color.red() & 0xF8) << 8);
+	rgb |= ((color.green() & 0xFC) << 3);
+	rgb |= ((color.blue() & 0xF8) >> 3);
+
+	data.append((rgb & 0xFF00U) >> 8);
+	data.append(rgb & 0x00FFU);
+	data.append((delay & 0xFF00U) >> 8);
+	data.append(delay & 0x00FFU);
+	data.append((time & 0xFF00U) >> 8);
+	data.append(time & 0x00FFU);
 
 	send(Message(EnableLed, data));
 }
@@ -152,15 +165,64 @@ void LiveView::handleMessage(const Message &msg)
 {
 	send(Message(Ack, QByteArray(1, msg.type)));
 	switch (msg.type) {
+	case DeviceStatusChange:
+		handleDeviceStatusChange(msg);
+		break;
+	case DateTimeRequest:
+		handleDateTimeRequest(msg);
+		break;
+	case EnableLedResponse:
+		// Nothing to do
+		break;
 	case GetDisplayPropertiesResponse:
 		handleDisplayProperties(msg);
 		break;
+	case GetSoftwareVersionResponse:
+		handleSoftwareVersion(msg);
+		break;
+	default:
+		qWarning() << "Received unknown LiveView message" << msg.type;
 	}
+}
+
+void LiveView::handleDeviceStatusChange(const Message &msg)
+{
+	if (msg.data.size() == 1) {
+		DeviceStatus status = static_cast<DeviceStatus>(msg.data.at(0));
+		qDebug() << "liveview device status change" << status;
+	}
+	sendResponse(DeviceStatusChangeResponse, ResponseOk);
+}
+
+void LiveView::handleDateTimeRequest(const Message &msg)
+{
+	QByteArray data;
+	data.resize(5);
+
+	QDateTime time = QDateTime::currentDateTime();
+	time.setTimeSpec(Qt::UTC);
+	quint32 timestamp = time.toTime_t();
+	data[0] = (timestamp & 0xFF000000U) >> 24;
+	data[1] = (timestamp & 0x00FF0000U) >> 16;
+	data[2] = (timestamp & 0x0000FF00U) >>  8;
+	data[3] = (timestamp & 0x000000FFU);
+	data[4] = _24hMode ? 1 : 0;
+
+	send(Message(DateTimeResponse, data));
 }
 
 void LiveView::handleDisplayProperties(const Message &msg)
 {
+	// For some reason firmware expects us to send this message right
+	// after display properties
+	// Otherwise the watch hangs up the connection
 	updateSoftwareVersion();
+}
+
+void LiveView::handleSoftwareVersion(const Message &msg)
+{
+	qDebug() << "LiveView software version is"
+	         << QString::fromAscii(msg.data.constData(), msg.data.size());
 }
 
 void LiveView::handleDataReceived()
@@ -247,7 +309,7 @@ void LiveView::handleDataReceived()
 void LiveView::handleSendTimerTick()
 {
 	static const int HEADER_SIZE = 6;
-	qDebug() << "Send tick";
+
 	// If there are packets to be sent...
 	if (!_sendingMsgs.empty()) {
 		// Send a message to the watch

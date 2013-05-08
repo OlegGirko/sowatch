@@ -46,13 +46,29 @@ protected:
 		NoMessage = 0,
 		GetDisplayProperties = 1,
 		GetDisplayPropertiesResponse = 2,
-		StandBy = 7,
-		StandByResponse = 8,
+		DeviceStatusChange = 7,
+		DeviceStatusChangeResponse = 8,
+		DateTimeRequest = 38,
+		DateTimeResponse = 39,
 		EnableLed = 40,
 		EnableLedResponse = 41,
 		Ack = 44,
 		GetSoftwareVersion = 68,
 		GetSoftwareVersionResponse = 69
+	};
+
+	enum ResponseType {
+		ResponseOk = 0,
+		ResponseError = 1,
+		ResponseOutOfMemory = 2,
+		ResponseExit = 3,
+		ResponseCancel = 4
+	};
+
+	enum DeviceStatus {
+		DeviceOff = 0,
+		DeviceOn = 1,
+		DeviceMenu = 2
 	};
 
 	struct Message {
@@ -67,13 +83,17 @@ protected:
 	void desetupBluetoothWatch();
 
 	void send(const Message& msg);
+	void sendResponse(MessageType type, ResponseType response);
 
 	void updateDisplayProperties();
 	void updateSoftwareVersion();
-	void enableLed();
+	void enableLed(const QColor& color, int delay, int time);
 
 	void handleMessage(const Message& msg);
+	void handleDeviceStatusChange(const Message& msg);
+	void handleDateTimeRequest(const Message& msg);
 	void handleDisplayProperties(const Message& msg);
+	void handleSoftwareVersion(const Message& msg);
 
 private slots:
 	void handleDataReceived();
@@ -81,6 +101,8 @@ private slots:
 
 private:
 	ConfigKey *_settings;
+
+	bool _24hMode : 1;
 
 	/** Message outbox queue. */
 	QQueue<Message> _sendingMsgs;
