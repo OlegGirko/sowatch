@@ -48,6 +48,15 @@ protected:
 		GetDisplayPropertiesResponse = 2,
 		DeviceStatusChange = 7,
 		DeviceStatusChangeResponse = 8,
+		SetMenuSize = 23,
+		SetMenuSizeResponse = 24,
+		MenuItemRequest = 25,
+		MenuItemResponse = 26,
+		NotificationRequest = 27,
+		NotificationResponse = 28,
+		Navigation = 29,
+		NavigationResponse = 30,
+		MenuItemsRequest = 35,
 		DateTimeRequest = 38,
 		DateTimeResponse = 39,
 		EnableLed = 40,
@@ -82,15 +91,25 @@ protected:
 	void setupBluetoothWatch();
 	void desetupBluetoothWatch();
 
+	/** Update the device menu (after a power on, etc.) */
+	void refreshMenu();
+
+protected:
 	void send(const Message& msg);
 	void sendResponse(MessageType type, ResponseType response);
 
 	void updateDisplayProperties();
 	void updateSoftwareVersion();
-	void enableLed(const QColor& color, int delay, int time);
+	void setMenuSize(unsigned char size);
+	void sendMenuItem(unsigned char id, bool alert, unsigned short unread, const QString& text, const QByteArray& image);
+	void enableLed(const QColor& color, unsigned short delay, unsigned short time);
 
 	void handleMessage(const Message& msg);
 	void handleDeviceStatusChange(const Message& msg);
+	void handleMenuItemRequest(const Message& msg);
+	void handleNotificationRequest(const Message& msg);
+	void handleNavigation(const Message& msg);
+	void handleMenuItemsRequest(const Message& msg);
 	void handleDateTimeRequest(const Message& msg);
 	void handleDisplayProperties(const Message& msg);
 	void handleSoftwareVersion(const Message& msg);
@@ -103,6 +122,8 @@ private:
 	ConfigKey *_settings;
 
 	bool _24hMode : 1;
+
+	QStringList _buttons;
 
 	/** Message outbox queue. */
 	QQueue<Message> _sendingMsgs;

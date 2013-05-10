@@ -16,6 +16,7 @@ LiveView::LiveView(ConfigKey* settings, QObject* parent) :
 	connect(_sendTimer, SIGNAL(timeout()), SLOT(handleSendTimerTick()));
 
 	_24hMode = settings->value("24h-mode", false).toBool();
+	_buttons << "Select" << "Up" << "Down" << "Left" << "Right";
 }
 
 LiveView::~LiveView()
@@ -40,12 +41,14 @@ QString LiveView::model() const
 
 QStringList LiveView::buttons() const
 {
-	return QStringList();
+	return _buttons;
 }
 
 bool LiveView::busy() const
 {
-	return false; // TODO
+	return !_connected ||
+			_socket->state() != QBluetoothSocket::ConnectedState ||
+			_sendingMsgs.size() > 20;
 }
 
 void LiveView::setDateTime(const QDateTime& dateTime)
@@ -68,21 +71,22 @@ QDateTime LiveView::dateTime() const
 
 void LiveView::queryBatteryLevel()
 {
-
+	// LiveView does not seem to support this.
 }
+
 int LiveView::batteryLevel() const
 {
-	return 0; // TODO
+	return 100;
 }
 
 void LiveView::queryCharging()
 {
-
+	// LiveView does not seem to support this.
 }
 
 bool LiveView::charging() const
 {
-	return false; // TODO
+	return false;
 }
 
 void LiveView::displayIdleScreen()
@@ -109,11 +113,17 @@ void LiveView::setupBluetoothWatch()
 {
 	connect(_socket, SIGNAL(readyRead()), SLOT(handleDataReceived()));
 	updateDisplayProperties();
+	refreshMenu();
 }
 
 void LiveView::desetupBluetoothWatch()
 {
 
+}
+
+void LiveView::refreshMenu()
+{
+	setMenuSize(2);
 }
 
 void LiveView::send(const Message &msg)
@@ -142,7 +152,33 @@ void LiveView::updateSoftwareVersion()
 	send(Message(GetSoftwareVersion, QByteArray(1, 0)));
 }
 
-void LiveView::enableLed(const QColor& color, int delay, int time)
+void LiveView::setMenuSize(unsigned char size)
+{
+	send(Message(SetMenuSize, QByteArray(1, size)));
+}
+
+void LiveView::sendMenuItem(unsigned char id, bool alert, unsigned short unread, const QString& text, const QByteArray& image)
+{
+	QByteArray data(1 + 2 * 3 + 2 + 2 * 3, 0);
+	data[0] = alert ? 1 : 0;
+	//data[1,2] // Unknown
+	data[3] = (unread & 0xFF00U) >> 8;
+	data[4] = (unread & 0x00FFU);
+	//data[5,6] // Unknown
+	data[7] = id + 3;
+	//data[8] // Unknown
+	//data[9,10] // Unknown
+	//data[11,12] // Unknown
+	quint16 text_length = text.length();
+	data[13] = (text_length & 0xFF00U) >> 8;
+	data[14] = (text_length & 0x00FFU);
+	data.append(text.toLatin1());
+	data.append(image);
+
+	send(Message(MenuItemResponse, data));
+}
+
+void LiveView::enableLed(const QColor& color, unsigned short delay, unsigned short time)
 {
 	QByteArray data;
 
@@ -168,6 +204,18 @@ void LiveView::handleMessage(const Message &msg)
 	case DeviceStatusChange:
 		handleDeviceStatusChange(msg);
 		break;
+	case MenuItemRequest:
+		handleMenuItemRequest(msg);
+		break;
+	case NotificationRequest:
+		handleNotificationRequest(msg);
+		break;
+	case Navigation:
+		handleNavigation(msg);
+		break;
+	case MenuItemsRequest:
+		handleMenuItemsRequest(msg);
+		break;
 	case DateTimeRequest:
 		handleDateTimeRequest(msg);
 		break;
@@ -190,14 +238,57 @@ void LiveView::handleDeviceStatusChange(const Message &msg)
 	if (msg.data.size() == 1) {
 		DeviceStatus status = static_cast<DeviceStatus>(msg.data.at(0));
 		qDebug() << "liveview device status change" << status;
+		switch (status) {
+		case DeviceOn:
+			refreshMenu();
+			break;
+		default:
+			break;
+		}
 	}
 	sendResponse(DeviceStatusChangeResponse, ResponseOk);
 }
 
+void LiveView::handleMenuItemRequest(const Message &msg)
+{
+	Q_UNUSED(msg);
+	// TODO
+	qWarning() << "TODO" << Q_FUNC_INFO;
+}
+
+void LiveView::handleNotificationRequest(const Message &msg)
+{
+	// TODO
+	sendResponse(NotificationResponse, ResponseError); // TODO Crashes the watch
+}
+
+void LiveView::handleNavigation(const Message &msg)
+{
+	// TODO
+	sendResponse(NavigationResponse, ResponseOk);
+}
+
+void LiveView::handleMenuItemsRequest(const Message &msg)
+{
+	qDebug() << "Sending menu items";
+	QFile icon_file;
+
+	icon_file.setFileName(SOWATCH_RESOURCES_DIR "/liveview/graphics/menu_notifications.png");
+	icon_file.open(QIODevice::ReadOnly);
+	sendMenuItem(0, false, 4, tr("Notifications"), icon_file.readAll());
+	icon_file.close();
+
+	icon_file.setFileName(SOWATCH_RESOURCES_DIR "/liveview/graphics/menu_missed_calls.png");
+	icon_file.open(QIODevice::ReadOnly);
+	sendMenuItem(1, false, 1, tr("Missed calls"), icon_file.readAll());
+	icon_file.close();
+}
+
 void LiveView::handleDateTimeRequest(const Message &msg)
 {
-	QByteArray data;
-	data.resize(5);
+	QByteArray data(5, 0);
+
+	Q_UNUSED(msg);
 
 	QDateTime time = QDateTime::currentDateTime();
 	time.setTimeSpec(Qt::UTC);
@@ -217,6 +308,7 @@ void LiveView::handleDisplayProperties(const Message &msg)
 	// after display properties
 	// Otherwise the watch hangs up the connection
 	updateSoftwareVersion();
+	Q_UNUSED(msg);
 }
 
 void LiveView::handleSoftwareVersion(const Message &msg)
@@ -256,9 +348,6 @@ void LiveView::handleDataReceived()
 			}
 
 			dataRead = _socket->read(header.c, HEADER_SIZE);
-#if PROTOCOL_DEBUG
-			qDebug() << "received header" << QByteArray(header.c, HEADER_SIZE).toHex();
-#endif
 			if (dataRead < HEADER_SIZE) {
 				qWarning() << "Short read";
 				return;
@@ -283,9 +372,6 @@ void LiveView::handleDataReceived()
 
 		/* We have the header; now, try to get the complete packet. */
 		if (_socket->bytesAvailable() < _receivingMsg.data.size()) {
-#if PROTOCOL_DEBUG
-			qDebug() << "Waiting for more data" << _socket->bytesAvailable() << "/" << _receivingMsg.data.size();
-#endif
 			return; /* Wait for more. */
 		}
 

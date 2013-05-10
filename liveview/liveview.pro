@@ -18,6 +18,8 @@ HEADERS += liveviewplugin.h \
     liveviewscanner.h \
     liveview.h
 
+res_files.files += res/graphics res/fonts
+
 LIBS += -L$$OUT_PWD/../libsowatch/ -lsowatch
 INCLUDEPATH += $$PWD/../libsowatch
 DEPENDPATH += $$PWD/../libsowatch
@@ -36,4 +38,4 @@ DEPENDPATH += $$PWD/../libsowatchbt
 	res_files.path = /usr/share/sowatch/metawatch
 	qml_files.path = /usr/share/sowatch/qml
 }
-INSTALLS += target
+INSTALLS += target res_files
