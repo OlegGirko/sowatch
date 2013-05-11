@@ -158,7 +158,7 @@ Page {
 				interactive: false
 				width: parent.width
 				height: UiConstants.ListItemHeightDefault * count
-				model: WatchletsModel {
+				model: ConfiguredWatchletsModel {
 					id: watchletsModel
 					configKey: watchPage.configKey
 					displayUnadded: false

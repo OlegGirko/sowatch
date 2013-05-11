@@ -40,6 +40,8 @@ Watchlet* MetaWatchWatchletsPlugin::getWatchlet(const QString& id, ConfigKey *se
 		return new MetaWatchFaceWatchlet(watch);
 	} else if (id == MetaWatchNotificationWatchlet::myId) {
 		return new MetaWatchNotificationWatchlet(watch);
+	} else {
+		return 0;
 	}
 }
 

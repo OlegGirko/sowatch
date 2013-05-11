@@ -9,8 +9,9 @@ using namespace sowatch;
 
 WatchServer::WatchServer(Watch* watch, QObject* parent) :
     QObject(parent), _watch(watch),
-    _nextWatchletButton(-1), _idleWatchlet(0), _notificationWatchlet(0),
+    _nextWatchletButton(-1),
     _oldNotificationThreshold(300),
+    _idleWatchlet(0), _notificationWatchlet(0),
     _notifications(new NotificationsModel(this)),
     _activeWatchlet(0), _currentWatchlet(0), _currentWatchletIndex(-1),
     _syncTimeTimer(new QTimer(this))
@@ -161,7 +162,6 @@ const NotificationsModel * WatchServer::notifications() const
 
 void WatchServer::postNotification(Notification *notification)
 {
-	const Notification::Type type = notification->type();
 	const Notification::Priority priority = notification->priority();
 
 	// Add notification to model
@@ -401,7 +401,6 @@ void WatchServer::handleNotificationChanged()
 	QObject *obj = sender();
 	if (obj) {
 		Notification* n = static_cast<Notification*>(obj);
-		const Notification::Type type = n->type();
 		const uint lastCount = _notificationCounts[n];
 		_notificationCounts[n] = n->count();
 

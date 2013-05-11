@@ -9,6 +9,7 @@
 #include "watch.h"
 #include "watchserver.h"
 #include "watchscanner.h"
+#include "watchpaintengine.h"
 #include "watchplugininterface.h"
 
 #include "notification.h"

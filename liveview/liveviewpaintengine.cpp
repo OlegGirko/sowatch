@@ -1,37 +1,40 @@
-#include "metawatch.h"
-#include "metawatchpaintengine.h"
+#include "liveviewpaintengine.h"
 
 using namespace sowatch;
 
-MetaWatchPaintEngine::MetaWatchPaintEngine()
-    : WatchPaintEngine()
+LiveViewPaintEngine::LiveViewPaintEngine() :
+    WatchPaintEngine()
 {
+
 }
 
-bool MetaWatchPaintEngine::begin(QPaintDevice *pdev)
+bool LiveViewPaintEngine::begin(QPaintDevice *pdev)
 {
-	_watch = static_cast<MetaWatch*>(pdev);
-	_mode = _watch->paintTargetMode();
+	_watch = static_cast<LiveView*>(pdev);
 
-	return WatchPaintEngine::begin(_watch->imageFor(_mode));
+	return WatchPaintEngine::begin(_watch->image());
 }
 
-bool MetaWatchPaintEngine::end()
+bool LiveViewPaintEngine::end()
 {
 	bool ret = WatchPaintEngine::end();
 	if (ret) {
-		_watch->update(_mode, _damaged.rects().toList());
+		QRect rect = _damaged.boundingRect();
+		if (!rect.isEmpty()) {
+			QImage sub_image = _watch->image()->copy(rect);
+			_watch->renderImage(rect.x(), rect.y(), sub_image);
+		}
 	}
 	return ret;
 }
 
-void MetaWatchPaintEngine::drawRects(const QRectF *rects, int rectCount)
+void LiveViewPaintEngine::drawRects(const QRectF *rects, int rectCount)
 {
 	int i;
 	for (i = 0; i < rectCount; i++) {
 		const QRectF& r = rects[i];
-		if (_hasBrush && fillsEntireImage(r.toRect()) && (_isBrushBlack | _isBrushWhite)) {
-			_watch->clear(_mode, _isBrushBlack);
+		if (_hasBrush && fillsEntireImage(r.toRect()) && _isBrushBlack) {
+			_watch->clear();
 			_damaged = QRegion();
 			continue;
 		}
@@ -48,13 +51,13 @@ void MetaWatchPaintEngine::drawRects(const QRectF *rects, int rectCount)
 	_painter.drawRects(rects, rectCount);
 }
 
-void MetaWatchPaintEngine::drawRects(const QRect *rects, int rectCount)
+void LiveViewPaintEngine::drawRects(const QRect *rects, int rectCount)
 {
 	int i;
 	for (i = 0; i < rectCount; i++) {
 		const QRect& r = rects[i];
-		if (_hasBrush && fillsEntireImage(r) && (_isBrushBlack | _isBrushWhite)) {
-			_watch->clear(_mode, _isBrushBlack);
+		if (_hasBrush && fillsEntireImage(r) && _isBrushBlack) {
+			_watch->clear();
 			_damaged = QRegion();
 			continue;
 		}
@@ -72,25 +75,22 @@ void MetaWatchPaintEngine::drawRects(const QRect *rects, int rectCount)
 	_painter.drawRects(rects, rectCount);
 }
 
-void MetaWatchPaintEngine::updateState(const QPaintEngineState &state)
+void LiveViewPaintEngine::updateState(const QPaintEngineState &state)
 {
 	WatchPaintEngine::updateState(state);
 	if (state.state() & QPaintEngine::DirtyBrush) {
 		QBrush brush = state.brush();
 		_isBrushBlack = false;
-		_isBrushWhite = false;
 		if (brush.style() == Qt::SolidPattern) {
 			const QColor color = brush.color();
 			if (color == Qt::black) {
 				_isBrushBlack = true;
-			} else if (color == Qt::white) {
-				_isBrushWhite = true;
 			}
 		}
 	}
 }
 
-bool MetaWatchPaintEngine::fillsEntireImage(const QRect& rect)
+bool LiveViewPaintEngine::fillsEntireImage(const QRect& rect)
 {
 	return rect == _area &&
 			(!_clipEnabled ||

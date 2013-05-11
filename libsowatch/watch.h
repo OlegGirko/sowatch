@@ -85,6 +85,8 @@ signals:
 	void buttonPressed(int button);
 	/** A button has been pressed and then released. */
 	void buttonReleased(int button);
+	/** Emitted when e.g. either via the watch menu, or similar, a watchlet is requested. */
+	void watchletRequested(const QString& id);
 };
 
 }

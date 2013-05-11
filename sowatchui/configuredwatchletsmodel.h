@@ -1,18 +1,18 @@
-#ifndef WATCHLETSMODEL_H
-#define WATCHLETSMODEL_H
+#ifndef CONFIGUREDWATCHLETSMODEL_H
+#define CONFIGUREDWATCHLETSMODEL_H
 
 #include <QAbstractListModel>
 
 #include <sowatch.h>
 
-class WatchletsModel : public QAbstractListModel
+class ConfiguredWatchletsModel : public QAbstractListModel
 {
 	Q_OBJECT
 	Q_PROPERTY(QString configKey READ configKey WRITE setConfigKey NOTIFY configKeyChanged)
 	Q_PROPERTY(bool displayUnadded READ displayUnadded WRITE setDisplayUnadded NOTIFY displayUnaddedChanged)
 
 public:
-	explicit WatchletsModel(QObject *parent = 0);
+	explicit ConfiguredWatchletsModel(QObject *parent = 0);
 
 	enum DataRoles {
 		NameRole = Qt::UserRole,

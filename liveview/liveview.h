@@ -7,6 +7,8 @@
 namespace sowatch
 {
 
+class LiveViewPaintEngine;
+
 class LiveView : public BluetoothWatch
 {
 	Q_OBJECT
@@ -38,6 +40,13 @@ public:
 	void displayApplication();
 
 	void vibrate(int msecs);
+
+	// Only for application mode
+	QImage* image();
+	/** Render a image in a certain position. */
+	void renderImage(int x, int y, const QImage& image);
+	/** Clear the current display to black. */
+	void clear();
 
 protected:
 	static const int DelayBetweenMessages = 5;
@@ -134,7 +143,13 @@ private:
 
 	bool _24hMode : 1;
 
+	int _screenWidth;
+	int _screenHeight;
 	QStringList _buttons;
+
+	// Required by QPaintDevice
+	mutable LiveViewPaintEngine* _paintEngine;
+	QImage _image;
 
 	/** Message outbox queue. */
 	QQueue<Message> _sendingMsgs;

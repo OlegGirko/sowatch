@@ -9,6 +9,7 @@ QTM_USE_NAMESPACE
 
 LiveViewPlugin::LiveViewPlugin()
 {
+
 }
 
 LiveViewPlugin::~LiveViewPlugin()

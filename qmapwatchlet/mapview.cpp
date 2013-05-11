@@ -265,7 +265,7 @@ void MapView::handleCurrentLocationNameSearchFinished()
 
 void MapView::handleCurrentLocationNameSearchError(QGeoSearchReply::Error error, const QString &errorString)
 {
-	qWarning() << "Current location name search error: " << errorString;
+	qWarning() << "Current location name search error: " << error << errorString;
 	if (_searchReply) {
 		_searchReply->deleteLater();
 		_searchReply = 0;

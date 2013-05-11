@@ -1,5 +1,6 @@
 #include <QtEndian>
 
+#include "liveviewpaintengine.h"
 #include "liveview.h"
 
 using namespace sowatch;
@@ -10,28 +11,56 @@ QTM_USE_NAMESPACE
 LiveView::LiveView(ConfigKey* settings, QObject* parent) :
 	BluetoothWatch(QBluetoothAddress(settings->value("address").toString()), parent),
 	_settings(settings->getSubkey(QString(), this)),
+    _24hMode(settings->value("24h-mode", false).toBool()),
+    _screenWidth(0), _screenHeight(0),
     _sendTimer(new QTimer(this))
 {
 	_sendTimer->setInterval(DelayBetweenMessages);
 	connect(_sendTimer, SIGNAL(timeout()), SLOT(handleSendTimerTick()));
 
-	_24hMode = settings->value("24h-mode", false).toBool();
 	_buttons << "Select" << "Up" << "Down" << "Left" << "Right";
 }
 
 LiveView::~LiveView()
 {
-
+	if (_paintEngine) {
+		delete _paintEngine;
+	}
 }
 
 QPaintEngine* LiveView::paintEngine() const
 {
-	return 0; // TODO
+	if (!_paintEngine) {
+		_paintEngine = new LiveViewPaintEngine;
+	}
+
+	return _paintEngine;
 }
 
 int LiveView::metric(PaintDeviceMetric metric) const
 {
-	return 0; // TODO
+	switch (metric) {
+	case PdmWidth:
+		return _screenWidth;
+	case PdmHeight:
+		return _screenHeight;
+	case PdmWidthMM:
+		return 24;
+	case PdmHeightMM:
+		return 24;
+	case PdmNumColors:
+		return 65536;
+	case PdmDepth:
+		return 16;
+	case PdmDpiX:
+	case PdmPhysicalDpiX:
+		return 136;
+	case PdmDpiY:
+	case PdmPhysicalDpiY:
+		return 136;
+	}
+
+	return -1;
 }
 
 QString LiveView::model() const
@@ -106,7 +135,28 @@ void LiveView::displayApplication()
 
 void LiveView::vibrate(int msecs)
 {
+	// TODO
+}
 
+QImage* LiveView::image()
+{
+	return &_image;
+}
+
+void LiveView::renderImage(int x, int y, const QImage &image)
+{
+	QBuffer buffer;
+	buffer.open(QIODevice::WriteOnly);
+	if (image.save(&buffer, "PNG")) {
+		displayBitmap(x, y, buffer.buffer());
+	} else {
+		qWarning() << "Failed to encode image";
+	}
+}
+
+void LiveView::clear()
+{
+	displayClear();
 }
 
 void LiveView::setupBluetoothWatch()
@@ -359,6 +409,17 @@ void LiveView::handleDateTimeRequest(const Message &msg)
 
 void LiveView::handleDisplayProperties(const Message &msg)
 {
+	if (msg.data.size() < 2) {
+		qWarning() << "Invalid DPR response";
+		return;
+	}
+
+	_screenWidth = msg.data[0];
+	_screenHeight = msg.data[1];
+
+	// Recreate the display image
+	_image = QImage(_screenWidth, _screenHeight, QImage::Format_RGB16);
+
 	// For some reason firmware expects us to send this message right
 	// after display properties
 	// Otherwise the watch hangs up the connection

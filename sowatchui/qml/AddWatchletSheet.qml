@@ -18,7 +18,7 @@ Sheet {
 
 		flickableDirection: Flickable.VerticalFlick
 
-		model: WatchletsModel {
+		model: ConfiguredWatchletsModel {
 			id: watchletsModel
 			configKey: sheet.configKey
 			displayUnadded: true

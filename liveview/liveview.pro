@@ -13,10 +13,12 @@ MOBILITY += connectivity systeminfo
 
 SOURCES += liveviewplugin.cpp \
     liveviewscanner.cpp \
-    liveview.cpp
+    liveview.cpp \
+    liveviewpaintengine.cpp
 HEADERS += liveviewplugin.h \
     liveviewscanner.h \
-    liveview.h
+    liveview.h \
+    liveviewpaintengine.h
 
 res_files.files += res/graphics res/fonts
 

@@ -117,7 +117,7 @@ MetaWatch::~MetaWatch()
 QPaintEngine* MetaWatch::paintEngine() const
 {
 	if (!_paintEngine) {
-		_paintEngine = new MetaWatchPaintEngine(const_cast<MetaWatch*>(this));
+		_paintEngine = new MetaWatchPaintEngine;
 	}
 
 	return _paintEngine;

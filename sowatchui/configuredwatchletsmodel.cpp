@@ -1,10 +1,10 @@
-#include "watchletsmodel.h"
+#include "configuredwatchletsmodel.h"
 
 using namespace sowatch;
 
 static const QString watchletsSubKey("/watchlets");
 
-WatchletsModel::WatchletsModel(QObject *parent) :
+ConfiguredWatchletsModel::ConfiguredWatchletsModel(QObject *parent) :
     QAbstractListModel(parent),
     _config(0),
     _unadded(false)
@@ -17,7 +17,7 @@ WatchletsModel::WatchletsModel(QObject *parent) :
 	setRoleNames(roles);
 }
 
-QString WatchletsModel::configKey() const
+QString ConfiguredWatchletsModel::configKey() const
 {
 	if (_config) {
 		QString key = _config->key();
@@ -27,7 +27,7 @@ QString WatchletsModel::configKey() const
 	}
 }
 
-void WatchletsModel::setConfigKey(const QString &configKey)
+void ConfiguredWatchletsModel::setConfigKey(const QString &configKey)
 {
 	QString oldConfigKey = this->configKey();
 	if (_config) {
@@ -44,12 +44,12 @@ void WatchletsModel::setConfigKey(const QString &configKey)
 	}
 }
 
-bool WatchletsModel::displayUnadded() const
+bool ConfiguredWatchletsModel::displayUnadded() const
 {
 	return _unadded;
 }
 
-void WatchletsModel::setDisplayUnadded(bool displayUnadded)
+void ConfiguredWatchletsModel::setDisplayUnadded(bool displayUnadded)
 {
 	qDebug() << "Set dunadded" << displayUnadded;
 	_unadded = displayUnadded;
@@ -57,13 +57,13 @@ void WatchletsModel::setDisplayUnadded(bool displayUnadded)
 	emit displayUnaddedChanged();
 }
 
-int WatchletsModel::rowCount(const QModelIndex &parent) const
+int ConfiguredWatchletsModel::rowCount(const QModelIndex &parent) const
 {
 	Q_UNUSED(parent);
 	return _list.count();
 }
 
-QVariant WatchletsModel::data(const QModelIndex &index, int role) const
+QVariant ConfiguredWatchletsModel::data(const QModelIndex &index, int role) const
 {
 	const QString id = _list[index.row()];
 	switch (role) {
@@ -79,7 +79,7 @@ QVariant WatchletsModel::data(const QModelIndex &index, int role) const
 	return QVariant();
 }
 
-void WatchletsModel::addWatchlet(const QString &name)
+void ConfiguredWatchletsModel::addWatchlet(const QString &name)
 {
 	if (!_config) return;
 	QStringList enabled = _config->value().toStringList();
@@ -88,7 +88,7 @@ void WatchletsModel::addWatchlet(const QString &name)
 	_config->set(enabled);
 }
 
-void WatchletsModel::removeWatchlet(const QString &name)
+void ConfiguredWatchletsModel::removeWatchlet(const QString &name)
 {
 	if (!_config) return;
 	QStringList enabled = _config->value().toStringList();
@@ -96,7 +96,7 @@ void WatchletsModel::removeWatchlet(const QString &name)
 	_config->set(enabled);
 }
 
-void WatchletsModel::moveWatchletUp(const QString &name)
+void ConfiguredWatchletsModel::moveWatchletUp(const QString &name)
 {
 	if (!_config) return;
 	QStringList enabled = _config->value().toStringList();
@@ -108,7 +108,7 @@ void WatchletsModel::moveWatchletUp(const QString &name)
 	_config->set(enabled);
 }
 
-void WatchletsModel::moveWatchletDown(const QString &name)
+void ConfiguredWatchletsModel::moveWatchletDown(const QString &name)
 {
 	if (!_config) return;
 	QStringList enabled = _config->value().toStringList();
@@ -120,7 +120,7 @@ void WatchletsModel::moveWatchletDown(const QString &name)
 	_config->set(enabled);
 }
 
-void WatchletsModel::reload()
+void ConfiguredWatchletsModel::reload()
 {
 	Registry *registry = Registry::registry();
 	Q_ASSERT(_config);
@@ -161,7 +161,7 @@ void WatchletsModel::reload()
 	endResetModel();
 }
 
-void WatchletsModel::handleConfigChanged()
+void ConfiguredWatchletsModel::handleConfigChanged()
 {
 	// TODO
 	reload();
