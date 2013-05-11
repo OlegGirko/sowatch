@@ -11,6 +11,7 @@ QTM_USE_NAMESPACE
 LiveView::LiveView(ConfigKey* settings, QObject* parent) :
 	BluetoothWatch(QBluetoothAddress(settings->value("address").toString()), parent),
 	_settings(settings->getSubkey(QString(), this)),
+    _watchlets(0),
     _24hMode(settings->value("24h-mode", false).toBool()),
     _screenWidth(0), _screenHeight(0),
     _sendTimer(new QTimer(this))
@@ -31,6 +32,7 @@ LiveView::~LiveView()
 QPaintEngine* LiveView::paintEngine() const
 {
 	if (!_paintEngine) {
+		qDebug() << "Constructing paint engine";
 		_paintEngine = new LiveViewPaintEngine;
 	}
 
@@ -120,7 +122,10 @@ bool LiveView::charging() const
 
 void LiveView::displayIdleScreen()
 {
-
+	if (_mode != RootMenuMode) {
+		_mode = RootMenuMode;
+		refreshMenu();
+	}
 }
 
 void LiveView::displayNotification(Notification *notification)
@@ -130,12 +135,24 @@ void LiveView::displayNotification(Notification *notification)
 
 void LiveView::displayApplication()
 {
+	_mode = ApplicationMode;
 	setMenuSize(0); // TODO
 }
 
 void LiveView::vibrate(int msecs)
 {
 	// TODO
+}
+
+void LiveView::setWatchletsModel(WatchletsModel *model)
+{
+	if (_watchlets) {
+		disconnect(_watchlets, 0, this, 0);
+	}
+	_watchlets = model;
+	if (_watchlets) {
+		connect(_watchlets, SIGNAL(modelChanged()), SLOT(handleWatchletsChanged()));
+	}
 }
 
 QImage* LiveView::image()
@@ -149,6 +166,7 @@ void LiveView::renderImage(int x, int y, const QImage &image)
 	buffer.open(QIODevice::WriteOnly);
 	if (image.save(&buffer, "PNG")) {
 		displayBitmap(x, y, buffer.buffer());
+		qDebug() << "render image " << x << 'x' << y << "size" << image.size();
 	} else {
 		qWarning() << "Failed to encode image";
 	}
@@ -161,6 +179,8 @@ void LiveView::clear()
 
 void LiveView::setupBluetoothWatch()
 {
+	_mode = RootMenuMode;
+
 	connect(_socket, SIGNAL(readyRead()), SLOT(handleDataReceived()));
 	updateDisplayProperties();
 	refreshMenu();
@@ -173,11 +193,14 @@ void LiveView::desetupBluetoothWatch()
 
 void LiveView::refreshMenu()
 {
-	setMenuSize(3);
+	if (_mode == RootMenuMode) {
+		setMenuSize(3);
+	}
 }
 
 void LiveView::send(const Message &msg)
 {
+	Q_ASSERT(_connected);
 	_sendingMsgs.enqueue(msg);
 	if (!_sendTimer->isActive()) {
 		_sendTimer->start();
@@ -248,7 +271,7 @@ void LiveView::enableLed(const QColor& color, unsigned short delay, unsigned sho
 {
 	QByteArray data;
 
-	quint16 rgb;
+	quint16 rgb = 0;
 	rgb |= ((color.red() & 0xF8) << 8);
 	rgb |= ((color.green() & 0xFC) << 3);
 	rgb |= ((color.blue() & 0xF8) >> 3);
@@ -308,13 +331,6 @@ void LiveView::handleDeviceStatusChange(const Message &msg)
 	if (msg.data.size() == 1) {
 		DeviceStatus status = static_cast<DeviceStatus>(msg.data.at(0));
 		qDebug() << "liveview device status change" << status;
-		switch (status) {
-		case DeviceOn:
-			refreshMenu();
-			break;
-		default:
-			break;
-		}
 	}
 	sendResponse(DeviceStatusChangeResponse, ResponseOk);
 }
@@ -350,21 +366,8 @@ void LiveView::handleNavigation(const Message &msg)
 	// TODO
 
 	if (event == 32) {
-		qDebug() << "Navigation, sending bitmap";
-
-		setMenuSize(0);
-
-		displayClear();
-
-		QFile f(SOWATCH_RESOURCES_DIR "/liveview/graphics/menu_missed_calls.png");
-		f.open(QIODevice::ReadOnly);
-		displayBitmap(2, 22, f.readAll());
-		f.close();
-
-		f.setFileName(SOWATCH_RESOURCES_DIR "/liveview/graphics/menu_messages.png");
-		f.open(QIODevice::ReadOnly);
-		displayBitmap(12, 22, f.readAll());
-		f.close();
+		qDebug() << "Navigation, requesting watchlet";
+		emit watchletRequested("com.javispedro.sowatch.neko");
 	}
 }
 
@@ -414,8 +417,10 @@ void LiveView::handleDisplayProperties(const Message &msg)
 		return;
 	}
 
-	_screenWidth = msg.data[0];
-	_screenHeight = msg.data[1];
+	_screenWidth = static_cast<unsigned char>(msg.data[0]);
+	_screenHeight = static_cast<unsigned char>(msg.data[1]);
+
+	qDebug() << "LiveView display properties:" << _screenWidth << 'x' << _screenHeight;
 
 	// Recreate the display image
 	_image = QImage(_screenWidth, _screenHeight, QImage::Format_RGB16);
@@ -531,7 +536,11 @@ void LiveView::handleSendTimerTick()
 		packet.replace(HEADER_SIZE, data_size, msg.data);
 
 #if PROTOCOL_DEBUG
-		qDebug() << "sending" << packet.toHex();
+		if (packet.size() < 20) {
+			qDebug() << "sending" << packet.toHex();
+		} else {
+			qDebug() << "sending" << packet.left(20).toHex() << "...";
+		}
 #endif
 
 		_socket->write(packet);
@@ -540,5 +549,12 @@ void LiveView::handleSendTimerTick()
 	if (_sendingMsgs.empty()) {
 		// Stop the send timer to save battery
 		_sendTimer->stop();
+	}
+}
+
+void LiveView::handleWatchletsChanged()
+{
+	if (_connected) {
+		refreshMenu();
 	}
 }

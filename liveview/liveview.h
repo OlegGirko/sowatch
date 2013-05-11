@@ -41,6 +41,8 @@ public:
 
 	void vibrate(int msecs);
 
+	void setWatchletsModel(WatchletsModel *model);
+
 	// Only for application mode
 	QImage* image();
 	/** Render a image in a certain position. */
@@ -98,6 +100,11 @@ protected:
 		MenuOther = 1
 	};
 
+	enum Mode {
+		RootMenuMode = 0,
+		ApplicationMode
+	};
+
 	struct Message {
 		MessageType type;
 		QByteArray data;
@@ -137,15 +144,19 @@ protected:
 private slots:
 	void handleDataReceived();
 	void handleSendTimerTick();
+	void handleWatchletsChanged();
 
 private:
 	ConfigKey *_settings;
+	WatchletsModel *_watchlets;
 
 	bool _24hMode : 1;
 
 	int _screenWidth;
 	int _screenHeight;
 	QStringList _buttons;
+
+	Mode _mode;
 
 	// Required by QPaintDevice
 	mutable LiveViewPaintEngine* _paintEngine;

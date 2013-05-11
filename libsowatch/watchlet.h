@@ -2,6 +2,7 @@
 #define SOWATCH_WATCHLET_H
 
 #include <QtCore/QObject>
+#include <QtDeclarative/QtDeclarative>
 #include "sowatch_global.h"
 
 namespace sowatch
@@ -9,6 +10,7 @@ namespace sowatch
 
 class Watch;
 class WatchServer;
+class WatchletsModel;
 class Notification;
 class NotificationsModel;
 
@@ -19,6 +21,7 @@ class SOWATCH_EXPORT Watchlet : public QObject
 	Q_PROPERTY(bool active READ isActive NOTIFY activeChanged)
 
 public:
+	Watchlet();
 	Watchlet(Watch *watch, const QString& id);
 	~Watchlet();
 
@@ -33,6 +36,7 @@ public:
 	virtual void deactivate();
 
 	// Some properties
+	virtual void setWatchletsModel(WatchletsModel *model);
 	virtual void setNotificationsModel(NotificationsModel *model);
 
 	virtual bool handlesNotification(Notification* notification) const;
@@ -52,5 +56,7 @@ private:
 };
 
 }
+
+QML_DECLARE_TYPE(sowatch::Watchlet)
 
 #endif // SOWATCH_WATCHLET_H

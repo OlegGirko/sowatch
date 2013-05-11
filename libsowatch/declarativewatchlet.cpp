@@ -2,6 +2,7 @@
 #include <QtDeclarative/QtDeclarative>
 #include "watchserver.h"
 #include "watch.h"
+#include "notificationsmodel.h"
 #include "gconfkey.h"
 #include "declarativewatchwrapper.h"
 #include "declarativewatchlet.h"

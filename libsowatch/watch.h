@@ -13,6 +13,9 @@
 namespace sowatch
 {
 
+class WatchletsModel;
+class NotificationsModel;
+
 class SOWATCH_EXPORT Watch : public QObject, public QPaintDevice
 {
 	Q_OBJECT
@@ -56,6 +59,9 @@ public:
 	/** Asynchronously queries whether the watch is connected to a charger. */
 	virtual void queryCharging() = 0;
 	virtual bool charging() const = 0;
+
+	virtual void setWatchletsModel(WatchletsModel *model);
+	virtual void setNotificationsModel(NotificationsModel *model);
 
 public slots:
 	/** Go back to the idle screen. */

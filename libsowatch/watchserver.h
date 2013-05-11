@@ -8,15 +8,16 @@
 #include <QtCore/QTimer>
 
 #include "sowatch_global.h"
-#include "notificationsmodel.h"
+#include "notification.h"
 
 namespace sowatch
 {
 
 class Watch;
 class Watchlet;
+class WatchletsModel;
 class NotificationProvider;
-class WeatherNotification;
+class NotificationsModel;
 
 class SOWATCH_EXPORT WatchServer : public QObject
 {
@@ -40,6 +41,8 @@ public:
 
 	Watchlet *notificationWatchlet();
 	void setNotificationWatchlet(Watchlet *watchlet);
+
+	const WatchletsModel * watchlets() const;
 
 	void addWatchlet(Watchlet *watchlet);
 	void insertWatchlet(int position, Watchlet *watchlet);
@@ -87,7 +90,7 @@ private:
 	Watchlet *_notificationWatchlet;
 
 	/** A list of watchlets, in order. */
-	QList<Watchlet*> _watchlets;
+	WatchletsModel *_watchlets;
 	/** Stores all the watchlets with a given watchled id. */
 	QMap<QString, Watchlet*> _watchletIds;
 
@@ -123,6 +126,7 @@ private slots:
 	void handleWatchDisconnected();
 	void handleWatchIdling();
 	void handleWatchButtonPress(int button);
+	void handleWatchletRequested(const QString& id);
 
 	void handleNotificationChanged();
 	void handleNotificationDismissed();

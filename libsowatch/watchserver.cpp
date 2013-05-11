@@ -1,8 +1,10 @@
 #include <QtCore/QDebug>
 
-#include "notificationprovider.h"
 #include "watch.h"
 #include "watchlet.h"
+#include "watchletsmodel.h"
+#include "notificationprovider.h"
+#include "notificationsmodel.h"
 #include "watchserver.h"
 
 using namespace sowatch;
@@ -12,6 +14,7 @@ WatchServer::WatchServer(Watch* watch, QObject* parent) :
     _nextWatchletButton(-1),
     _oldNotificationThreshold(300),
     _idleWatchlet(0), _notificationWatchlet(0),
+    _watchlets(new WatchletsModel(this)),
     _notifications(new NotificationsModel(this)),
     _activeWatchlet(0), _currentWatchlet(0), _currentWatchletIndex(-1),
     _syncTimeTimer(new QTimer(this))
@@ -20,10 +23,14 @@ WatchServer::WatchServer(Watch* watch, QObject* parent) :
 	connect(_watch, SIGNAL(disconnected()), SLOT(handleWatchDisconnected()));
 	connect(_watch, SIGNAL(idling()), SLOT(handleWatchIdling()));
 	connect(_watch, SIGNAL(buttonPressed(int)), SLOT(handleWatchButtonPress(int)));
+	connect(_watch, SIGNAL(watchletRequested(QString)),
+	        SLOT(handleWatchletRequested(QString)));
 	connect(_syncTimeTimer, SIGNAL(timeout()), SLOT(syncTime()));
 
 	_syncTimeTimer->setSingleShot(true);
 	_syncTimeTimer->setInterval(24 * 3600 * 1000); // Once a day
+
+	_watch->setWatchletsModel(_watchlets);
 }
 
 Watch* WatchServer::watch()
@@ -94,10 +101,14 @@ void WatchServer::setNotificationWatchlet(Watchlet *watchlet)
 	}
 }
 
+const WatchletsModel * WatchServer::watchlets() const
+{
+	return _watchlets;
+}
+
 void WatchServer::addWatchlet(Watchlet *watchlet)
 {
-	Q_ASSERT(watchlet);
-	insertWatchlet(_watchlets.size(), watchlet);
+	insertWatchlet(_watchlets->size(), watchlet);
 }
 
 void WatchServer::insertWatchlet(int position, Watchlet *watchlet)
@@ -110,20 +121,18 @@ void WatchServer::insertWatchlet(int position, Watchlet *watchlet)
 
 	setWatchletProperties(watchlet);
 
-	_watchlets.insert(position, watchlet);
+	_watchlets->insert(position, watchlet);
 	_watchletIds[id] = watchlet;
 }
 
 void WatchServer::moveWatchlet(const Watchlet *watchlet, int to)
 {
 	const QString id = watchlet->id();
-	int index = _watchlets.indexOf(const_cast<Watchlet*>(watchlet));
 
 	Q_ASSERT(watchlet->watch() == _watch);
 	Q_ASSERT(_watchletIds.contains(id));
-	Q_ASSERT(index >= 0);
 
-	_watchlets.move(index, to);
+	_watchlets->move(watchlet, to);
 }
 
 void WatchServer::removeWatchlet(const Watchlet *watchlet)
@@ -139,7 +148,7 @@ void WatchServer::removeWatchlet(const Watchlet *watchlet)
 
 	unsetWatchletProperties(const_cast<Watchlet*>(watchlet));
 
-	_watchlets.removeAll(const_cast<Watchlet*>(watchlet));
+	_watchlets->remove(watchlet);
 	_watchletIds.remove(id);
 }
 
@@ -261,12 +270,14 @@ void WatchServer::closeWatchlet()
 void WatchServer::setWatchletProperties(Watchlet *watchlet)
 {
 	Q_ASSERT(watchlet->watch() == _watch);
+	watchlet->setWatchletsModel(_watchlets);
 	watchlet->setNotificationsModel(_notifications);
 }
 
 void WatchServer::unsetWatchletProperties(Watchlet *watchlet)
 {
 	Q_ASSERT(watchlet->watch() == _watch);
+	watchlet->setWatchletsModel(0);
 	watchlet->setNotificationsModel(0);
 }
 
@@ -301,11 +312,11 @@ void WatchServer::nextWatchlet()
 {
 	qDebug() << "current watchlet index" << _currentWatchletIndex;
 	_currentWatchletIndex++;
-	if (_currentWatchletIndex >= _watchlets.size() || _currentWatchletIndex < 0) {
+	if (_currentWatchletIndex >= _watchlets->size() || _currentWatchletIndex < 0) {
 		_currentWatchletIndex = -1;
 		closeWatchlet();
 	} else {
-		Watchlet* watchlet = _watchlets.at(_currentWatchletIndex);
+		Watchlet* watchlet = _watchlets->at(_currentWatchletIndex);
 		openWatchlet(watchlet);
 	}
 }
@@ -394,6 +405,11 @@ void WatchServer::handleWatchButtonPress(int button)
 			nextNotification();
 		}
 	}
+}
+
+void WatchServer::handleWatchletRequested(const QString &id)
+{
+	openWatchlet(id);
 }
 
 void WatchServer::handleNotificationChanged()

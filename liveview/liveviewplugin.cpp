@@ -31,6 +31,7 @@ WatchScanner* LiveViewPlugin::getScanner(QObject *parent)
 
 QUrl LiveViewPlugin::getConfigQmlUrl(const QString &driver)
 {
+	Q_UNUSED(driver);
 	return QUrl();
 }
 

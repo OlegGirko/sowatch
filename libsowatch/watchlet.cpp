@@ -48,6 +48,11 @@ void Watchlet::deactivate()
 	emit deactivated();
 }
 
+void Watchlet::setWatchletsModel(WatchletsModel *model)
+{
+	Q_UNUSED(model);
+}
+
 void Watchlet::setNotificationsModel(NotificationsModel *model)
 {
 	Q_UNUSED(model);

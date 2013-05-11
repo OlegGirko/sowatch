@@ -1,11 +1,13 @@
+#include <QtCore/QDebug>
+
 #include "liveviewpaintengine.h"
 
 using namespace sowatch;
 
 LiveViewPaintEngine::LiveViewPaintEngine() :
-    WatchPaintEngine()
+    WatchPaintEngine(), _watch(0)
 {
-
+	qDebug() << "SE CCONS";
 }
 
 bool LiveViewPaintEngine::begin(QPaintDevice *pdev)
