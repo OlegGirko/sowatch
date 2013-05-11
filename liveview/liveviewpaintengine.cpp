@@ -7,7 +7,6 @@ using namespace sowatch;
 LiveViewPaintEngine::LiveViewPaintEngine() :
     WatchPaintEngine(), _watch(0)
 {
-	qDebug() << "SE CCONS";
 }
 
 bool LiveViewPaintEngine::begin(QPaintDevice *pdev)

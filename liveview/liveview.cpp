@@ -14,6 +14,8 @@ LiveView::LiveView(ConfigKey* settings, QObject* parent) :
     _watchlets(0),
     _24hMode(settings->value("24h-mode", false).toBool()),
     _screenWidth(0), _screenHeight(0),
+    _mode(RootMenuMode),
+    _paintEngine(0),
     _sendTimer(new QTimer(this))
 {
 	_sendTimer->setInterval(DelayBetweenMessages);
@@ -166,7 +168,7 @@ void LiveView::renderImage(int x, int y, const QImage &image)
 	buffer.open(QIODevice::WriteOnly);
 	if (image.save(&buffer, "PNG")) {
 		displayBitmap(x, y, buffer.buffer());
-		qDebug() << "render image " << x << 'x' << y << "size" << image.size();
+		qDebug() << "render image at" << x << 'x' << y << "size" << image.size();
 	} else {
 		qWarning() << "Failed to encode image";
 	}
@@ -188,7 +190,8 @@ void LiveView::setupBluetoothWatch()
 
 void LiveView::desetupBluetoothWatch()
 {
-
+	_sendTimer->stop();
+	_sendingMsgs.clear();
 }
 
 void LiveView::refreshMenu()
@@ -361,14 +364,24 @@ void LiveView::handleNavigation(const Message &msg)
 	int event = msg.data[2];
 	qDebug() << "navigation" << event << item_id << menu_id;
 
-	sendResponse(NavigationResponse, ResponseOk);
 
-	// TODO
 
-	if (event == 32) {
-		qDebug() << "Navigation, requesting watchlet";
+	switch (event) {
+	case SelectLongPress:
+		if (_mode == ApplicationMode) {
+			sendResponse(NavigationResponse, ResponseCancel);
+			emit closeWatchledRequested();
+			return;
+		}
+		break;
+	case SelectMenu:
+		sendResponse(NavigationResponse, ResponseOk);
 		emit watchletRequested("com.javispedro.sowatch.neko");
+		return;
 	}
+
+	// Fallback case
+	sendResponse(NavigationResponse, ResponseOk);
 }
 
 void LiveView::handleMenuItemsRequest(const Message &msg)

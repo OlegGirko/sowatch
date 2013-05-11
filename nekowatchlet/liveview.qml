@@ -1,8 +1,11 @@
 import QtQuick 1.0
 
-Item {
+Rectangle {
+	color: "black"
+
 	Neko {
 		id: neko
+		imageSource: "neko-inv.png"
 		running: watch.active
 
 		targetX: goal.x
@@ -13,7 +16,7 @@ Item {
 		id: goal
 		width: 2
 		height: 2
-		color: "black"
+		color: "white"
 
 		Behavior on x { SmoothedAnimation { velocity: 80; }}
 		Behavior on y { SmoothedAnimation { velocity: 80; }}

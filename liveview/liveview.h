@@ -105,6 +105,13 @@ protected:
 		ApplicationMode
 	};
 
+	enum NavigationEvent {
+		SelectPress = 13,
+		SelectLongPress = 14,
+		SelectDoublePress = 15,
+		SelectMenu = 32
+	};
+
 	struct Message {
 		MessageType type;
 		QByteArray data;

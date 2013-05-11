@@ -57,8 +57,6 @@ WatchHandler::WatchHandler(ConfigKey *config, QObject *parent)
 	_server = new WatchServer(_watch, this);
 
 	// Configure the server
-	_server->setNextWatchletButton(_config->value("next-watchlet-button").toString());
-
 	QString idle_watchlet_id = _config->value("idle-watchlet").toString();
 	if (!idle_watchlet_id.isEmpty()) {
 		Watchlet *watchlet = createWatchlet(idle_watchlet_id);
@@ -217,8 +215,22 @@ void WatchHandler::handleConfigSubkeyChanged(const QString &subkey)
 	} else if (subkey == "providers") {
 		qDebug() << "Providers list changed";
 		updateProviders();
-	} else if (subkey == "next-watchlet-button" && _server) {
-		_server->setNextWatchletButton(_config->value("next-watchlet-button").toString());
+	} else if (subkey == "idle-watchlet" && _server) {
+		qDebug() << "Idle watchlet changed";
+		QString id(_config->value("idle-watchlet").toString());
+		if (!id.isEmpty()) {
+			_server->setIdleWatchlet(createWatchlet(id));
+		} else {
+			_server->setIdleWatchlet(0);
+		}
+	} else if (subkey == "notification-watchlet" && _server) {
+		qDebug() << "Notification watchlet changed";
+		QString id(_config->value("notification-watchlet").toString());
+		if (!id.isEmpty()) {
+			_server->setNotificationWatchlet(createWatchlet(id));
+		} else {
+			_server->setNotificationWatchlet(0);
+		}
 	}
 }
 

@@ -91,8 +91,12 @@ signals:
 	void buttonPressed(int button);
 	/** A button has been pressed and then released. */
 	void buttonReleased(int button);
-	/** Emitted when e.g. either via the watch menu, or similar, a watchlet is requested. */
+	/** Emitted when e.g. either via the watch menu, or similar, advancing watchlet carrousel is requested. */
+	void nextWatchletRequested();
+	/** Emitted when e.g. either via the watch menu, or similar, a given watchlet is requested. */
 	void watchletRequested(const QString& id);
+	/** Emitted when closing the current watchlet is requested. */
+	void closeWatchledRequested();
 };
 
 }

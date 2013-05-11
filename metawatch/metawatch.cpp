@@ -576,7 +576,11 @@ void MetaWatch::handleButtonEventMessage(const Message &msg)
 	qDebug() << "button event" << button << " (" << press << ")";
 
 	if (press == PressOnly) {
-		emit buttonPressed(button);
+		if (button == BtnA) { // This is the next watchlet button
+			emit nextWatchletRequested();
+		} else {
+			emit buttonPressed(button);
+		}
 	} else if (press == PressAndRelease) {
 		emit buttonReleased(button);
 	}

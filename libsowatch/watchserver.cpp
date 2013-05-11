@@ -11,7 +11,6 @@ using namespace sowatch;
 
 WatchServer::WatchServer(Watch* watch, QObject* parent) :
     QObject(parent), _watch(watch),
-    _nextWatchletButton(-1),
     _oldNotificationThreshold(300),
     _idleWatchlet(0), _notificationWatchlet(0),
     _watchlets(new WatchletsModel(this)),
@@ -22,9 +21,10 @@ WatchServer::WatchServer(Watch* watch, QObject* parent) :
 	connect(_watch, SIGNAL(connected()), SLOT(handleWatchConnected()));
 	connect(_watch, SIGNAL(disconnected()), SLOT(handleWatchDisconnected()));
 	connect(_watch, SIGNAL(idling()), SLOT(handleWatchIdling()));
-	connect(_watch, SIGNAL(buttonPressed(int)), SLOT(handleWatchButtonPress(int)));
+	connect(_watch, SIGNAL(nextWatchletRequested()), SLOT(handleNextWatchletRequested()));
 	connect(_watch, SIGNAL(watchletRequested(QString)),
 	        SLOT(handleWatchletRequested(QString)));
+	connect(_watch, SIGNAL(closeWatchledRequested()), SLOT(handleCloseWatchletRequested()));
 	connect(_syncTimeTimer, SIGNAL(timeout()), SLOT(syncTime()));
 
 	_syncTimeTimer->setSingleShot(true);
@@ -41,27 +41,6 @@ Watch* WatchServer::watch()
 const Watch* WatchServer::watch() const
 {
 	return _watch;
-}
-
-QString WatchServer::nextWatchletButton() const
-{
-	if (_nextWatchletButton >= 0) {
-		return _watch->buttons().at(_nextWatchletButton);
-	} else {
-		return QString();
-	}
-}
-
-void WatchServer::setNextWatchletButton(const QString& value)
-{
-	if (value.isEmpty()) {
-		_nextWatchletButton = -1;
-		return;
-	}
-	_nextWatchletButton = _watch->buttons().indexOf(value);
-	if (_nextWatchletButton < 0) {
-		qWarning() << "Invalid watch button" << value;
-	}
 }
 
 Watchlet * WatchServer::idleWatchlet()
@@ -392,24 +371,27 @@ void WatchServer::handleWatchIdling()
 	}
 }
 
-void WatchServer::handleWatchButtonPress(int button)
+void WatchServer::handleNextWatchletRequested()
 {
-	if (button == _nextWatchletButton) {
-		qDebug() << "next watchlet button pressed";
-		if (_pendingNotifications.empty()) {
-			// No notifications: either app or idle mode.
-			nextWatchlet();
-		} else {
-			// Skip to next notification if any
-			_pendingNotifications.dequeue();
-			nextNotification();
-		}
+	qDebug() << "next watchlet button pressed";
+	if (_pendingNotifications.empty()) {
+		// No notifications: either app or idle mode.
+		nextWatchlet();
+	} else {
+		// Skip to next notification if any
+		_pendingNotifications.dequeue();
+		nextNotification();
 	}
 }
 
 void WatchServer::handleWatchletRequested(const QString &id)
 {
 	openWatchlet(id);
+}
+
+void WatchServer::handleCloseWatchletRequested()
+{
+	closeWatchlet();
 }
 
 void WatchServer::handleNotificationChanged()

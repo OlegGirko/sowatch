@@ -3,7 +3,13 @@
 function make_symlink {
 	local src="$1"
 	local target="$2"
-	ln -sf "$src" "$target"
+	if [ -L "$target/$(basename "$src")" ]; then
+		# Overwrite existing symlinks
+		ln -sf "$src" "$target"
+	else
+		# But nothing else
+		ln -s "$src" "$target"
+	fi
 }
 
 function make_symlinks {
@@ -23,7 +29,6 @@ SOWATCH_ROOT=$(dirname "$SCRIPT_PATH")
 BUILD_ROOT=$(pwd)
 
 rm -r drivers notifications watchlets
-
 mkdir -p drivers notifications watchlets
 
 make_symlinks $BUILD_ROOT/*/lib*driver.so drivers

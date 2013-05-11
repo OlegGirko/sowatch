@@ -79,8 +79,6 @@ signals:
 private:
 	Watch* _watch;
 
-	/** The watch button that causes next watchlet to be run. */
-	int _nextWatchletButton;
 	/** The amount of seconds that have to pass for a notification to be considered "outdated" and not shown. */
 	int _oldNotificationThreshold;
 
@@ -125,8 +123,9 @@ private slots:
 	void handleWatchConnected();
 	void handleWatchDisconnected();
 	void handleWatchIdling();
-	void handleWatchButtonPress(int button);
+	void handleNextWatchletRequested();
 	void handleWatchletRequested(const QString& id);
+	void handleCloseWatchletRequested();
 
 	void handleNotificationChanged();
 	void handleNotificationDismissed();
