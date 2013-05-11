@@ -101,7 +101,7 @@ void LiveView::displayNotification(Notification *notification)
 
 void LiveView::displayApplication()
 {
-
+	setMenuSize(0); // TODO
 }
 
 void LiveView::vibrate(int msecs)
@@ -123,7 +123,7 @@ void LiveView::desetupBluetoothWatch()
 
 void LiveView::refreshMenu()
 {
-	setMenuSize(2);
+	setMenuSize(3);
 }
 
 void LiveView::send(const Message &msg)
@@ -136,7 +136,7 @@ void LiveView::send(const Message &msg)
 
 void LiveView::sendResponse(MessageType type, ResponseType response)
 {
-	send(Message(type, QByteArray(0, static_cast<char>(response))));
+	send(Message(type, QByteArray(1, static_cast<char>(response))));
 }
 
 void LiveView::updateDisplayProperties()
@@ -152,15 +152,31 @@ void LiveView::updateSoftwareVersion()
 	send(Message(GetSoftwareVersion, QByteArray(1, 0)));
 }
 
+void LiveView::displayBitmap(unsigned char x, unsigned char y, const QByteArray &image)
+{
+	QByteArray data(3, 0);
+	data[0] = x;
+	data[1] = y;
+	data[2] = 1; // TODO Figure out what this is. Maybe format?
+	data.append(image);
+	send(Message(DisplayBitmap, data));
+}
+
+void LiveView::displayClear()
+{
+	send(Message(DisplayClear));
+}
+
 void LiveView::setMenuSize(unsigned char size)
 {
+	qDebug() << "Set menu size to" << size;
 	send(Message(SetMenuSize, QByteArray(1, size)));
 }
 
-void LiveView::sendMenuItem(unsigned char id, bool alert, unsigned short unread, const QString& text, const QByteArray& image)
+void LiveView::sendMenuItem(unsigned char id, MenuItemType type, unsigned short unread, const QString& text, const QByteArray& image)
 {
 	QByteArray data(1 + 2 * 3 + 2 + 2 * 3, 0);
-	data[0] = alert ? 1 : 0;
+	data[0] = type;
 	//data[1,2] // Unknown
 	data[3] = (unread & 0xFF00U) >> 8;
 	data[4] = (unread & 0x00FFU);
@@ -203,6 +219,10 @@ void LiveView::handleMessage(const Message &msg)
 	switch (msg.type) {
 	case DeviceStatusChange:
 		handleDeviceStatusChange(msg);
+		break;
+	case DisplayClearResponse:
+	case DisplayBitmapResponse:
+		// Nothing to do
 		break;
 	case MenuItemRequest:
 		handleMenuItemRequest(msg);
@@ -264,8 +284,38 @@ void LiveView::handleNotificationRequest(const Message &msg)
 
 void LiveView::handleNavigation(const Message &msg)
 {
-	// TODO
+	if (msg.data.size() < 5) {
+		// Packet too small
+		sendResponse(NavigationResponse, ResponseError);
+		return;
+	}
+
+	int menu_id = msg.data[4];
+	int item_id = msg.data[3];
+	int event = msg.data[2];
+	qDebug() << "navigation" << event << item_id << menu_id;
+
 	sendResponse(NavigationResponse, ResponseOk);
+
+	// TODO
+
+	if (event == 32) {
+		qDebug() << "Navigation, sending bitmap";
+
+		setMenuSize(0);
+
+		displayClear();
+
+		QFile f(SOWATCH_RESOURCES_DIR "/liveview/graphics/menu_missed_calls.png");
+		f.open(QIODevice::ReadOnly);
+		displayBitmap(2, 22, f.readAll());
+		f.close();
+
+		f.setFileName(SOWATCH_RESOURCES_DIR "/liveview/graphics/menu_messages.png");
+		f.open(QIODevice::ReadOnly);
+		displayBitmap(12, 22, f.readAll());
+		f.close();
+	}
 }
 
 void LiveView::handleMenuItemsRequest(const Message &msg)
@@ -275,12 +325,17 @@ void LiveView::handleMenuItemsRequest(const Message &msg)
 
 	icon_file.setFileName(SOWATCH_RESOURCES_DIR "/liveview/graphics/menu_notifications.png");
 	icon_file.open(QIODevice::ReadOnly);
-	sendMenuItem(0, false, 4, tr("Notifications"), icon_file.readAll());
+	sendMenuItem(0, MenuNotificationList, 2, tr("Notifications"), icon_file.readAll());
 	icon_file.close();
 
 	icon_file.setFileName(SOWATCH_RESOURCES_DIR "/liveview/graphics/menu_missed_calls.png");
 	icon_file.open(QIODevice::ReadOnly);
-	sendMenuItem(1, false, 1, tr("Missed calls"), icon_file.readAll());
+	sendMenuItem(1, MenuNotificationList, 1, tr("Missed calls"), icon_file.readAll());
+	icon_file.close();
+
+	icon_file.setFileName(SOWATCH_RESOURCES_DIR "/liveview/graphics/menu_messages.png");
+	icon_file.open(QIODevice::ReadOnly);
+	sendMenuItem(2, MenuOther, 0, tr("Messages"), icon_file.readAll());
 	icon_file.close();
 }
 

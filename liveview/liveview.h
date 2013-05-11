@@ -48,6 +48,10 @@ protected:
 		GetDisplayPropertiesResponse = 2,
 		DeviceStatusChange = 7,
 		DeviceStatusChangeResponse = 8,
+		DisplayBitmap = 19,
+		DisplayBitmapResponse = 20,
+		DisplayClear = 21,
+		DisplayClearResponse = 22,
 		SetMenuSize = 23,
 		SetMenuSizeResponse = 24,
 		MenuItemRequest = 25,
@@ -80,6 +84,11 @@ protected:
 		DeviceMenu = 2
 	};
 
+	enum MenuItemType {
+		MenuNotificationList = 0,
+		MenuOther = 1
+	};
+
 	struct Message {
 		MessageType type;
 		QByteArray data;
@@ -100,8 +109,10 @@ protected:
 
 	void updateDisplayProperties();
 	void updateSoftwareVersion();
+	void displayBitmap(unsigned char x, unsigned char y, const QByteArray& image);
+	void displayClear();
 	void setMenuSize(unsigned char size);
-	void sendMenuItem(unsigned char id, bool alert, unsigned short unread, const QString& text, const QByteArray& image);
+	void sendMenuItem(unsigned char id, MenuItemType type, unsigned short unread, const QString& text, const QByteArray& image);
 	void enableLed(const QColor& color, unsigned short delay, unsigned short time);
 
 	void handleMessage(const Message& msg);
