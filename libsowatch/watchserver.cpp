@@ -187,11 +187,12 @@ void WatchServer::postNotification(Notification *notification)
 void WatchServer::nextNotification()
 {
 	if (!_watch->isConnected()) return;
+	if (_activeWatchlet) {
+		// Deactive active watchlet, if any.
+		deactivateActiveWatchlet();
+	}
 	if (!_pendingNotifications.empty()) {
 		Notification *n = _pendingNotifications.head();
-		if (_activeWatchlet) {
-			deactivateActiveWatchlet();
-		}
 		_watch->displayNotification(n);
 		if (_notificationWatchlet) {
 			activateWatchlet(_notificationWatchlet);

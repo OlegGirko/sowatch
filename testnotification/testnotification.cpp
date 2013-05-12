@@ -8,7 +8,7 @@ TestNotification::TestNotification(Type type, const QString &title, const QStrin
       _time(QDateTime::currentDateTime()),
       _title(title), _body(body)
 {
-	const int high = 10000, low = 5000;
+	const int high = 60 * 1000, low = 30 * 1000;
 	int rand = qrand() % ((high + 1) - low) + low;
 	QTimer::singleShot(rand, this, SIGNAL(dismissed()));
 }

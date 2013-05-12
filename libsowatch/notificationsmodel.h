@@ -33,7 +33,7 @@ public:
 	Q_INVOKABLE int fullCountByType(int type) const; // See QTBUG-26415
 
 	Q_INVOKABLE Notification* getMostRecentByType(Notification::Type type) const;
-	Q_INVOKABLE Notification* getMostRecentByType(int type) const;
+	Q_INVOKABLE QObject* getMostRecentByType(int type) const; // QML version
 
 	Notification::Type getTypeOfDeletedNotification(Notification *n) const;
 

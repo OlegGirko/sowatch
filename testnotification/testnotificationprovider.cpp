@@ -1,4 +1,5 @@
 #include "testnotification.h"
+#include "testweathernotification.h"
 #include "testnotificationprovider.h"
 
 using namespace sowatch;
@@ -10,10 +11,11 @@ TestNotificationProvider::TestNotificationProvider(QObject *parent) :
     _timer(new QTimer(this))
 {
 	const int initial_delay = 2000;
-	const int burst_num = 0;
+	const int burst_num = 1;
 	const int burst_delay = 500;
 	const int extra_delay = 100 * 1000;
 	QTimer::singleShot(initial_delay, this, SLOT(generateInitialNotification()));
+	QTimer::singleShot(initial_delay + 100, this, SLOT(generateWeatherNotification()));
 	for (int i = 0; i < burst_num; i++) {
 		QTimer::singleShot(initial_delay + burst_delay * (i+1), this, SLOT(generateNotification()));
 	}
@@ -31,6 +33,12 @@ void TestNotificationProvider::generateInitialNotification()
 	TestNotification *n = new TestNotification(Notification::EmailNotification,
 	                                           "A friend",
 	                                           "This is a test email notification");
+	emit incomingNotification(n);
+}
+
+void TestNotificationProvider::generateWeatherNotification()
+{
+	TestWeatherNotification *n = new TestWeatherNotification;
 	emit incomingNotification(n);
 }
 

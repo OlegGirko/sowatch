@@ -17,19 +17,42 @@ MWPage {
 		Image {
 			width: page.width
 			height: 2
-			source: "idle_border.png"
+			source: "idle-border.png"
 		}
 
-		Item {
+		Row {
 			width: page.width
 			height: 30
-			// TODO Weather stuff.
+
+			Text {
+				id: labelForecast
+				width: 36
+				anchors.verticalCenter: parent.verticalCenter
+				font.family: "MetaWatch Small caps 8pt"
+				font.pixelSize: 8
+				wrapMode: Text.Wrap
+			}
+
+			Image {
+				id: iconForecast
+				anchors.verticalCenter: parent.verticalCenter
+				width: 24
+			}
+
+			Text {
+				id: labelTemperature
+				width: 36
+				anchors.verticalCenter: parent.verticalCenter
+				font.family: "MetaWatch Large 16pt"
+				font.pixelSize: 16
+				wrapMode: Text.Wrap
+			}
 		}
 
 		Image {
 			width: page.width
 			height: 2
-			source: "idle_border.png"
+			source: "idle-border.png"
 		}
 
 		Item {
@@ -46,7 +69,7 @@ MWPage {
 				Image {
 					width: 24
 					height: 18
-					source: "idle_call.png"
+					source: "idle-call.png"
 				}
 				Text {
 					id: labelCalls
@@ -61,7 +84,7 @@ MWPage {
 				Image {
 					width: 24
 					height: 18
-					source: "idle_msg.png"
+					source: "idle-msg.png"
 				}
 				Text {
 					id: labelMsgs
@@ -76,7 +99,7 @@ MWPage {
 				Image {
 					width: 24
 					height: 18
-					source: "idle_mail.png"
+					source: "idle-mail.png"
 				}
 				Text {
 					id: labelMails
@@ -89,19 +112,42 @@ MWPage {
 		}
 	}
 
+	function _getImageForWeather(type) {
+		switch (type) {
+		case WeatherNotification.Sunny:
+			return "weather-sunny.png";
+		case WeatherNotification.PartlyCloudy:
+		case WeatherNotification.Cloudy:
+		case WeatherNotification.Fog:
+			return "weather-cloudy.png";
+		case WeatherNotification.Rain:
+			return "weather-rain.png";
+		case WeatherNotification.Thunderstorm:
+			return "weather-thunderstorm.png";
+		case WeatherNotification.Snow:
+			return "weather-snow.png";
+		}
+	}
+
 	function updateUnreadCounts() {
 		labelCalls.text = notifications.fullCountByType(Notification.MissedCallNotification);
 		labelMsgs.text = notifications.fullCountByType(Notification.SmsNotification) +
 				notifications.fullCountByType(Notification.MmsNotification) +
 				notifications.fullCountByType(Notification.ImNotification);
 		labelMails.text = notifications.fullCountByType(Notification.EmailNotification);
-		console.log("unread mails = " + labelMails.text);
 	}
 
 	function updateWeather() {
 		var weather = notifications.getMostRecentByType(Notification.WeatherNotification);
-		if (typeof weather !== "undefined") {
-			// TODO Weather stuff
+		if (weather) {
+			var unit = weather.temperatureUnits == WeatherNotification.Celsius ? "°C" : "°F";
+			labelForecast.text = weather.body
+			labelTemperature.text = weather.temperature + unit
+			iconForecast.source = _getImageForWeather(weather.forecast)
+		} else {
+			labelForecast.text = ""
+			labelTemperature.text = ""
+			iconForecast.source = ""
 		}
 	}
 

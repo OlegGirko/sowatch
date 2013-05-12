@@ -11,64 +11,87 @@ MWPage {
 		id: title
 	}
 
-	Item {
-		id: container
+	MWScrollable {
+		id: scrollable
 		anchors.top: title.bottom
 		anchors.bottom: parent.bottom
 		anchors.left: parent.left
 		anchors.right: parent.right
 
-		Item {
-			id: emailContainer
-			visible: curNotification.type === Notification.EmailNotification
-			anchors.fill: parent
+		Column {
+			id: defaultContainer
+			visible: false
+			width: page.width
 
 			MWLabel {
-				anchors.centerIn: parent
-				text: "Email"
+				text: curNotification ? curNotification.title : ""
+				font.pixelSize: 16
+				wrapMode: Text.WordWrap
+			}
+			MWLabel {
+				text: curNotification ? curNotification.body : ""
+				wrapMode: Text.WordWrap
 			}
 		}
 
-		Item {
+		Column {
+			id: emailContainer
+			visible: false
+			width: page.width
+
+			Image {
+				source: "notification-email.png"
+			}
+			MWLabel {
+				text: curNotification ? curNotification.title : ""
+				font.pixelSize: 16
+				wrapMode: Text.WordWrap
+			}
+			MWLabel {
+				text: curNotification ? curNotification.body : ""
+				wrapMode: Text.WordWrap
+			}
+		}
+
+		Column {
 			id: chatContainer
-			visible: curNotification.type === Notification.ImNotification
-			anchors.fill: parent
+			visible: false
+			width: page.width
 
 			MWLabel {
 				id: chatTitle
-				text: curNotification.title
+				font.pixelSize: 16
+				text: curNotification ? curNotification.title : ""
 			}
 
-			Image {
-				x: 20
-				y: chatBubble.y - 8
-				source: "bubble_tip.png"
-				z: 1
-			}
-
-			BorderImage {
-				id: chatBubble
-				anchors {
-					top: chatTitle.bottom; left: parent.left; right: parent.right;
-					leftMargin: 2; topMargin: 8; rightMargin: 2; bottomMargin: 2;
-				}
-				border { left: 16; top: 16; right: 16; bottom: 16; }
-				height: childrenRect.height + 16
-				source: "bubble.png"
-
+			ChatBubble {
+				width: parent.width
 				MWLabel {
-					anchors {
-						top: parent.top; left: parent.left; right: parent.right;
-						margins: 16 / 2
-					}
-					text: curNotification.body
 					width: parent.width
+					text: curNotification ? curNotification.body : ""
 					wrapMode: Text.Wrap
 				}
 			}
 		}
 	}
 
+	states: [
+		State {
+			when: curNotification && curNotification.type === Notification.EmailNotification
+			PropertyChanges { target: emailContainer; visible: true; }
+		},
+		State {
+			when: curNotification && (
+					  curNotification.type === Notification.ImNotification ||
+					  curNotification.type === Notification.SmsNotification ||
+					  curNotification.type === Notification.MmsNotification)
+			PropertyChanges { target: chatContainer; visible: true; }
+		},
+		State {
+			when: curNotification // Any other notification type
+			PropertyChanges { target: defaultContainer; visible: true; }
+		}
+	]
 
 
 	function handlesNotification(notification) {
@@ -77,5 +100,22 @@ MWPage {
 
 	function openNotification(notification) {
 		curNotification = notification;
+	}
+
+	Connections {
+		target: watch
+		onButtonPressed: {
+			switch (button) {
+			case 1:
+				scrollable.scrollUp();
+				break;
+			case 2:
+				scrollable.scrollDown();
+				break;
+			}
+		}
+		onActiveChanged: {
+			scrollable.scrollTop();
+		}
 	}
 }

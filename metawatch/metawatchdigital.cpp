@@ -3,9 +3,7 @@
 using namespace sowatch;
 
 MetaWatchDigital::MetaWatchDigital(ConfigKey* settings, QObject *parent) :
-	MetaWatch(settings, parent),
-	_nMails(0), _nCalls(0), _nIms(0), _nSms(0), _nMms(0),
-	_wForecast(WeatherNotification::UnknownWeather)
+	MetaWatch(settings, parent)
 {
 	QImage baseImage(screenWidth, screenHeight, QImage::Format_MonoLSB);
 	baseImage.setColor(0, QColor(Qt::white).rgb());
@@ -67,6 +65,12 @@ void MetaWatchDigital::displayApplication()
 	MetaWatch::displayApplication();
 }
 
+void MetaWatchDigital::clear(Mode mode, bool black)
+{
+	if (!_connected) return;
+	loadLcdTemplate(mode, black ? 1 : 0);
+}
+
 void MetaWatchDigital::update(Mode mode, const QList<QRect> &rects)
 {
 	if (!_connected) return;
@@ -86,20 +90,32 @@ void MetaWatchDigital::update(Mode mode, const QList<QRect> &rects)
 	}
 }
 
-void MetaWatchDigital::clear(Mode mode, bool black)
+#if 0
+QUrl MetaWatchDigital::iconForNotification(const Notification *n)
 {
-	if (!_connected) return;
-	loadLcdTemplate(mode, black ? 1 : 0);
-}
-
-void MetaWatchDigital::renderIdleScreen()
-{
-
+	switch (n->type()) {
+	case Notification::CallNotification:
+	case Notification::MissedCallNotification:
+		return QUrl::fromLocalFile(SOWATCH_RESOURCES_DIR "/metawatch/graphics/phone.png");
+		break;
+	case Notification::SmsNotification:
+	case Notification::MmsNotification:
+	case Notification::ImNotification:
+		return QUrl::fromLocalFile(SOWATCH_RESOURCES_DIR "/metawatch/graphics/message.png");
+		break;
+	case Notification::EmailNotification:
+		return QUrl::fromLocalFile(SOWATCH_RESOURCES_DIR "/metawatch/graphics/email.bmp");
+		break;
+	case Notification::CalendarNotification:
+		return QUrl::fromLocalFile(SOWATCH_RESOURCES_DIR "/metawatch/graphics/timer.bmp");
+		break;
+	default:
+		return QUrl();
+	}
 }
 
 void MetaWatchDigital::renderIdleWeather()
 {
-#if 0
 	_paintMode = IdleMode;
 	QFont sf("MetaWatch Small caps 8pt");
 	QFont lf("MetaWatch Large 16pt");
@@ -128,7 +144,6 @@ void MetaWatchDigital::renderIdleWeather()
 	}
 
 	_paintMode = _currentMode;
-#endif
 }
 
 QImage MetaWatchDigital::iconForWeather(WeatherNotification::WeatherType w)
@@ -149,67 +164,6 @@ QImage MetaWatchDigital::iconForWeather(WeatherNotification::WeatherType w)
 	default:
 		return QImage();
 	}
-}
-
-void MetaWatchDigital::renderNotification(Notification *n)
-{
-	_paintMode = NotificationMode;
-	QPainter p;
-	QFont sf("MetaWatch Small caps 8pt");
-	QFont lf("MetaWatch Large 16pt");
-	QFont mf("MetaWatch Large 16pt");
-	QImage icon = iconForNotification(n);
-
-	sf.setPixelSize(8);
-	mf.setPixelSize(14);
-	lf.setPixelSize(16);
-
-	const int iconW = icon.width(), iconH = icon.height();
-	const int margin = 4;
-	const int x = margin;
-	const int iconY = margin;
-	const int titleY = margin*2 + iconH;
-	const int dateX = x + iconW + margin;
-	QTextOption option;
-	QRect rect, titleRect;
-	QString text;
-
-	p.begin(this);
-
-	p.fillRect(0, 0, screenWidth, screenHeight, Qt::white);
-	p.drawImage(x, iconY, icon);
-
-	p.setPen(Qt::black);
-	option.setWrapMode(QTextOption::WrapAtWordBoundaryOrAnywhere);
-	option.setAlignment(Qt::AlignRight | Qt::AlignVCenter);
-
-	// Render "N minutes ago"
-	p.setFont(sf);
-	rect.setRect(dateX, iconY, (screenWidth - dateX) - margin, iconH);
-	text = n->displayTime();
-	p.drawText(rect, text, option);
-
-	option.setAlignment(Qt::AlignLeft | Qt::AlignTop);
-
-	// Render title
-	p.setFont(lf);
-	rect.setRect(x, titleY, screenWidth - x*2, screenHeight - titleY);
-	text = n->title();
-	titleRect = p.boundingRect(rect, text, option).toRect();
-	p.drawText(rect, text, option);
-
-	// Do not try to draw body if title was large
-	int bodyY = titleRect.y() + titleRect.height();
-	if (bodyY >= screenHeight) return;
-
-	// Render body
-	p.setFont(mf);
-	rect.setRect(x, bodyY, screenWidth - x*2, screenHeight - bodyY);
-	text = n->body();
-	p.drawText(rect, text, option);
-
-	p.end();
-	_paintMode = _currentMode;
 }
 
 QImage MetaWatchDigital::iconForNotification(const Notification *n)
@@ -234,6 +188,7 @@ QImage MetaWatchDigital::iconForNotification(const Notification *n)
 		return QImage();
 	}
 }
+#endif
 
 void MetaWatchDigital::setupBluetoothWatch()
 {
@@ -256,7 +211,4 @@ void MetaWatchDigital::setupBluetoothWatch()
 
 	// Configure to show watch-rendered clock in idle screen
 	configureLcdIdleSystemArea(false);
-
-	// Render the idle screen assuming previous contents were lost
-	renderIdleScreen();
 }

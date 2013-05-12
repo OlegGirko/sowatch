@@ -31,6 +31,7 @@ public:
 
 private slots:
 	void handleFormDestroyed();
+	void handleButtonPressed(int button);
 
 private:
 	MetaWatchDigitalSimulatorForm* _form;

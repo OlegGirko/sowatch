@@ -112,6 +112,7 @@ int NotificationsModel::fullCountByType(int type) const
 Notification* NotificationsModel::getMostRecentByType(Notification::Type type) const
 {
 	if (!_list[type].empty()) {
+		qDebug() << "Returning most recent" << _list[type].first();
 		// TODO Actually get the most recent (sort by date)
 		return _list[type].first();
 	} else {
@@ -119,10 +120,10 @@ Notification* NotificationsModel::getMostRecentByType(Notification::Type type) c
 	}
 }
 
-Notification* NotificationsModel::getMostRecentByType(int type) const
+QObject* NotificationsModel::getMostRecentByType(int type) const
 {
 	Q_ASSERT(type >= 0 && type < Notification::TypeCount);
-	return getMostRecentByType(static_cast<Notification::Type>(type));
+	return static_cast<QObject*>(getMostRecentByType(static_cast<Notification::Type>(type)));
 }
 
 Notification::Type NotificationsModel::getTypeOfDeletedNotification(Notification *n) const

@@ -18,6 +18,7 @@ public:
 
 private slots:
 	void generateInitialNotification();
+	void generateWeatherNotification();
 	void generateNotification();
 
 private:

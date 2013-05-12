@@ -29,22 +29,6 @@ public:
 
 protected:
 	void setupBluetoothWatch();
-
-private:
-	// Idle screen: notifications unread count
-	ushort _nMails, _nCalls, _nIms, _nSms, _nMms;
-	// Idle screen: weather information
-	WeatherNotification::WeatherType _wForecast;
-	QString _wBody;
-	short _wTemperature;
-	bool _wMetric;
-
-	void renderIdleScreen();
-	void renderIdleWeather();
-	QImage iconForWeather(WeatherNotification::WeatherType w);
-
-	void renderNotification(Notification *n);
-	QImage iconForNotification(const Notification *n);
 };
 
 }

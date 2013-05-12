@@ -2,6 +2,7 @@
 #include <QtDeclarative/QtDeclarative>
 #include "watchserver.h"
 #include "watch.h"
+#include "watchletsmodel.h"
 #include "notificationsmodel.h"
 #include "gconfkey.h"
 #include "declarativewatchwrapper.h"
@@ -24,9 +25,15 @@ DeclarativeWatchlet::DeclarativeWatchlet(Watch* watch, const QString& id) :
 
 	if (!_registered) {
 		qRegisterMetaType<Notification::Type>("Notification::Type");
+		qRegisterMetaType<Notification::Priority>("Notification::Priority");
 		qRegisterMetaType<WeatherNotification::WeatherType>("WeatherNotification::WeatherType");
+		qRegisterMetaType<WeatherNotification::Unit>("WeatherNotification::Unit");
 		qmlRegisterUncreatableType<DeclarativeWatchWrapper>("com.javispedro.sowatch", 1, 0,
 			"Watch", "Watch is only available via the 'watch' context property");
+		qmlRegisterUncreatableType<WatchletsModel>("com.javispedro.sowatch", 1, 0,
+			"Notification", "WatchletsModel is only available via the 'notifications' context property");
+		qmlRegisterUncreatableType<Watchlet>("com.javispedro.sowatch", 1, 0,
+			"Notification", "Watchlet is an abstract class");
 		qmlRegisterUncreatableType<NotificationsModel>("com.javispedro.sowatch", 1, 0,
 			"NotificationsModel", "NotificationsModel is only available via the 'notifications' context property");
 		qmlRegisterUncreatableType<Notification>("com.javispedro.sowatch", 1, 0,
@@ -48,6 +55,7 @@ DeclarativeWatchlet::DeclarativeWatchlet(Watch* watch, const QString& id) :
 		_engine->addImportPath(SOWATCH_QML_DIR);
 
 		// Set context properties that are shared by all watchlets here
+		_engine->rootContext()->setContextProperty("watchlets", 0);
 		_engine->rootContext()->setContextProperty("notifications", 0);
 
 		watch->setProperty("declarativeEngine", QVariant::fromValue(_engine));
@@ -124,6 +132,11 @@ void DeclarativeWatchlet::deactivate()
 {
 	_wrapper->deactivate();
 	GraphicsWatchlet::deactivate();
+}
+
+void DeclarativeWatchlet::setWatchletsModel(WatchletsModel *model)
+{
+	_context->setContextProperty("watchlets", model);
 }
 
 void DeclarativeWatchlet::setNotificationsModel(NotificationsModel *model)

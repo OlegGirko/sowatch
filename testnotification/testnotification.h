@@ -31,4 +31,6 @@ private:
 
 }
 
+QML_DECLARE_TYPE(sowatch::TestNotification)
+
 #endif // TESTNOTIFICATION_H

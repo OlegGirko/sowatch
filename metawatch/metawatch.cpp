@@ -269,8 +269,12 @@ void MetaWatch::setupBluetoothWatch()
 	_currentMode = IdleMode;
 	_paintMode = IdleMode;
 
-	connect(_socket, SIGNAL(readyRead()),
+	if (_socket) {
+		// If we are running under the simulator, there might not be
+		// a socket.
+		connect(_socket, SIGNAL(readyRead()),
 	        SLOT(dataReceived()));
+	}
 
 	// Configure the watch according to user preferences
 	updateWatchProperties();
@@ -467,9 +471,6 @@ void MetaWatch::enableButton(Mode mode, Button button, ButtonPress press)
 	// We create a custom event code that allows us to know what
 	// the pressed button and the event code were.
 	msg.data[4] = 0x80 | ((press << 4) & 0x30) | (button & 0xF);
-
-	qDebug() << "enable button" << button << "(" << press << ")" <<
-	            "in mode" << mode << "to" << static_cast<unsigned char>(msg.data[4]);
 
 	send(msg);
 }

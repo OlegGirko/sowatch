@@ -28,6 +28,7 @@ public:
 	void activate();
 	void deactivate();
 
+	void setWatchletsModel(WatchletsModel *model);
 	void setNotificationsModel(NotificationsModel *model);
 
 	bool handlesNotification(Notification *notification) const;
