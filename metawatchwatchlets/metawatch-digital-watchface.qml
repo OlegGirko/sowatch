@@ -65,7 +65,7 @@ MWPage {
 			height: 30
 			spacing: 8
 			Column {
-				spacing: 4
+				spacing: 2
 				Image {
 					width: 24
 					height: 18

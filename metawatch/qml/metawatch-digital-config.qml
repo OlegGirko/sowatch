@@ -96,37 +96,4 @@ Column {
 			source: "image://theme/meegotouch-combobox-indicator" + (theme.inverted ? "-inverted" : "")
 		}
 	}
-
-	Item {
-		id: autoBacklightItem
-		width: parent.width
-		height: UiConstants.ListItemHeightDefault
-
-		GConfKey {
-			id: autoBacklightKey
-			key: configKey + "/auto-backlight"
-		}
-		Column {
-			anchors.verticalCenter: parent.verticalCenter
-			anchors.left: parent.left
-
-			Label {
-				text: qsTr("Automatic backlight")
-				font: UiConstants.TitleFont
-			}
-
-			Label {
-				text: qsTr("Turn backlight on during notifications")
-				font: UiConstants.SubtitleFont
-				color: UiConstants.FieldLabelColor
-			}
-		}
-		CheckBox {
-			id: autoBacklightSwitch
-			anchors.verticalCenter: parent.verticalCenter
-			anchors.right: parent.right
-			checked: autoBacklightKey.value
-			onCheckedChanged: autoBacklightKey.value = checked
-		}
-	}
 }

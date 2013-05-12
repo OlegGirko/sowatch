@@ -112,7 +112,6 @@ int NotificationsModel::fullCountByType(int type) const
 Notification* NotificationsModel::getMostRecentByType(Notification::Type type) const
 {
 	if (!_list[type].empty()) {
-		qDebug() << "Returning most recent" << _list[type].first();
 		// TODO Actually get the most recent (sort by date)
 		return _list[type].first();
 	} else {

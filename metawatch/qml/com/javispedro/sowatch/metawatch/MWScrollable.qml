@@ -14,11 +14,8 @@ Flickable {
 	contentHeight: contentItem.childrenRect.height
 
 	function scrollDown() {
-		console.log(contentHeight + " " + height);
-		console.log(childrenRect.height);
 		var maxY = Math.max(0, contentHeight - height);
 		var newContentY = contentY + 96/3;
-		console.log(maxY + " " + newContentY);
 
 		if (newContentY > maxY) {
 			contentY = maxY; // Never overscroll.

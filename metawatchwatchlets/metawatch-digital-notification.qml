@@ -21,7 +21,9 @@ MWPage {
 		Column {
 			id: defaultContainer
 			visible: false
-			width: page.width
+			anchors.left: parent.left
+			anchors.leftMargin: 1
+			width: page.width - 3
 
 			MWLabel {
 				text: curNotification ? curNotification.title : ""
@@ -37,7 +39,9 @@ MWPage {
 		Column {
 			id: emailContainer
 			visible: false
-			width: page.width
+			anchors.left: parent.left
+			anchors.leftMargin: 1
+			width: page.width - 3
 
 			Image {
 				source: "notification-email.png"
@@ -56,7 +60,9 @@ MWPage {
 		Column {
 			id: chatContainer
 			visible: false
-			width: page.width
+			anchors.left: parent.left
+			anchors.leftMargin: 1
+			width: page.width - 5
 
 			MWLabel {
 				id: chatTitle
@@ -106,8 +112,6 @@ MWPage {
 	Connections {
 		target: watch
 		onButtonPressed: {
-			console.log(emailContainer.height);
-			console.log()
 			switch (button) {
 			case 1:
 				scrollable.scrollUp();
