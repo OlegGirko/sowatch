@@ -99,12 +99,15 @@ MWPage {
 	}
 
 	function openNotification(notification) {
+		scrollable.scrollTop();
 		curNotification = notification;
 	}
 
 	Connections {
 		target: watch
 		onButtonPressed: {
+			console.log(emailContainer.height);
+			console.log()
 			switch (button) {
 			case 1:
 				scrollable.scrollUp();
@@ -113,9 +116,6 @@ MWPage {
 				scrollable.scrollDown();
 				break;
 			}
-		}
-		onActiveChanged: {
-			scrollable.scrollTop();
 		}
 	}
 }
