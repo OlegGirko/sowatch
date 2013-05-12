@@ -10,8 +10,8 @@ Flickable {
 	boundsBehavior: Flickable.StopAtBounds
 	flickableDirection: Flickable.VerticalFlick
 
-	contentWidth: childrenRect.width
-	contentHeight: childrenRect.height
+	contentWidth: contentItem.childrenRect.width
+	contentHeight: contentItem.childrenRect.height
 
 	function scrollDown() {
 		console.log(contentHeight + " " + height);
@@ -41,7 +41,7 @@ Flickable {
 		contentY = 0;
 	}
 
-	Rectangle {
+	children: Rectangle {
 		id: indicatorCont
 		visible: flickable.indicator && (flickable.contentHeight > flickable.height)
 		anchors.top: parent.top

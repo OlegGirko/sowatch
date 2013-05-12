@@ -691,7 +691,9 @@ void MetaWatch::realReceive(bool block)
 	do {
 		qint64 dataRead;
 
+#if PROTOCOL_DEBUG
 		qDebug() << "received" << _socket->bytesAvailable() << "bytes";
+#endif
 
 		if (_partialReceived.type == 0) {
 			/* Still not received even the packet type */
@@ -729,7 +731,9 @@ void MetaWatch::realReceive(bool block)
 			_partialReceived.type = static_cast<MessageType>(header[2]);
 			_partialReceived.data.resize(header[1] - 6);
 			_partialReceived.options = header[3];
+#if PROTOCOL_DEBUG
 			qDebug() << "got header";
+#endif
 		}
 
 		/* We have the header; now, try to get the complete packet. */
