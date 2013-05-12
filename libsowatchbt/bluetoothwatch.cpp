@@ -165,6 +165,9 @@ void BluetoothWatch::handleSocketDisconnected()
 void BluetoothWatch::handleSocketError(QBluetoothSocket::SocketError error)
 {
 	qWarning() << "Socket error:" << error;
+	if (_socket) {
+		_socket->close();
+	}
 	// Seems that sometimes a disconnection event may not be generated.
 	handleSocketDisconnected();
 }
