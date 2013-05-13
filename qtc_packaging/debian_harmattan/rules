@@ -69,7 +69,7 @@ binary-arch: build install
 	dh_fixperms
 	# dh_makeshlibs # Uncomment this line for use without Qt Creator
 	dh_installdeb
-	# dh_shlibdeps # Uncomment this line for use without Qt Creator
+	# dh_shlibdeps -l/opt/sowatch/lib # Uncomment this line for use without Qt Creator
 	dh_gencontrol
 	dh_md5sums
 	dh_builddeb

@@ -9,7 +9,6 @@ using namespace sowatch;
 MetaWatchScanner::MetaWatchScanner(QObject *parent) :
 	BluetoothWatchScanner(parent)
 {
-	setUuidFilter(QBluetoothUuid::SerialPort);
 }
 
 void MetaWatchScanner::handleDiscoveredService(const QBluetoothServiceInfo &info)

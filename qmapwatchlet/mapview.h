@@ -36,7 +36,7 @@ public:
 	void setUpdateInterval(int msec);
 
 	bool decolor() const;
-	void setDecolor(bool decolor) const;
+	void setDecolor(bool decolor);
 
 	qreal zoomLevel() const;
 	void setZoomLevel(qreal level);

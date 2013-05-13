@@ -7,7 +7,7 @@
 using namespace sowatch;
 
 QMafwWatchlet::QMafwWatchlet(Watch* watch) :
-	DeclarativeWatchlet(server, "com.javispedro.sowatch.qmafw"),
+	DeclarativeWatchlet(watch, "com.javispedro.sowatch.qmafw"),
 	_registry(MafwRegistry::instance()),
 	_player(new QMafwWatchletPlayer(this)),
     _volumeControl(new QMafwWatchletVolumeControl(this))
@@ -24,7 +24,7 @@ QMafwWatchlet::QMafwWatchlet(Watch* watch) :
 
 	context()->setContextProperty("player", _player);
 	context()->setContextProperty("volumeControl", _volumeControl);
-	setSource(QUrl(SOWATCH_QML_DIR "/qmafwwatchlet/" + server->watch()->model() + ".qml"));
+	setSource(QUrl(SOWATCH_QML_DIR "/qmafwwatchlet/" + watch->model() + ".qml"));
 }
 
 void QMafwWatchlet::handleRendererAdded(const QString &uuid)

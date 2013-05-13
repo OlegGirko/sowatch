@@ -9,7 +9,6 @@ using namespace sowatch;
 LiveViewScanner::LiveViewScanner(QObject *parent) :
 	BluetoothWatchScanner(parent)
 {
-	setUuidFilter(QBluetoothUuid::SerialPort);
 }
 
 void LiveViewScanner::handleDiscoveredService(const QBluetoothServiceInfo &info)

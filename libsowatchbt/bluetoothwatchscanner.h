@@ -19,17 +19,16 @@ class SOWATCHBT_EXPORT BluetoothWatchScanner : public WatchScanner
 
 public:
 	BluetoothWatchScanner(QObject *parent);
+	~BluetoothWatchScanner();
 
 	void start();
-
-protected:
-	void setUuidFilter(const QBluetoothUuid & uuid);
 
 protected slots:
 	virtual void handleDiscoveredService(const QBluetoothServiceInfo& info) = 0;
 
 private:
-	QBluetoothServiceDiscoveryAgent *_agent;
+	static int _instances;
+	static QBluetoothServiceDiscoveryAgent *_agent;
 };
 
 }

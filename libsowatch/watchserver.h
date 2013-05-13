@@ -23,7 +23,6 @@ class SOWATCH_EXPORT WatchServer : public QObject
 {
     Q_OBJECT
 	Q_PROPERTY(Watch* watch READ watch CONSTANT)
-	Q_PROPERTY(QString nextWatchletButton READ nextWatchletButton WRITE setNextWatchletButton)
 	Q_PROPERTY(Watchlet* idleWatchlet READ idleWatchlet WRITE setIdleWatchlet)
 	Q_PROPERTY(Watchlet* notificationWatchlet READ notificationWatchlet WRITE setNotificationWatchlet)
 
@@ -32,9 +31,6 @@ public:
 
 	Watch* watch();
 	const Watch* watch() const;
-
-	QString nextWatchletButton() const;
-	void setNextWatchletButton(const QString& value);
 
 	Watchlet *idleWatchlet();
 	void setIdleWatchlet(Watchlet *watchlet);

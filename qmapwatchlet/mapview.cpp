@@ -95,6 +95,16 @@ void MapView::setUpdateInterval(int msec)
 	}
 }
 
+bool MapView::decolor() const
+{
+	return _decolor;
+}
+
+void MapView::setDecolor(bool decolor)
+{
+	_decolor = decolor;
+}
+
 qreal MapView::zoomLevel() const
 {
 	if (_mapData) {
