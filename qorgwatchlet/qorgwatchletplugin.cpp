@@ -24,12 +24,14 @@ QStringList QOrgWatchletPlugin::watchlets()
 	return l;
 }
 
-WatchletPluginInterface::WatchletInfo QOrgWatchletPlugin::describeWatchlet(const QString &id)
+WatchletPluginInterface::WatchletInfo QOrgWatchletPlugin::describeWatchlet(const QString &id, const QString &watchModel)
 {
 	WatchletInfo info;
 	if (id != "com.javispedro.sowatch.qorg") return info;
 	info.name = "Calendar";
-	info.icon = QUrl::fromLocalFile(SOWATCH_QML_DIR "/qorgwatchlet/icon.png");
+	info.phoneIcon = QUrl::fromLocalFile(SOWATCH_QML_DIR "/qorgwatchlet/icon.png");
+	info.icon = QUrl::fromLocalFile(SOWATCH_QML_DIR "/qorgwatchlet/" + watchModel + "-icon.png");
+	info.visible = true;
 	return info;
 }
 

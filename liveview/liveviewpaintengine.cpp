@@ -35,7 +35,7 @@ void LiveViewPaintEngine::drawRects(const QRectF *rects, int rectCount)
 	for (i = 0; i < rectCount; i++) {
 		const QRectF& r = rects[i];
 		if (_hasBrush && fillsEntireImage(r.toRect()) && _isBrushBlack) {
-			_watch->clear();
+			//_watch->clear();
 			_damaged = QRegion();
 			continue;
 		}
@@ -58,7 +58,7 @@ void LiveViewPaintEngine::drawRects(const QRect *rects, int rectCount)
 	for (i = 0; i < rectCount; i++) {
 		const QRect& r = rects[i];
 		if (_hasBrush && fillsEntireImage(r) && _isBrushBlack) {
-			_watch->clear();
+			//_watch->clear();
 			_damaged = QRegion();
 			continue;
 		}

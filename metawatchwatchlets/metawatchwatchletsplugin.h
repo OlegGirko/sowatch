@@ -16,7 +16,7 @@ public:
 	~MetaWatchWatchletsPlugin();
 
 	QStringList watchlets();
-	WatchletInfo describeWatchlet(const QString &id);
+	WatchletInfo describeWatchlet(const QString &id, const QString& watchModel);
 	Watchlet* getWatchlet(const QString& id, ConfigKey *settings, Watch* watch);
 };
 

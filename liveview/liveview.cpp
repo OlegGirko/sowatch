@@ -16,6 +16,7 @@ LiveView::LiveView(ConfigKey* settings, QObject* parent) :
     _screenWidth(0), _screenHeight(0),
     _mode(RootMenuMode),
     _paintEngine(0),
+    _rootMenuFirstWatchlet(0),
     _sendTimer(new QTimer(this))
 {
 	_sendTimer->setInterval(DelayBetweenMessages);
@@ -90,6 +91,7 @@ void LiveView::setDateTime(const QDateTime& dateTime)
 	// the phone to be sending it.
 	// Wonder what will happen during DST changes?
 	// Do nothing here.
+	Q_UNUSED(dateTime);
 }
 
 void LiveView::queryDateTime()
@@ -154,6 +156,7 @@ void LiveView::setWatchletsModel(WatchletsModel *model)
 	_watchlets = model;
 	if (_watchlets) {
 		connect(_watchlets, SIGNAL(modelChanged()), SLOT(handleWatchletsChanged()));
+		handleWatchletsChanged();
 	}
 }
 
@@ -164,13 +167,9 @@ QImage* LiveView::image()
 
 void LiveView::renderImage(int x, int y, const QImage &image)
 {
-	QBuffer buffer;
-	buffer.open(QIODevice::WriteOnly);
-	if (image.save(&buffer, "PNG")) {
-		displayBitmap(x, y, buffer.buffer());
-		qDebug() << "render image at" << x << 'x' << y << "size" << image.size();
-	} else {
-		qWarning() << "Failed to encode image";
+	QByteArray data = encodeImage(image);
+	if (!data.isEmpty()) {
+		displayBitmap(x, y, data);
 	}
 }
 
@@ -194,10 +193,62 @@ void LiveView::desetupBluetoothWatch()
 	_sendingMsgs.clear();
 }
 
+void LiveView::recreateWatchletsMenu()
+{
+	// Erase all current watchlets frm the menu
+	QList<RootMenuItem>::iterator it = _rootMenu.begin();
+	it += _rootMenuFirstWatchlet;
+	_rootMenu.erase(it, _rootMenu.end());
+
+	if (_watchlets) {
+		const int num_watchlets = _watchlets->size();
+		for (int i = 0; i < num_watchlets; i++) {
+			RootMenuItem item;
+			QModelIndex index = _watchlets->index(i);
+			item.type = MenuOther;
+			item.title = _watchlets->data(index, WatchletsModel::TitleRole).toString();
+			item.icon = encodeImage(_watchlets->data(index, WatchletsModel::IconRole).toUrl());
+			item.unread = 0;
+			item.watchletId = _watchlets->at(i)->id();
+			_rootMenu.append(item);
+		}
+	}
+}
+
 void LiveView::refreshMenu()
 {
 	if (_mode == RootMenuMode) {
-		setMenuSize(3);
+		setMenuSize(_rootMenu.size());
+	}
+}
+
+QByteArray LiveView::encodeImage(const QImage& image) const
+{
+	QBuffer buffer;
+	buffer.open(QIODevice::WriteOnly);
+	if (image.save(&buffer, "PNG")) {
+		return buffer.buffer();
+	} else {
+		qWarning() << "Failed to encode image";
+		return QByteArray();
+	}
+}
+
+QByteArray LiveView::encodeImage(const QUrl& url) const
+{
+	if (url.encodedPath().endsWith(".png")) {
+		// Just load the image
+		QFile f(url.toLocalFile());
+		if (f.open(QIODevice::ReadOnly)) {
+			qDebug() << "Encoding local PNG" << url.toLocalFile();
+			return f.readAll();
+		} else {
+			qWarning() << "Could not read image:" << url.toString();
+			return QByteArray();
+		}
+	} else {
+		qDebug() << "Encoding local nonPNG" << url.toLocalFile();
+		return encodeImage(QImage(url.toLocalFile()));
 	}
 }
 
@@ -359,12 +410,10 @@ void LiveView::handleNavigation(const Message &msg)
 		return;
 	}
 
-	int menu_id = msg.data[4];
-	int item_id = msg.data[3];
-	int event = msg.data[2];
+	int menu_id = static_cast<unsigned char>(msg.data[4]);
+	int item_id = static_cast<unsigned char>(msg.data[3]);
+	int event = static_cast<unsigned char>(msg.data[2]);
 	qDebug() << "navigation" << event << item_id << menu_id;
-
-
 
 	switch (event) {
 	case SelectLongPress:
@@ -375,8 +424,22 @@ void LiveView::handleNavigation(const Message &msg)
 		}
 		break;
 	case SelectMenu:
-		sendResponse(NavigationResponse, ResponseOk);
-		emit watchletRequested("com.javispedro.sowatch.neko");
+		if (item_id <= _rootMenu.size()) {
+			sendResponse(NavigationResponse, ResponseError);
+
+			switch(_rootMenu[item_id].type) {
+			case MenuNotificationList:
+				Q_ASSERT(false); // TODO
+				break;
+			case MenuOther:
+				emit watchletRequested(_rootMenu[item_id].watchletId);
+				break;
+			}
+
+		} else {
+			sendResponse(NavigationResponse, ResponseError);
+		}
+
 		return;
 	}
 
@@ -387,22 +450,13 @@ void LiveView::handleNavigation(const Message &msg)
 void LiveView::handleMenuItemsRequest(const Message &msg)
 {
 	qDebug() << "Sending menu items";
-	QFile icon_file;
-
-	icon_file.setFileName(SOWATCH_RESOURCES_DIR "/liveview/graphics/menu_notifications.png");
-	icon_file.open(QIODevice::ReadOnly);
-	sendMenuItem(0, MenuNotificationList, 2, tr("Notifications"), icon_file.readAll());
-	icon_file.close();
-
-	icon_file.setFileName(SOWATCH_RESOURCES_DIR "/liveview/graphics/menu_missed_calls.png");
-	icon_file.open(QIODevice::ReadOnly);
-	sendMenuItem(1, MenuNotificationList, 1, tr("Missed calls"), icon_file.readAll());
-	icon_file.close();
-
-	icon_file.setFileName(SOWATCH_RESOURCES_DIR "/liveview/graphics/menu_messages.png");
-	icon_file.open(QIODevice::ReadOnly);
-	sendMenuItem(2, MenuOther, 0, tr("Messages"), icon_file.readAll());
-	icon_file.close();
+	if (_mode == RootMenuMode) {
+		for (int i = 0; i < _rootMenu.size(); i++) {
+			qDebug() << "Sending one menu item";
+			sendMenuItem(i, _rootMenu[i].type, _rootMenu[i].unread,
+			                _rootMenu[i].title, _rootMenu[i].icon);
+		}
+	}
 }
 
 void LiveView::handleDateTimeRequest(const Message &msg)
@@ -567,6 +621,7 @@ void LiveView::handleSendTimerTick()
 
 void LiveView::handleWatchletsChanged()
 {
+	recreateWatchletsMenu();
 	if (_connected) {
 		refreshMenu();
 	}

@@ -22,17 +22,18 @@ public:
 	struct WatchletInfo {
 		QString name;
 		QUrl icon;
-		bool hidden;
+		QUrl phoneIcon;
+		bool visible;
 		QUrl configQmlUrl;
 
-		inline WatchletInfo() :
-		    hidden(false)
+		inline WatchletInfo() : visible(false)
 		{
+
 		}
 	};
 
 	virtual QStringList watchlets() = 0;
-	virtual WatchletInfo describeWatchlet(const QString& id) = 0;
+	virtual WatchletInfo describeWatchlet(const QString& id, const QString& watchModel) = 0;
 	virtual Watchlet* getWatchlet(const QString& id, ConfigKey *settings, Watch *watch) = 0;
 };
 

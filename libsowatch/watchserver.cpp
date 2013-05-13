@@ -30,6 +30,7 @@ WatchServer::WatchServer(Watch* watch, QObject* parent) :
 	_syncTimeTimer->setSingleShot(true);
 	_syncTimeTimer->setInterval(24 * 3600 * 1000); // Once a day
 
+	_watchlets->setWatchModel(_watch->model());
 	_watch->setWatchletsModel(_watchlets);
 }
 

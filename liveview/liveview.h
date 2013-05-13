@@ -120,11 +120,24 @@ protected:
 		{ }
 	};
 
+	struct RootMenuItem {
+		MenuItemType type;
+		QByteArray icon;
+		QString title;
+		int unread;
+		QString watchletId;
+	};
+
 	void setupBluetoothWatch();
 	void desetupBluetoothWatch();
 
+	/** Recreate the device menu (after watchlets change) */
+	void recreateWatchletsMenu();
 	/** Update the device menu (after a power on, etc.) */
 	void refreshMenu();
+
+	QByteArray encodeImage(const QImage& image) const;
+	QByteArray encodeImage(const QUrl& url) const;
 
 protected:
 	void send(const Message& msg);
@@ -168,6 +181,10 @@ private:
 	// Required by QPaintDevice
 	mutable LiveViewPaintEngine* _paintEngine;
 	QImage _image;
+
+	QList<RootMenuItem> _rootMenu;
+	/** Keeps the index of the first watchlet. */
+	int _rootMenuFirstWatchlet;
 
 	/** Message outbox queue. */
 	QQueue<Message> _sendingMsgs;

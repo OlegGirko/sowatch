@@ -11,8 +11,19 @@ WatchletsModel::WatchletsModel(QObject *parent) :
 {
 	QHash<int, QByteArray> roles = roleNames();
 	roles[TitleRole] = QByteArray("title");
+	roles[IconRole] = QByteArray("icon");
 	roles[ObjectRole] = QByteArray("object");
 	setRoleNames(roles);
+}
+
+QString WatchletsModel::watchModel() const
+{
+	return _watchModel;
+}
+
+void WatchletsModel::setWatchModel(const QString &s)
+{
+	_watchModel = s;
 }
 
 int WatchletsModel::rowCount(const QModelIndex &parent) const
@@ -35,6 +46,8 @@ QVariant WatchletsModel::data(const QModelIndex &index, int role) const
 	switch (role) {
 	case Qt::DisplayRole:
 		return QVariant::fromValue(info.name);
+	case IconRole:
+		return QVariant::fromValue(info.icon);
 	case ObjectRole:
 		return QVariant::fromValue(const_cast<sowatch::Watchlet*>(watchlet));
 	}
@@ -109,7 +122,7 @@ WatchletsModel::WatchletInfo WatchletsModel::getInfoForWatchlet(const Watchlet *
 	QString id = w->id();
 	WatchletPluginInterface *plugin = Registry::registry()->getWatchletPlugin(id);
 	if (plugin) {
-		return plugin->describeWatchlet(id);
+		return plugin->describeWatchlet(id, _watchModel);
 	} else {
 		return WatchletInfo();
 	}

@@ -19,12 +19,14 @@ QStringList SysInfoPlugin::watchlets()
 	return l;
 }
 
-SysInfoPlugin::WatchletInfo SysInfoPlugin::describeWatchlet(const QString &id)
+SysInfoPlugin::WatchletInfo SysInfoPlugin::describeWatchlet(const QString &id, const QString &watchModel)
 {
 	WatchletInfo info;
 	if (id != "com.javispedro.sowatch.sysinfo") return info;
 	info.name = "Phone info";
-	info.icon = QUrl::fromLocalFile(SOWATCH_QML_DIR "/sysinfowatchlet/icon.png");
+	info.phoneIcon = QUrl::fromLocalFile(SOWATCH_QML_DIR "/sysinfowatchlet/icon.png");
+	info.icon = QUrl::fromLocalFile(SOWATCH_QML_DIR "/sysinfowatchlet/" + watchModel + "-icon.png");
+	info.visible = true;
 	return info;
 }
 

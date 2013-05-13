@@ -1,20 +1,13 @@
 import QtQuick 1.0
 import QtMobility.location 1.2
-import com.javispedro.sowatch.metawatch 1.0
 import com.javispedro.sowatch.qmap 1.0
 
-MWPage {
-	MWTitle {
-		id: title
-		z: 1
-	}
-
+Item {
 	MapView {
 		id: map
 		anchors.fill: parent
 		updateEnabled: watch.active
 		updateInterval: 5000;
-		decolor: true
 	}
 
 	Connections {

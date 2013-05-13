@@ -20,15 +20,19 @@ QStringList MetaWatchWatchletsPlugin::watchlets()
 	return l;
 }
 
-WatchletPluginInterface::WatchletInfo MetaWatchWatchletsPlugin::describeWatchlet(const QString &id)
+WatchletPluginInterface::WatchletInfo MetaWatchWatchletsPlugin::describeWatchlet(const QString &id, const QString& watchModel)
 {
 	WatchletInfo info;
 	if (id == MetaWatchFaceWatchlet::myId) {
-		info.name = "MetaWatch Face Watchlet";
-		info.hidden = true;
+		if (watchModel == "metawatch-digital") {
+			info.name = "MetaWatch Face Watchlet";
+			// Keep non visible
+		}
 	} else if (id == MetaWatchNotificationWatchlet::myId) {
-		info.name = "MetaWatch Notification Watchlet";
-		info.hidden = true;
+		if (watchModel == "metawatch-digital") {
+			info.name = "MetaWatch Notification Watchlet";
+			// Keep non visible
+		}
 	}
 	return info;
 }

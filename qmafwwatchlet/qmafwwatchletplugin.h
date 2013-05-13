@@ -16,7 +16,7 @@ public:
 	explicit QMafwWatchletPlugin(QObject *parent = 0);
 
 	QStringList watchlets();
-	WatchletInfo describeWatchlet(const QString &id);
+	WatchletInfo describeWatchlet(const QString &id, const QString &watchModel);
 	Watchlet* getWatchlet(const QString &id, ConfigKey *config, WatchServer *server);
 };
 

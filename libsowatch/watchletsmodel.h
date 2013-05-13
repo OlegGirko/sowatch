@@ -12,14 +12,19 @@ namespace sowatch
 class WatchletsModel : public QAbstractListModel
 {
 	Q_OBJECT
+	Q_PROPERTY(QString watchModel READ watchModel WRITE setWatchModel NOTIFY watchModelChanged)
 
 public:
 	explicit WatchletsModel(QObject *parent = 0);
 
 	enum DataRoles {
 		ObjectRole = Qt::UserRole,
-		TitleRole = Qt::DisplayRole
+		TitleRole = Qt::DisplayRole,
+		IconRole = Qt::DecorationRole
 	};
+
+	QString watchModel() const;
+	void setWatchModel(const QString& s);
 
 	int rowCount(const QModelIndex &parent) const;
 	QVariant data(const QModelIndex &index, int role) const;
@@ -35,14 +40,16 @@ public:
 	void remove(int position);
 
 signals:
+	void watchModelChanged();
 	void modelChanged();
 
 protected:
 	typedef WatchletPluginInterface::WatchletInfo WatchletInfo;
 
-	static WatchletInfo getInfoForWatchlet(const Watchlet *w);
+	WatchletInfo getInfoForWatchlet(const Watchlet *w);
 
 private:
+	QString _watchModel;
 	QList<Watchlet*> _list;
 	QList<WatchletInfo> _info;
 

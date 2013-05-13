@@ -70,7 +70,7 @@ QVariant ConfiguredWatchletsModel::data(const QModelIndex &index, int role) cons
 	case Qt::DisplayRole:
 		return QVariant::fromValue(_info[id].name);
 	case Qt::DecorationRole:
-		return QVariant::fromValue(_info[id].icon);
+		return QVariant::fromValue(_info[id].phoneIcon);
 	case NameRole:
 		return QVariant::fromValue(id);
 	case ConfigQmlUrlRole:
@@ -131,11 +131,13 @@ void ConfiguredWatchletsModel::reload()
 
 	qDebug() << "Reloading watchlets";
 
+	QString watchModel = _config->value("driver").toString();
+
 	QStringList all = registry->allWatchlets();
 	foreach (const QString& s, all) {
 		WatchletPluginInterface *plugin = registry->getWatchletPlugin(s);
 		if (plugin) {
-			_info[s] = plugin->describeWatchlet(s);
+			_info[s] = plugin->describeWatchlet(s, watchModel);
 		} else {
 			WatchletPluginInterface::WatchletInfo info;
 			info.name = s;
@@ -149,7 +151,7 @@ void ConfiguredWatchletsModel::reload()
 	if (_unadded) {
 		qDebug() << "Listing unadded watchlets from" << all;
 		foreach (const QString& s, all) {
-			if (!_info[s].hidden && !_enabled.contains(s)) {
+			if (_info[s].visible && !_enabled.contains(s)) {
 				_list.append(s);
 			}
 		}

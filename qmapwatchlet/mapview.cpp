@@ -12,7 +12,7 @@ using namespace sowatch;
 
 MapView::MapView(QDeclarativeItem *parent) :
     QDeclarativeItem(parent),
-    _enabled(false),
+    _enabled(false), _decolor(false),
     _arrow(SOWATCH_QML_DIR "/qmapwatchlet/arrow.png"),
     _mapData(0),
     _posSource(QGeoPositionInfoSource::createDefaultSource(this)),
@@ -123,44 +123,48 @@ void MapView::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, Q
 	if (_mapData) {
 		// Render to an image first
 		const QSize size(_mapData->windowSize().toSize());
-		QImage image(size, QImage::Format_RGB32);
-		QImage pixmap(size, QImage::Format_MonoLSB);
+		if (_decolor) {
+			QImage image(size, QImage::Format_RGB32);
+			QImage pixmap(size, QImage::Format_MonoLSB);
 
-		const int w = image.width(), h = image.height();
-		const int npixels = w * h;
-		QScopedArrayPointer<qreal> greys(new qreal[npixels]);
+			const int w = image.width(), h = image.height();
+			const int npixels = w * h;
+			QScopedArrayPointer<qreal> greys(new qreal[npixels]);
 
-		{
-			QPainter p(&image);
-			_mapData->paint(&p, option);
-		}
-
-		// Convert to a bitmap using some ad-hoc ugly algorithm...
-		qreal sum = 0;
-		for (int y = 0; y < h; y++) {
-			QRgb *l = reinterpret_cast<QRgb*>(image.scanLine(y));
-			for (int x = 0; x < w; x++) {
-				const int r = qRed(l[x]), g = qGreen(l[x]), b = qBlue(l[x]);
-				const qreal grey = r * 0.299f + g * 0.587f + b * 0.114f;
-
-				greys[y * w + x] = grey;
-
-				sum += grey;
+			{
+				QPainter p(&image);
+				_mapData->paint(&p, option);
 			}
-		}
 
-		const qreal avg = sum / npixels;
-		const qreal thr = avg * 0.9;
+			// Convert to a bitmap using some ad-hoc ugly algorithm...
+			qreal sum = 0;
+			for (int y = 0; y < h; y++) {
+				QRgb *l = reinterpret_cast<QRgb*>(image.scanLine(y));
+				for (int x = 0; x < w; x++) {
+					const int r = qRed(l[x]), g = qGreen(l[x]), b = qBlue(l[x]);
+					const qreal grey = r * 0.299f + g * 0.587f + b * 0.114f;
 
-		for (int y = 0; y < h; y++) {
-			for (int x = 0; x < w; x++) {
-				// TODO: Optimize
-				pixmap.setPixel(x, y, greys[y * w + x] >= thr ? Qt::color1 : Qt::color0);
+					greys[y * w + x] = grey;
+
+					sum += grey;
+				}
 			}
-		}
 
-		// And render into the watch
-		painter->drawImage(0, 0, pixmap);
+			const qreal avg = sum / npixels;
+			const qreal thr = avg * 0.9;
+
+			for (int y = 0; y < h; y++) {
+				for (int x = 0; x < w; x++) {
+					// TODO: Optimize
+					pixmap.setPixel(x, y, greys[y * w + x] >= thr ? Qt::color1 : Qt::color0);
+				}
+			}
+
+			// And render into the watch
+			painter->drawImage(0, 0, pixmap);
+		} else {
+			_mapData->paint(painter, option);
+		}
 
 		// Now render the arrow indicator
 		const int centerX = size.width() / 2, centerY = size.height() / 2;
