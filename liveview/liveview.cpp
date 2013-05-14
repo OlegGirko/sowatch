@@ -54,9 +54,9 @@ int LiveView::metric(PaintDeviceMetric metric) const
 	case PdmHeightMM:
 		return 24;
 	case PdmNumColors:
-		return 65536;
+		return 256;
 	case PdmDepth:
-		return 16;
+		return 8;
 	case PdmDpiX:
 	case PdmPhysicalDpiX:
 		return 136;
@@ -167,7 +167,8 @@ QImage* LiveView::image()
 
 void LiveView::renderImage(int x, int y, const QImage &image)
 {
-	QByteArray data = encodeImage(image);
+	qDebug() << "Rendering image at" << x << 'x' << y << "of size" << image.size();
+	QByteArray data = encodeImage(image.copy(0,0,64,64));
 	if (!data.isEmpty()) {
 		displayBitmap(x, y, data);
 	}
@@ -226,7 +227,7 @@ QByteArray LiveView::encodeImage(const QImage& image) const
 {
 	QBuffer buffer;
 	buffer.open(QIODevice::WriteOnly);
-	if (image.save(&buffer, "PNG")) {
+	if (image.save(&buffer, "PNG", 0)) {
 		return buffer.buffer();
 	} else {
 		qWarning() << "Failed to encode image";
@@ -286,6 +287,7 @@ void LiveView::displayBitmap(unsigned char x, unsigned char y, const QByteArray 
 	data[1] = y;
 	data[2] = 1; // TODO Figure out what this is. Maybe format?
 	data.append(image);
+	qDebug() << "Trying to send" << image.size() << "bytes";
 	send(Message(DisplayBitmap, data));
 }
 

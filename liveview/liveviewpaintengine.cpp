@@ -21,9 +21,17 @@ bool LiveViewPaintEngine::end()
 	bool ret = WatchPaintEngine::end();
 	if (ret) {
 		QRect rect = _damaged.boundingRect();
-		if (!rect.isEmpty()) {
-			QImage sub_image = _watch->image()->copy(rect);
-			_watch->renderImage(rect.x(), rect.y(), sub_image);
+
+		const int tile_size = 64;
+		// Have to make tiles
+		for (int x = rect.left(); x < rect.right(); x += tile_size) {
+			for (int y = rect.top(); y < rect.bottom(); y += tile_size) {
+				QRect tile(x, y,
+						   qMin(x + tile_size, rect.right()),
+						   qMin(y + tile_size, rect.bottom()));
+				QImage sub_image = _watch->image()->copy(tile);
+				_watch->renderImage(tile.x(), tile.y(), sub_image);
+			}
 		}
 	}
 	return ret;
@@ -35,7 +43,7 @@ void LiveViewPaintEngine::drawRects(const QRectF *rects, int rectCount)
 	for (i = 0; i < rectCount; i++) {
 		const QRectF& r = rects[i];
 		if (_hasBrush && fillsEntireImage(r.toRect()) && _isBrushBlack) {
-			//_watch->clear();
+			_watch->clear();
 			_damaged = QRegion();
 			continue;
 		}
@@ -58,7 +66,7 @@ void LiveViewPaintEngine::drawRects(const QRect *rects, int rectCount)
 	for (i = 0; i < rectCount; i++) {
 		const QRect& r = rects[i];
 		if (_hasBrush && fillsEntireImage(r) && _isBrushBlack) {
-			//_watch->clear();
+			_watch->clear();
 			_damaged = QRegion();
 			continue;
 		}

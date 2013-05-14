@@ -11,7 +11,8 @@ SOURCES += qmapwatchletplugin.cpp qmapwatchlet.cpp mapview.cpp \
 HEADERS += qmapwatchletplugin.h qmapwatchlet.h mapview.h \
     compasswatchlet.h compassview.h
 
-qml_files.files = map-metawatch-digital.qml map-icon.png arrow.png \
+qml_files.files = map-metawatch-digital.qml map-liveview.qml \
+	map-icon.png map-metawatch-digital-icon.png map-liveview-icon.png arrow.png \
 	compass-metawatch-digital.qml compass-icon.png compass.png
 
 LIBS += -L$$OUT_PWD/../libsowatch/ -lsowatch
