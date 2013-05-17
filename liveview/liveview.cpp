@@ -418,6 +418,21 @@ void LiveView::handleNavigation(const Message &msg)
 	qDebug() << "navigation" << event << item_id << menu_id;
 
 	switch (event) {
+	case UpPress:
+		emit buttonPressed(1);
+		break;
+	case DownPress:
+		emit buttonPressed(2);
+		break;
+	case LeftPress:
+		emit buttonPressed(3);
+		break;
+	case RightPress:
+		emit buttonPressed(4);
+		break;
+	case SelectPress:
+		emit buttonPressed(0);
+		break;
 	case SelectLongPress:
 		if (_mode == ApplicationMode) {
 			sendResponse(NavigationResponse, ResponseCancel);

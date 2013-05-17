@@ -51,7 +51,7 @@ public:
 	void clear();
 
 protected:
-	static const int DelayBetweenMessages = 5;
+	static const int DelayBetweenMessages = 10;
 
 	enum MessageType {
 		NoMessage = 0,
@@ -106,6 +106,10 @@ protected:
 	};
 
 	enum NavigationEvent {
+		UpPress = 1,
+		DownPress = 4,
+		LeftPress = 7,
+		RightPress = 10,
 		SelectPress = 13,
 		SelectLongPress = 14,
 		SelectDoublePress = 15,
