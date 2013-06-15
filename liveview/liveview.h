@@ -42,6 +42,9 @@ public:
 	void vibrate(int msecs);
 
 	void setWatchletsModel(WatchletsModel *model);
+	void setNotificationsModel(NotificationsModel *model);
+
+	static const int MaxBitmapSize;
 
 	// Only for application mode
 	QImage* image();
@@ -51,7 +54,7 @@ public:
 	void clear();
 
 protected:
-	static const int DelayBetweenMessages = 10;
+	static const int DelayBetweenMessages = 200;
 
 	enum MessageType {
 		NoMessage = 0,
@@ -102,7 +105,8 @@ protected:
 
 	enum Mode {
 		RootMenuMode = 0,
-		ApplicationMode
+		ApplicationMode,
+		NotificationListMode
 	};
 
 	enum NavigationEvent {
@@ -116,6 +120,14 @@ protected:
 		SelectMenu = 32
 	};
 
+	enum NotificationAction {
+		NotificationShowCurrent = 0,
+		NotificationShowFirst = 1,
+		NotificationShowLast = 2,
+		NotificationShowNext = 3,
+		NotificationShowPrev = 4
+	};
+
 	struct Message {
 		MessageType type;
 		QByteArray data;
@@ -124,24 +136,40 @@ protected:
 		{ }
 	};
 
+	struct RootMenuNotificationItem {
+		QByteArray icon;
+		QString title;
+		QList<Notification::Type> notificationTypes;
+	};
+
 	struct RootMenuItem {
 		MenuItemType type;
 		QByteArray icon;
 		QString title;
 		int unread;
 		QString watchletId;
+		const RootMenuNotificationItem *notificationItem;
 	};
+
+	static QMap<MessageType, MessageType> _ackMap;
+	static void initializeAckMap();
+	static MessageType ackForMessage(MessageType type);
+
+	static QList<RootMenuNotificationItem> _rootNotificationItems;
+	static void initializeRootNotificationItems();
 
 	void setupBluetoothWatch();
 	void desetupBluetoothWatch();
 
+
+	void recreateNotificationsMenu();
 	/** Recreate the device menu (after watchlets change) */
 	void recreateWatchletsMenu();
 	/** Update the device menu (after a power on, etc.) */
 	void refreshMenu();
 
-	QByteArray encodeImage(const QImage& image) const;
-	QByteArray encodeImage(const QUrl& url) const;
+	static QByteArray encodeImage(const QImage& image);
+	static QByteArray encodeImage(const QUrl& url);
 
 protected:
 	void send(const Message& msg);
@@ -153,6 +181,7 @@ protected:
 	void displayClear();
 	void setMenuSize(unsigned char size);
 	void sendMenuItem(unsigned char id, MenuItemType type, unsigned short unread, const QString& text, const QByteArray& image);
+	void sendNotification(unsigned short id, unsigned short unread, unsigned short count, const QString& date, const QString& header, const QString& body, const QByteArray& image);
 	void enableLed(const QColor& color, unsigned short delay, unsigned short time);
 
 	void handleMessage(const Message& msg);
@@ -165,14 +194,18 @@ protected:
 	void handleDisplayProperties(const Message& msg);
 	void handleSoftwareVersion(const Message& msg);
 
+private:
+	void sendMessageFromQueue();
+
 private slots:
 	void handleDataReceived();
-	void handleSendTimerTick();
 	void handleWatchletsChanged();
+	void handleNotificationsChanged();
 
 private:
 	ConfigKey *_settings;
 	WatchletsModel *_watchlets;
+	NotificationsModel *_notifications;
 
 	bool _24hMode : 1;
 
@@ -181,6 +214,7 @@ private:
 	QStringList _buttons;
 
 	Mode _mode;
+	int _curNotificationIndex;
 
 	// Required by QPaintDevice
 	mutable LiveViewPaintEngine* _paintEngine;
@@ -190,9 +224,9 @@ private:
 	/** Keeps the index of the first watchlet. */
 	int _rootMenuFirstWatchlet;
 
-	/** Message outbox queue. */
+	/** Outgoing message queue. */
 	QQueue<Message> _sendingMsgs;
-	QTimer* _sendTimer;
+	MessageType _waitingForAck;
 	/** Incomplete message that is being received. */
 	Message _receivingMsg;
 };

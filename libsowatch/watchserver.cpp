@@ -32,6 +32,7 @@ WatchServer::WatchServer(Watch* watch, QObject* parent) :
 
 	_watchlets->setWatchModel(_watch->model());
 	_watch->setWatchletsModel(_watchlets);
+	_watch->setNotificationsModel(_notifications);
 }
 
 Watch* WatchServer::watch()
@@ -242,7 +243,7 @@ void WatchServer::closeWatchlet()
 			deactivateActiveWatchlet();
 		}
 		_currentWatchlet = 0;
-		if (_watch->isConnected() && _pendingNotifications.empty()) {
+		if (_watch->isConnected()) {
 			goToIdle();
 		}
 	}

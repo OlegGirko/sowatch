@@ -22,13 +22,13 @@ bool LiveViewPaintEngine::end()
 	if (ret) {
 		QRect rect = _damaged.boundingRect();
 
-		const int tile_size = 64;
+		const int tile_size = LiveView::MaxBitmapSize;
 		// Have to make tiles
 		for (int x = rect.left(); x < rect.right(); x += tile_size) {
 			for (int y = rect.top(); y < rect.bottom(); y += tile_size) {
 				QRect tile(x, y,
-						   qMin(x + tile_size, rect.right()),
-						   qMin(y + tile_size, rect.bottom()));
+						   qMin(tile_size, rect.width()),
+						   qMin(tile_size, rect.height()));
 				QImage sub_image = _watch->image()->copy(tile);
 				_watch->renderImage(tile.x(), tile.y(), sub_image);
 			}

@@ -30,7 +30,7 @@ TestNotificationProvider::~TestNotificationProvider()
 
 void TestNotificationProvider::generateInitialNotification()
 {
-	TestNotification *n = new TestNotification(Notification::EmailNotification,
+	TestNotification *n = new TestNotification(Notification::MissedCallNotification,
 	                                           "A friend",
 	                                           "This is a test email notification");
 	emit incomingNotification(n);

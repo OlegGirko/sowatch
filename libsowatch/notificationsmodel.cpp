@@ -22,17 +22,13 @@ NotificationsModel::NotificationsModel(QObject *parent) :
 
 int NotificationsModel::rowCount(const QModelIndex &parent) const
 {
-	int count = 0;
 	Q_UNUSED(parent);
-	FOREACH_TYPE(type) {
-		count += _list[type].count();
-	}
-	return count;
+	return size();
 }
 
 QVariant NotificationsModel::data(const QModelIndex &index, int role) const
 {
-	const Notification *n = getNotificationByIndex(index.row());
+	const Notification *n = at(index.row());
 	if (!n) return QVariant();
 	switch (role) {
 	case Qt::DisplayRole:
@@ -45,6 +41,63 @@ QVariant NotificationsModel::data(const QModelIndex &index, int role) const
 		return QVariant::fromValue(n->count());
 	}
 	return QVariant();
+}
+
+int NotificationsModel::size() const
+{
+	int count = 0;
+	FOREACH_TYPE(type) {
+		count += _list[type].count();
+	}
+	return count;
+}
+
+int NotificationsModel::size(const QList<Notification::Type>& types) const
+{
+	int count = 0;
+	foreach(Notification::Type type, types) {
+		count += _list[type].count();
+	}
+	return count;
+}
+
+Notification * NotificationsModel::at(int position) const
+{
+	FOREACH_TYPE(type) {
+		const int size = _list[type].size();
+		if (position < size) {
+			return _list[type].at(position);
+		} else {
+			position -= size;
+		}
+	}
+	qWarning() << "Notification with index" << position << "not found";
+	return 0;
+}
+
+Notification * NotificationsModel::at(Notification::Type type, int position) const
+{
+	const int size = _list[type].size();
+	if (position < size) {
+		return _list[type].at(position);
+	} else {
+		qWarning() << "Notification with index" << position << "not found";
+		return 0;
+	}
+}
+
+Notification * NotificationsModel::at(const QList<Notification::Type>& types, int position) const
+{
+	foreach(Notification::Type type, types) {
+		const int size = _list[type].size();
+		if (position < size) {
+			return _list[type].at(position);
+		} else {
+			position -= size;
+		}
+	}
+	qWarning() << "Notification with index" << position << "not found";
+	return 0;
 }
 
 void NotificationsModel::add(Notification *n)
@@ -81,6 +134,17 @@ void NotificationsModel::remove(Notification::Type type, Notification *n)
 	endRemoveRows();
 
 	emit modelChanged();
+}
+
+int NotificationsModel::countByType(Notification::Type type) const
+{
+	int count = 0;
+	Q_FOREACH(const Notification *n, _list[type]) {
+		if (n->priority() != Notification::Silent) {
+			count++;
+		}
+	}
+	return count;
 }
 
 int NotificationsModel::fullCount() const
@@ -158,20 +222,6 @@ int NotificationsModel::getIndexForNotification(Notification *n) const
 	Q_ASSERT(subindex >= 0);
 
 	return getOffsetForType(type) + subindex;
-}
-
-const Notification * NotificationsModel::getNotificationByIndex(int index) const
-{
-	FOREACH_TYPE(type) {
-		const int size = _list[type].size();
-		if (index < size) {
-			return _list[type].at(index);
-		} else {
-			index -= size;
-		}
-	}
-	qWarning() << "Notification with index" << index << "not found";
-	return 0;
 }
 
 void NotificationsModel::handleNotificationChanged()

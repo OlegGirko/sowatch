@@ -8,21 +8,24 @@ QTM_USE_NAMESPACE
 
 #define PROTOCOL_DEBUG 1
 
+const int LiveView::MaxBitmapSize = 64;
+QMap<LiveView::MessageType, LiveView::MessageType> LiveView::_ackMap;
+QList<LiveView::RootMenuNotificationItem> LiveView::_rootNotificationItems;
+
 LiveView::LiveView(ConfigKey* settings, QObject* parent) :
 	BluetoothWatch(QBluetoothAddress(settings->value("address").toString()), parent),
 	_settings(settings->getSubkey(QString(), this)),
-    _watchlets(0),
+    _watchlets(0), _notifications(0),
     _24hMode(settings->value("24h-mode", false).toBool()),
     _screenWidth(0), _screenHeight(0),
     _mode(RootMenuMode),
     _paintEngine(0),
     _rootMenuFirstWatchlet(0),
-    _sendTimer(new QTimer(this))
+    _waitingForAck(NoMessage)
 {
-	_sendTimer->setInterval(DelayBetweenMessages);
-	connect(_sendTimer, SIGNAL(timeout()), SLOT(handleSendTimerTick()));
-
+	initializeAckMap();
 	_buttons << "Select" << "Up" << "Down" << "Left" << "Right";
+	initializeRootNotificationItems();
 }
 
 LiveView::~LiveView()
@@ -82,7 +85,7 @@ bool LiveView::busy() const
 {
 	return !_connected ||
 			_socket->state() != QBluetoothSocket::ConnectedState ||
-			_sendingMsgs.size() > 20;
+			_sendingMsgs.size() > 1;
 }
 
 void LiveView::setDateTime(const QDateTime& dateTime)
@@ -126,6 +129,7 @@ bool LiveView::charging() const
 
 void LiveView::displayIdleScreen()
 {
+	qDebug() << "LiveView display idle screen (cur mode=" << _mode << ")";
 	if (_mode != RootMenuMode) {
 		_mode = RootMenuMode;
 		refreshMenu();
@@ -134,7 +138,7 @@ void LiveView::displayIdleScreen()
 
 void LiveView::displayNotification(Notification *notification)
 {
-
+	qDebug() << "LiveView display notification" << notification->title();
 }
 
 void LiveView::displayApplication()
@@ -160,6 +164,19 @@ void LiveView::setWatchletsModel(WatchletsModel *model)
 	}
 }
 
+void LiveView::setNotificationsModel(NotificationsModel *model)
+{
+	qDebug() << Q_FUNC_INFO;
+	if (_notifications) {
+		disconnect(_notifications, 0, this, 0);
+	}
+	_notifications = model;
+	if (_notifications) {
+		connect(_notifications, SIGNAL(modelChanged()), SLOT(handleNotificationsChanged()));
+		handleNotificationsChanged();
+	}
+}
+
 QImage* LiveView::image()
 {
 	return &_image;
@@ -167,11 +184,25 @@ QImage* LiveView::image()
 
 void LiveView::renderImage(int x, int y, const QImage &image)
 {
+	const QSize image_size = image.size();
 	qDebug() << "Rendering image at" << x << 'x' << y << "of size" << image.size();
-	QByteArray data = encodeImage(image.copy(0,0,64,64));
-	if (!data.isEmpty()) {
-		displayBitmap(x, y, data);
+	QByteArray data;
+	if (image.size().isEmpty()) {
+		return; // Empty image
 	}
+
+	if (image_size.width() > MaxBitmapSize || image_size.height() > MaxBitmapSize) {
+		const QRect new_size(0, 0,
+		                     qMin(MaxBitmapSize, image_size.width()),
+		                     qMin(MaxBitmapSize, image_size.height()));
+		data = encodeImage(image.copy(new_size));
+	} else {
+		data = encodeImage(image);
+	}
+
+	Q_ASSERT(!data.isEmpty());
+
+	displayBitmap(x, y, data);
 }
 
 void LiveView::clear()
@@ -179,9 +210,53 @@ void LiveView::clear()
 	displayClear();
 }
 
+void LiveView::initializeAckMap()
+{
+	if (_ackMap.empty()) {
+		_ackMap[GetDisplayProperties] = GetDisplayPropertiesResponse;
+		_ackMap[DeviceStatusChange] = DeviceStatusChangeResponse;
+		_ackMap[DisplayBitmap] = DisplayBitmapResponse;
+		_ackMap[DisplayClear] = DisplayClearResponse;
+		//_ackMap[SetMenuSize] = SetMenuSizeResponse; // fw does not send this, for some reason.
+		_ackMap[EnableLed] = EnableLedResponse;
+	}
+}
+
+LiveView::MessageType LiveView::ackForMessage(MessageType type)
+{
+	QMap<MessageType, MessageType>::const_iterator i = _ackMap.constFind(type);
+	if (i != _ackMap.constEnd()) {
+		return i.value();
+	}
+	return NoMessage;
+}
+
+void LiveView::initializeRootNotificationItems()
+{
+	if (_rootNotificationItems.empty()) {
+		RootMenuNotificationItem item;
+		item.icon = encodeImage(QUrl::fromLocalFile(SOWATCH_RESOURCES_DIR "/liveview/graphics/menu_missed_calls.png"));
+		item.title = tr("Missed calls");
+		item.notificationTypes.append(Notification::MissedCallNotification);
+		_rootNotificationItems.append(item);
+
+		item.icon = encodeImage(QUrl::fromLocalFile(SOWATCH_RESOURCES_DIR "/liveview/graphics/menu_notifications.png"));
+		item.title = tr("Events");
+		// All other notifications
+		item.notificationTypes.append(Notification::OtherNotification);
+		item.notificationTypes.append(Notification::SmsNotification);
+		item.notificationTypes.append(Notification::MmsNotification);
+		item.notificationTypes.append(Notification::ImNotification);
+		item.notificationTypes.append(Notification::EmailNotification);
+		item.notificationTypes.append(Notification::CalendarNotification);
+		_rootNotificationItems.append(item);
+	}
+}
+
 void LiveView::setupBluetoothWatch()
 {
 	_mode = RootMenuMode;
+	_waitingForAck = NoMessage;
 
 	connect(_socket, SIGNAL(readyRead()), SLOT(handleDataReceived()));
 	updateDisplayProperties();
@@ -190,8 +265,36 @@ void LiveView::setupBluetoothWatch()
 
 void LiveView::desetupBluetoothWatch()
 {
-	_sendTimer->stop();
 	_sendingMsgs.clear();
+}
+
+void LiveView::recreateNotificationsMenu()
+{
+	// Erase all current notifications from the menu
+	QList<RootMenuItem>::iterator it = _rootMenu.begin();
+	it += _rootMenuFirstWatchlet;
+	_rootMenu.erase(_rootMenu.begin(), it);
+
+	_rootMenuFirstWatchlet = 0;
+
+	if (_notifications) {
+		foreach (const RootMenuNotificationItem& nitem, _rootNotificationItems) {
+			int count = 0;
+			foreach (Notification::Type type, nitem.notificationTypes) {
+				count += _notifications->countByType(type);
+			}
+			if (count > 0) {
+				RootMenuItem item;
+				item.type = MenuNotificationList;
+				item.title = nitem.title;
+				item.icon = nitem.icon;
+				item.unread = count;
+				item.notificationItem = &nitem;
+				_rootMenu.insert(_rootMenuFirstWatchlet, item);
+				_rootMenuFirstWatchlet++;
+			}
+		}
+	}
 }
 
 void LiveView::recreateWatchletsMenu()
@@ -208,6 +311,9 @@ void LiveView::recreateWatchletsMenu()
 			QModelIndex index = _watchlets->index(i);
 			item.type = MenuOther;
 			item.title = _watchlets->data(index, WatchletsModel::TitleRole).toString();
+			if (item.title.isEmpty()) {
+				qWarning() << "Watchlet" << _watchlets->at(i)->id() << "without title";
+			}
 			item.icon = encodeImage(_watchlets->data(index, WatchletsModel::IconRole).toUrl());
 			item.unread = 0;
 			item.watchletId = _watchlets->at(i)->id();
@@ -223,7 +329,7 @@ void LiveView::refreshMenu()
 	}
 }
 
-QByteArray LiveView::encodeImage(const QImage& image) const
+QByteArray LiveView::encodeImage(const QImage& image)
 {
 	QBuffer buffer;
 	buffer.open(QIODevice::WriteOnly);
@@ -235,7 +341,7 @@ QByteArray LiveView::encodeImage(const QImage& image) const
 	}
 }
 
-QByteArray LiveView::encodeImage(const QUrl& url) const
+QByteArray LiveView::encodeImage(const QUrl& url)
 {
 	if (url.encodedPath().endsWith(".png")) {
 		// Just load the image
@@ -257,8 +363,10 @@ void LiveView::send(const Message &msg)
 {
 	Q_ASSERT(_connected);
 	_sendingMsgs.enqueue(msg);
-	if (!_sendTimer->isActive()) {
-		_sendTimer->start();
+	if (_waitingForAck == NoMessage) {
+		sendMessageFromQueue();
+	} else {
+		qDebug() << "Enqueing message while waiting for ack" << _waitingForAck;
 	}
 }
 
@@ -323,6 +431,36 @@ void LiveView::sendMenuItem(unsigned char id, MenuItemType type, unsigned short 
 	send(Message(MenuItemResponse, data));
 }
 
+void LiveView::sendNotification(unsigned short id, unsigned short unread, unsigned short count, const QString &date, const QString &header, const QString &body, const QByteArray &image)
+{
+	QByteArray data;
+	QDataStream ds(&data, QIODevice::WriteOnly);
+
+	ds << quint8(0); // Unknown
+	ds << quint16(count);
+	ds << quint16(unread);
+	ds << quint16(id);
+	ds << quint8(0) << quint8(0); // Unknown
+
+	QByteArray str = date.toLatin1();
+	ds << quint16(str.length());
+	ds.writeRawData(str.constData(), str.length());
+
+	str = header.toLatin1();
+	ds << quint16(str.length());
+	ds.writeRawData(str.constData(), str.length());
+
+	str = body.toLatin1();
+	ds << quint16(str.length());
+	ds.writeRawData(str.constData(), str.length());
+
+	ds << quint8(0) << quint8(0) << quint8(0); // Unknown
+	ds << quint16(image.length());
+	ds.writeRawData(image.constData(), image.size());
+
+	send(Message(NotificationResponse, data));
+}
+
 void LiveView::enableLed(const QColor& color, unsigned short delay, unsigned short time)
 {
 	QByteArray data;
@@ -345,6 +483,11 @@ void LiveView::enableLed(const QColor& color, unsigned short delay, unsigned sho
 void LiveView::handleMessage(const Message &msg)
 {
 	send(Message(Ack, QByteArray(1, msg.type)));
+	if (msg.type == _waitingForAck) {
+		qDebug() << "Got ack to" << _waitingForAck;
+		_waitingForAck = NoMessage;
+		sendMessageFromQueue();
+	}
 	switch (msg.type) {
 	case DeviceStatusChange:
 		handleDeviceStatusChange(msg);
@@ -400,8 +543,79 @@ void LiveView::handleMenuItemRequest(const Message &msg)
 
 void LiveView::handleNotificationRequest(const Message &msg)
 {
-	// TODO
-	sendResponse(NotificationResponse, ResponseError); // TODO Crashes the watch
+	if (msg.data.size() < 4) {
+		// Packet too small
+		sendResponse(NotificationResponse, ResponseError);
+		return;
+	}
+
+	int menu_id = static_cast<unsigned char>(msg.data[0]);
+	NotificationAction action = static_cast<NotificationAction>(msg.data[1]);
+	unsigned int max_size = static_cast<unsigned char>(msg.data[2]) << 8;
+	max_size |= static_cast<unsigned char>(msg.data[3]);
+	qDebug() << "notification rq" << action << menu_id << "(" << max_size << ")";
+
+	if (menu_id >= _rootMenu.size()) {
+		sendNotification(0, 0, 0, "", "", "", QByteArray());
+		return;
+	}
+
+	const RootMenuNotificationItem *notification_item = _rootMenu[menu_id].notificationItem;
+	if (!notification_item) {
+		sendNotification(0, 0, 0, "", "", "", QByteArray());
+		return;
+	}
+
+	const QList<Notification::Type> &notification_types = notification_item->notificationTypes;
+	const int num_notifications = _notifications->size(notification_types);
+
+	if (_mode != NotificationListMode) {
+		_mode = NotificationListMode;
+		_curNotificationIndex = 0;
+	}
+
+	switch (action) {
+	case NotificationShowFirst:
+		_curNotificationIndex = 0;
+		break;
+	case NotificationShowLast:
+		_curNotificationIndex = num_notifications - 1;
+		break;
+	case NotificationShowPrev:
+		if (_curNotificationIndex > 0) {
+			_curNotificationIndex--;
+		} else {
+			_curNotificationIndex = 0;
+		}
+		break;
+	case NotificationShowNext:
+		if (_curNotificationIndex < num_notifications - 1) {
+			_curNotificationIndex++;
+		} else {
+			_curNotificationIndex = num_notifications - 1;
+		}
+		break;
+	case NotificationShowCurrent:
+		if (_curNotificationIndex >= num_notifications - 1 ||
+		        _curNotificationIndex < 0) {
+			_curNotificationIndex = 0;
+		}
+		break;
+	}
+
+	const Notification *notification = _notifications->at(notification_types,
+	                                                      _curNotificationIndex);
+	if (!notification) {
+		sendNotification(_curNotificationIndex, num_notifications, num_notifications,
+		                 "", "", "", QByteArray());
+		return;
+	}
+
+	sendNotification(_curNotificationIndex, num_notifications, num_notifications,
+	                 notification->dateTime().toString(Qt::SystemLocaleShortDate),
+	                 notification->title(),
+	                 notification->body(),
+	                 QByteArray());
 }
 
 void LiveView::handleNavigation(const Message &msg)
@@ -438,6 +652,10 @@ void LiveView::handleNavigation(const Message &msg)
 			sendResponse(NavigationResponse, ResponseCancel);
 			emit closeWatchledRequested();
 			return;
+		} else if (_mode == NotificationListMode) {
+			sendResponse(NavigationResponse, ResponseCancel);
+			_mode = RootMenuMode;
+			return;
 		}
 		break;
 	case SelectMenu:
@@ -446,7 +664,7 @@ void LiveView::handleNavigation(const Message &msg)
 
 			switch(_rootMenu[item_id].type) {
 			case MenuNotificationList:
-				Q_ASSERT(false); // TODO
+				// This should not happen!
 				break;
 			case MenuOther:
 				emit watchletRequested(_rootMenu[item_id].watchletId);
@@ -467,9 +685,12 @@ void LiveView::handleNavigation(const Message &msg)
 void LiveView::handleMenuItemsRequest(const Message &msg)
 {
 	qDebug() << "Sending menu items";
+	if (_mode == NotificationListMode) {
+		_mode = RootMenuMode; // Switch to the root menu
+	}
 	if (_mode == RootMenuMode) {
 		for (int i = 0; i < _rootMenu.size(); i++) {
-			qDebug() << "Sending one menu item";
+			qDebug() << "Sending one menu item" << _rootMenu[i].title;
 			sendMenuItem(i, _rootMenu[i].type, _rootMenu[i].unread,
 			                _rootMenu[i].title, _rootMenu[i].icon);
 		}
@@ -520,6 +741,43 @@ void LiveView::handleSoftwareVersion(const Message &msg)
 {
 	qDebug() << "LiveView software version is"
 	         << QString::fromAscii(msg.data.constData(), msg.data.size());
+}
+
+
+void LiveView::sendMessageFromQueue()
+{
+	static const int HEADER_SIZE = 6;
+	Q_ASSERT(_waitingForAck == NoMessage);
+
+	// If there are packets to be sent...
+	while (!_sendingMsgs.empty()) {
+		// Send a message to the watch
+		Message msg = _sendingMsgs.dequeue();
+		const quint32 data_size = msg.data.size();
+		QByteArray packet;
+
+		Q_ASSERT(_connected && _socket);
+
+		packet.resize(HEADER_SIZE + data_size);
+		packet[0] = msg.type;
+		packet[1] = HEADER_SIZE - 2;
+		packet[2] = (data_size & 0xFF000000U) >> 24;
+		packet[3] = (data_size & 0x00FF0000U) >> 16;
+		packet[4] = (data_size & 0x0000FF00U) >>  8;
+		packet[5] = (data_size & 0x000000FFU);
+		packet.replace(HEADER_SIZE, data_size, msg.data);
+
+#if PROTOCOL_DEBUG
+		qDebug() << "sending" << msg.type << packet.mid(6, 24).toHex();
+#endif
+
+		_socket->write(packet);
+
+		_waitingForAck = ackForMessage(msg.type);
+		if (_waitingForAck != NoMessage) {
+			break; // Wait for that ack before sending more messages.
+		}
+	}
 }
 
 void LiveView::handleDataReceived()
@@ -597,48 +855,17 @@ void LiveView::handleDataReceived()
 	} while (_socket->bytesAvailable() > 0);
 }
 
-void LiveView::handleSendTimerTick()
-{
-	static const int HEADER_SIZE = 6;
-
-	// If there are packets to be sent...
-	if (!_sendingMsgs.empty()) {
-		// Send a message to the watch
-		Message msg = _sendingMsgs.dequeue();
-		const quint32 data_size = msg.data.size();
-		QByteArray packet;
-
-		Q_ASSERT(_connected && _socket);
-
-		packet.resize(HEADER_SIZE + data_size);
-		packet[0] = msg.type;
-		packet[1] = HEADER_SIZE - 2;
-		packet[2] = (data_size & 0xFF000000U) >> 24;
-		packet[3] = (data_size & 0x00FF0000U) >> 16;
-		packet[4] = (data_size & 0x0000FF00U) >>  8;
-		packet[5] = (data_size & 0x000000FFU);
-		packet.replace(HEADER_SIZE, data_size, msg.data);
-
-#if PROTOCOL_DEBUG
-		if (packet.size() < 20) {
-			qDebug() << "sending" << packet.toHex();
-		} else {
-			qDebug() << "sending" << packet.left(20).toHex() << "...";
-		}
-#endif
-
-		_socket->write(packet);
-	}
-	// If we just finished sending all packets...
-	if (_sendingMsgs.empty()) {
-		// Stop the send timer to save battery
-		_sendTimer->stop();
-	}
-}
-
 void LiveView::handleWatchletsChanged()
 {
 	recreateWatchletsMenu();
+	if (_connected) {
+		refreshMenu();
+	}
+}
+
+void LiveView::handleNotificationsChanged()
+{
+	recreateNotificationsMenu();
 	if (_connected) {
 		refreshMenu();
 	}

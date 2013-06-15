@@ -24,9 +24,17 @@ public:
 	int rowCount(const QModelIndex &parent) const;
 	QVariant data(const QModelIndex &index, int role) const;
 
+	int size() const;
+	int size(const QList<Notification::Type>& types) const;
+	Notification* at(int position) const;
+	Notification* at(Notification::Type type, int position) const;
+	Notification* at(const QList<Notification::Type>& types, int position) const;
+
 	void add(Notification *n);
 	void remove(Notification *n);
 	void remove(Notification::Type type, Notification *n);
+
+	Q_INVOKABLE int countByType(Notification::Type type) const;
 
 	Q_INVOKABLE int fullCount() const;
 	Q_INVOKABLE int fullCountByType(Notification::Type type) const;
@@ -44,7 +52,6 @@ private:
 	int getOffsetForType(Notification::Type type) const;
 	int getAppendOffsetForType(Notification::Type type) const;
 	int getIndexForNotification(Notification *n) const;
-	const Notification* getNotificationByIndex(int index) const;
 
 private slots:
 	void handleNotificationChanged();
