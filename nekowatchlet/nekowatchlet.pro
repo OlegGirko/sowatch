@@ -26,6 +26,3 @@ unix:!symbian {
 	}
 	INSTALLS += target qml_files
 }
-
-OTHER_FILES += \
-    liveview.qml

@@ -8,7 +8,7 @@ SOURCES += qorgwatchletplugin.cpp qorgwatchlet.cpp
 
 HEADERS += qorgwatchletplugin.h qorgwatchlet.h
 
-qml_files.files = metawatch-digital.qml icon.png
+qml_files.files = metawatch-digital.qml icon.png metawatch-digital-icon.png liveview-icon.png
 
 LIBS += -L$$OUT_PWD/../libsowatch/ -lsowatch
 
