@@ -33,11 +33,11 @@ DEPENDPATH += $$PWD/../libsowatchbt
 !isEmpty(MEEGO_VERSION_MAJOR)|maemo5 {
 	QMAKE_RPATHDIR += /opt/sowatch/lib
 	target.path = /opt/sowatch/lib/drivers
-	res_files.path = /opt/sowatch/share/metawatch
+	res_files.path = /opt/sowatch/share/liveview
 	qml_files.path = /opt/sowatch/qml
 } else {
 	target.path = /usr/lib/sowatch/drivers
-	res_files.path = /usr/share/sowatch/metawatch
+	res_files.path = /usr/share/sowatch/liveview
 	qml_files.path = /usr/share/sowatch/qml
 }
 INSTALLS += target res_files
