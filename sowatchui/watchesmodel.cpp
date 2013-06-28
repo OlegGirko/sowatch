@@ -102,9 +102,23 @@ void WatchesModel::addFoundWatch(const QVariantMap &info)
 	}
 
 	// Set some defaults
+	const QString watchModel = info["model"].toString();
 	Registry *registry = Registry::registry();
+
 	newkey->set("providers", registry->allNotificationProviders());
-	newkey->set("watchlets", registry->allWatchlets());
+
+	QStringList allWatchlets = registry->allWatchlets();
+	QStringList configuredWatchlets;
+	foreach(const QString& watchletId, allWatchlets) {
+		WatchletPluginInterface *plugin = registry->getWatchletPlugin(watchletId);
+		if (plugin) {
+			WatchletPluginInterface::WatchletInfo info = plugin->describeWatchlet(watchletId, watchModel);
+			if (info.visible) {
+				configuredWatchlets += watchletId;
+			}
+		}
+	}
+	newkey->set("watchlets", configuredWatchlets);
 
 	// Now add to the watches list
 	QStringList active = _watches_list->value().toStringList();

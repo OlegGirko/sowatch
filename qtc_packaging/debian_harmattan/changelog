@@ -1,3 +1,9 @@
+sowatch (0.5.1) unstable; urgency=low
+
+  * Fix issues with MW configuration crashing.
+
+ -- Javier S. Pedro <maemo@javispedro.com>  Fri, 28 Jun 2013 15:40:46 +0200
+
 sowatch (0.5.0) unstable; urgency=low
 
   * MetaWatch face and notifications are now rendered using QML.
