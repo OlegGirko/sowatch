@@ -31,8 +31,11 @@ WatchScanner* LiveViewPlugin::getScanner(QObject *parent)
 
 QUrl LiveViewPlugin::getConfigQmlUrl(const QString &driver)
 {
-	Q_UNUSED(driver);
-	return QUrl();
+	if (driver == "liveview") {
+		return QUrl::fromLocalFile(SOWATCH_QML_DIR "/liveview-config.qml");
+	} else {
+		return QUrl();
+	}
 }
 
 Watch* LiveViewPlugin::getWatch(const QString& driver, ConfigKey* settings, QObject *parent)

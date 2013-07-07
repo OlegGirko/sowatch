@@ -368,9 +368,8 @@ QByteArray LiveView::encodeImage(const QUrl& url)
 
 void LiveView::send(const Message &msg)
 {
-	Q_ASSERT(_connected);
 	_sendingMsgs.enqueue(msg);
-	if (_waitingForAck == NoMessage) {
+	if (_connected && _waitingForAck == NoMessage) {
 		sendMessageFromQueue();
 	} else {
 #if PROTOCOL_DEBUG
