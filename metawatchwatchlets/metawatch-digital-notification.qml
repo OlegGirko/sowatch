@@ -20,7 +20,7 @@ MWPage {
 
 		Column {
 			id: defaultContainer
-			visible: false
+			visible: true
 			anchors.left: parent.left
 			anchors.leftMargin: 1
 			width: page.width - 3
@@ -33,6 +33,35 @@ MWPage {
 			MWLabel {
 				text: curNotification ? curNotification.body : ""
 				wrapMode: Text.WordWrap
+			}
+		}
+
+		Column {
+			id: callContainer
+			visible: false
+			anchors.top: parent.top
+			anchors.topMargin: 10
+			anchors.left: parent.left
+			anchors.leftMargin: 1
+			width: page.width - 5
+			spacing: 2
+
+			Image {
+				source: "notification-phone.png"
+				anchors.horizontalCenter: parent.horizontalCenter
+			}
+			MWLabel {
+				text: curNotification ? curNotification.title : ""
+				font.pixelSize: 16
+				wrapMode: Text.WordWrap
+				horizontalAlignment: Text.AlignHCenter
+				width: parent.width
+			}
+			MWLabel {
+				text: curNotification ? curNotification.body : ""
+				wrapMode: Text.WordWrap
+				horizontalAlignment: Text.AlignHCenter
+				width: parent.width
 			}
 		}
 
@@ -83,19 +112,24 @@ MWPage {
 
 	states: [
 		State {
-			when: curNotification && curNotification.type === Notification.EmailNotification
+			name: "CallNotification"
+			when: curNotification.type === Notification.CallNotification
+			PropertyChanges { target: defaultContainer; visible: false; }
+			PropertyChanges { target: callContainer; visible: true; }
+		},
+		State {
+			name: "EmailNotification"
+			when: curNotification.type === Notification.EmailNotification
+			PropertyChanges { target: defaultContainer; visible: false; }
 			PropertyChanges { target: emailContainer; visible: true; }
 		},
 		State {
-			when: curNotification && (
-					  curNotification.type === Notification.ImNotification ||
-					  curNotification.type === Notification.SmsNotification ||
-					  curNotification.type === Notification.MmsNotification)
+			name: "ImNotification"
+			when: curNotification.type === Notification.ImNotification ||
+				  curNotification.type === Notification.SmsNotification ||
+				  curNotification.type === Notification.MmsNotification
+			PropertyChanges { target: defaultContainer; visible: false; }
 			PropertyChanges { target: chatContainer; visible: true; }
-		},
-		State {
-			when: curNotification // Any other notification type
-			PropertyChanges { target: defaultContainer; visible: true; }
 		}
 	]
 

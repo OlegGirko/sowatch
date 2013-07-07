@@ -1,3 +1,14 @@
+sowatch (0.5.2) unstable; urgency=low
+
+  * Fix some packaging issues.
+  * Fix MW notifications, including incoming call one.
+  * Add some support for LiveView notifications (currently fails to turn
+    (the LV on, but it does vibrate at least).
+  * Support more watchlets in LV.
+  * Removal of more old code.
+
+ -- Javier S. Pedro <maemo@javispedro.com>  Sun, 07 Jul 2013 15:37:12 +0200
+
 sowatch (0.5.1) unstable; urgency=low
 
   * Fix issues with MW configuration crashing.
