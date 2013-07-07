@@ -123,6 +123,8 @@ void DeclarativeWatchlet::activate()
 			qDebug() << "Resizing root object to height" << watch->width();
 			_item->setHeight(watch->height());
 		}
+	} else {
+		qWarning() << "Declarative watchlet will not render: missing root object";
 	}
 	GraphicsWatchlet::activate();
 	_wrapper->activate();

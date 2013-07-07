@@ -32,7 +32,7 @@ BluetoothWatch::BluetoothWatch(const QBluetoothAddress& address, QObject *parent
 		// (To give time for other plugins to initialize, etc.)
 		scheduleConnect();
 	} else {
-		qDebug() << "Not starting MetaWatch connection because BT is off";
+		qDebug() << "Not starting watch connection because BT is off";
 	}
 }
 

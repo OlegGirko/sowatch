@@ -21,6 +21,7 @@ HEADERS += liveviewplugin.h \
     liveviewpaintengine.h
 
 res_files.files += res/graphics res/fonts
+qml_files.files += qml/com qml/liveview-config.qml
 
 LIBS += -L$$OUT_PWD/../libsowatch/ -lsowatch
 INCLUDEPATH += $$PWD/../libsowatch
@@ -40,4 +41,4 @@ DEPENDPATH += $$PWD/../libsowatchbt
 	res_files.path = /usr/share/sowatch/liveview
 	qml_files.path = /usr/share/sowatch/qml
 }
-INSTALLS += target res_files
+INSTALLS += target res_files qml_files

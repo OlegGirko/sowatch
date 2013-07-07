@@ -10,7 +10,7 @@ TestNotificationProvider::TestNotificationProvider(QObject *parent) :
     NotificationProvider(parent),
     _timer(new QTimer(this))
 {
-	const int initial_delay = 2000;
+	const int initial_delay = 4000;
 	const int burst_num = 1;
 	const int burst_delay = 500;
 	const int extra_delay = 100 * 1000;

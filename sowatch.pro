@@ -16,8 +16,9 @@ metawatch.depends = libsowatch libsowatchbt
 metawatchwatchlets.depends = metawatch
 
 # LiveView driver plugin
-SUBDIRS += liveview
+SUBDIRS += liveview liveviewwatchlets
 liveview.depends = libsowatch libsowatchbt
+liveviewwatchlets.depends = liveview
 
 # Some watchlets
 # This just shows a list of pending notifications and has no dependencies.

@@ -6,7 +6,7 @@
 using namespace sowatch;
 QTM_USE_NAMESPACE
 
-#define PROTOCOL_DEBUG 1
+#define PROTOCOL_DEBUG 0
 
 const int LiveView::MaxBitmapSize = 64;
 QMap<LiveView::MessageType, LiveView::MessageType> LiveView::_ackMap;
@@ -17,7 +17,7 @@ LiveView::LiveView(ConfigKey* settings, QObject* parent) :
 	_settings(settings->getSubkey(QString(), this)),
     _watchlets(0), _notifications(0),
     _24hMode(settings->value("24h-mode", false).toBool()),
-    _screenWidth(0), _screenHeight(0),
+    _screenWidth(128), _screenHeight(128),
     _mode(RootMenuMode),
     _paintEngine(0),
     _rootMenuFirstWatchlet(0),
@@ -131,6 +131,7 @@ void LiveView::displayIdleScreen()
 {
 	qDebug() << "LiveView display idle screen (cur mode=" << _mode << ")";
 	if (_mode != RootMenuMode) {
+		displayClear();
 		_mode = RootMenuMode;
 		refreshMenu();
 	}
@@ -139,17 +140,22 @@ void LiveView::displayIdleScreen()
 void LiveView::displayNotification(Notification *notification)
 {
 	qDebug() << "LiveView display notification" << notification->title();
+	_mode = NotificationMode;
+	setScreenMode(ScreenMax);
+	setMenuSize(0);
+	enableLed(Qt::green, 0, 250);
+	vibrate(0, 200);
 }
 
 void LiveView::displayApplication()
 {
 	_mode = ApplicationMode;
-	setMenuSize(0); // TODO
+	setMenuSize(0); // This clears up the menu.
 }
 
 void LiveView::vibrate(int msecs)
 {
-	// TODO
+	vibrate(0, msecs);
 }
 
 void LiveView::setWatchletsModel(WatchletsModel *model)
@@ -166,7 +172,6 @@ void LiveView::setWatchletsModel(WatchletsModel *model)
 
 void LiveView::setNotificationsModel(NotificationsModel *model)
 {
-	qDebug() << Q_FUNC_INFO;
 	if (_notifications) {
 		disconnect(_notifications, 0, this, 0);
 	}
@@ -219,6 +224,8 @@ void LiveView::initializeAckMap()
 		_ackMap[DisplayClear] = DisplayClearResponse;
 		//_ackMap[SetMenuSize] = SetMenuSizeResponse; // fw does not send this, for some reason.
 		_ackMap[EnableLed] = EnableLedResponse;
+		_ackMap[Vibrate] = VibrateResponse;
+		_ackMap[SetScreenMode] = SetScreenModeResponse;
 	}
 }
 
@@ -366,7 +373,9 @@ void LiveView::send(const Message &msg)
 	if (_waitingForAck == NoMessage) {
 		sendMessageFromQueue();
 	} else {
+#if PROTOCOL_DEBUG
 		qDebug() << "Enqueing message while waiting for ack" << _waitingForAck;
+#endif
 	}
 }
 
@@ -480,11 +489,31 @@ void LiveView::enableLed(const QColor& color, unsigned short delay, unsigned sho
 	send(Message(EnableLed, data));
 }
 
+void LiveView::vibrate(unsigned short delay, unsigned short time)
+{
+	QByteArray data;
+
+	data.append((delay & 0xFF00U) >> 8);
+	data.append(delay & 0x00FFU);
+	data.append((time & 0xFF00U) >> 8);
+	data.append(time & 0x00FFU);
+
+	send(Message(Vibrate, data));
+}
+
+void LiveView::setScreenMode(ScreenBrigthness mode)
+{
+	qDebug() << "Set screenmode to" << mode;
+	send(Message(SetScreenMode, QByteArray(1, mode)));
+}
+
 void LiveView::handleMessage(const Message &msg)
 {
 	send(Message(Ack, QByteArray(1, msg.type)));
 	if (msg.type == _waitingForAck) {
+#if PROTOCOL_DEBUG
 		qDebug() << "Got ack to" << _waitingForAck;
+#endif
 		_waitingForAck = NoMessage;
 		sendMessageFromQueue();
 	}
@@ -512,10 +541,14 @@ void LiveView::handleMessage(const Message &msg)
 		handleDateTimeRequest(msg);
 		break;
 	case EnableLedResponse:
+	case VibrateResponse:
 		// Nothing to do
 		break;
 	case GetDisplayPropertiesResponse:
 		handleDisplayProperties(msg);
+		break;
+	case SetScreenModeResponse:
+		// Nothing to do
 		break;
 	case GetSoftwareVersionResponse:
 		handleSoftwareVersion(msg);
@@ -530,6 +563,21 @@ void LiveView::handleDeviceStatusChange(const Message &msg)
 	if (msg.data.size() == 1) {
 		DeviceStatus status = static_cast<DeviceStatus>(msg.data.at(0));
 		qDebug() << "liveview device status change" << status;
+		switch (status) {
+		case DeviceOff:
+			if (_mode == NotificationMode) {
+				emit idling();
+			}
+			break;
+		case DeviceOn:
+			if (_notifications && _notifications->size() > 0) {
+				enableLed(Qt::green, 0, 250);
+			}
+			break;
+		case DeviceMenu:
+			qDebug() << "Device in menu";
+			break;
+		}
 	}
 	sendResponse(DeviceStatusChangeResponse, ResponseOk);
 }
@@ -652,6 +700,10 @@ void LiveView::handleNavigation(const Message &msg)
 			sendResponse(NavigationResponse, ResponseCancel);
 			emit closeWatchledRequested();
 			return;
+		} else if (_mode == NotificationMode) {
+			sendResponse(NavigationResponse, ResponseCancel);
+			emit nextWatchletRequested();
+			return;
 		} else if (_mode == NotificationListMode) {
 			sendResponse(NavigationResponse, ResponseCancel);
 			_mode = RootMenuMode;
@@ -684,6 +736,7 @@ void LiveView::handleNavigation(const Message &msg)
 
 void LiveView::handleMenuItemsRequest(const Message &msg)
 {
+	Q_UNUSED(msg);
 	qDebug() << "Sending menu items";
 	if (_mode == NotificationListMode) {
 		_mode = RootMenuMode; // Switch to the root menu
@@ -829,8 +882,10 @@ void LiveView::handleDataReceived()
 			}
 			_receivingMsg.data.resize(data_size);
 
+#if PROTOCOL_DEBUG
 			qDebug() << "got header (type=" << _receivingMsg.type <<
 			            "size=" << data_size << ")";
+#endif
 		}
 
 		/* We have the header; now, try to get the complete packet. */

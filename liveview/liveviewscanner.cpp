@@ -20,6 +20,7 @@ void LiveViewScanner::handleDiscoveredService(const QBluetoothServiceInfo &info)
 		foundInfo["driver"] = QString("liveview");
 		foundInfo["address"] = dev.address().toString();
 		foundInfo["name"] = deviceName;
+		foundInfo["notification-watchlet"] = QString("com.javispedro.sowatch.liveview.notification");
 		emit watchFound(foundInfo);
 	}
 }

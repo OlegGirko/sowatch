@@ -1,19 +1,19 @@
-#ifndef METAWATCHWATCHLETSPLUGIN_H
-#define METAWATCHWATCHLETSPLUGIN_H
+#ifndef LIVEVIEWWATCHLETSPLUGIN_H
+#define LIVEVIEWWATCHLETSPLUGIN_H
 
 #include <sowatch.h>
 
 namespace sowatch
 {
 
-class MetaWatchWatchletsPlugin : public QObject, public WatchletPluginInterface
+class LiveViewWatchletsPlugin : public QObject, public WatchletPluginInterface
 {
 	Q_OBJECT
 	Q_INTERFACES(sowatch::WatchletPluginInterface)
 
 public:
-	explicit MetaWatchWatchletsPlugin(QObject *parent = 0);
-	~MetaWatchWatchletsPlugin();
+	explicit LiveViewWatchletsPlugin(QObject *parent = 0);
+	~LiveViewWatchletsPlugin();
 
 	QStringList watchlets();
 	WatchletInfo describeWatchlet(const QString &id, const QString& watchModel);
@@ -22,4 +22,4 @@ public:
 
 }
 
-#endif // METAWATCHWATCHLETSPLUGIN_H
+#endif // LIVEVIEWWATCHLETSPLUGIN_H

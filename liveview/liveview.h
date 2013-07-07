@@ -79,7 +79,11 @@ protected:
 		DateTimeResponse = 39,
 		EnableLed = 40,
 		EnableLedResponse = 41,
+		Vibrate = 42,
+		VibrateResponse = 43,
 		Ack = 44,
+		SetScreenMode = 64,
+		SetScreenModeResponse = 65,
 		GetSoftwareVersion = 68,
 		GetSoftwareVersionResponse = 69
 	};
@@ -106,6 +110,7 @@ protected:
 	enum Mode {
 		RootMenuMode = 0,
 		ApplicationMode,
+		NotificationMode,
 		NotificationListMode
 	};
 
@@ -126,6 +131,12 @@ protected:
 		NotificationShowLast = 2,
 		NotificationShowNext = 3,
 		NotificationShowPrev = 4
+	};
+
+	enum ScreenBrigthness {
+		ScreenOff = 49,
+		ScreenDim = 50,
+		ScreenMax = 51
 	};
 
 	struct Message {
@@ -183,6 +194,8 @@ protected:
 	void sendMenuItem(unsigned char id, MenuItemType type, unsigned short unread, const QString& text, const QByteArray& image);
 	void sendNotification(unsigned short id, unsigned short unread, unsigned short count, const QString& date, const QString& header, const QString& body, const QByteArray& image);
 	void enableLed(const QColor& color, unsigned short delay, unsigned short time);
+	void vibrate(unsigned short delay, unsigned short time);
+	void setScreenMode(ScreenBrigthness mode);
 
 	void handleMessage(const Message& msg);
 	void handleDeviceStatusChange(const Message& msg);
@@ -207,12 +220,15 @@ private:
 	WatchletsModel *_watchlets;
 	NotificationsModel *_notifications;
 
+	// Configurable settings
 	bool _24hMode : 1;
 
+	// Watch properties
 	int _screenWidth;
 	int _screenHeight;
 	QStringList _buttons;
 
+	// Runtime variables
 	Mode _mode;
 	int _curNotificationIndex;
 

@@ -1,27 +1,20 @@
-TARGET = sysinfowatchlet
+TARGET = liveviewwatchlets
 TEMPLATE = lib
 CONFIG   += plugin
-QT       += network
 
-# Qt Mobility 1.2
-maemo5 {
-	CONFIG += mobility12
-} else {
-	CONFIG += mobility
-}
-MOBILITY += systeminfo
+SOURCES += liveviewwatchletsplugin.cpp \
+	liveviewnotificationwatchlet.cpp
 
-SOURCES += sysinfoplugin.cpp sysinfowatchlet.cpp
+HEADERS += liveviewwatchletsplugin.h \
+	liveviewnotificationwatchlet.h \
+    liveviewnotificationwatchlet.h
 
-HEADERS += sysinfoplugin.h sysinfowatchlet.h
-
-qml_files.files = metawatch-digital.qml liveview.qml icon.png metawatch-digital-icon.png liveview-icon.png
+qml_files.files = liveview-notification.qml
 
 LIBS += -L$$OUT_PWD/../libsowatch/ -lsowatch
-
 INCLUDEPATH += $$PWD/../libsowatch
 DEPENDPATH += $$PWD/../libsowatch
-QML_IMPORT_PATH += $$PWD/../metawatch/qml
+QML_IMPORT_PATH += $$PWD/../liveview/qml
 
 unix:!symbian {
 	!isEmpty(MEEGO_VERSION_MAJOR)|maemo5 {
@@ -34,3 +27,6 @@ unix:!symbian {
 	}
 	INSTALLS += target qml_files
 }
+
+OTHER_FILES += \
+    liveview-notification.qml
