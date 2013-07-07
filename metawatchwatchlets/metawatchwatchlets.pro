@@ -8,7 +8,10 @@ SOURCES += metawatchwatchletsplugin.cpp \
 HEADERS += metawatchwatchletsplugin.h \
 	metawatchfacewatchlet.h metawatchnotificationwatchlet.h
 
-qml_files.files = metawatch-digital-watchface.qml metawatch-digital-notification.qml
+qml_files.files = metawatch-digital-watchface.qml metawatch-digital-notification.qml ChatBubble.qml \
+	bubble.png bubble_tip.png idle-border.png idle-call.png idle-mail.png idle-msg.png \
+	notification-email.png notification-message.png notification-phone.png notification-timer.png \
+	weather-cloudy.png weather-rain.png weather-snow.png weather-sunny.png weather-thunderstorm.png weather-wind.png
 
 LIBS += -L$$OUT_PWD/../libsowatch/ -lsowatch
 INCLUDEPATH += $$PWD/../libsowatch
@@ -26,6 +29,3 @@ unix:!symbian {
 	}
 	INSTALLS += target qml_files
 }
-
-OTHER_FILES += \
-    ChatBubble.qml
