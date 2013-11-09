@@ -9,15 +9,21 @@ using namespace sowatch;
 
 #define FOREACH_TYPE(x) FOREACH_TYPE_FROM_TO(x, Notification::OtherNotification, Notification::TypeCount)
 
+//Is this the proper way to reimplement roleNames() in this context?
+QHash<int, QByteArray> _roles;
+
 NotificationsModel::NotificationsModel(QObject *parent) :
     QAbstractListModel(parent)
 {
-	QHash<int, QByteArray> roles = roleNames();
-	roles[Qt::DisplayRole] = QByteArray("title");
-	roles[ObjectRole] = QByteArray("object");
-	roles[BodyRole] = QByteArray("body");
-	roles[CountRole] = QByteArray("count");
-	setRoleNames(roles);
+    QHash<int, QByteArray> _roles = roleNames();
+    _roles[Qt::DisplayRole] = QByteArray("title");
+    _roles[ObjectRole] = QByteArray("object");
+    _roles[BodyRole] = QByteArray("body");
+    _roles[CountRole] = QByteArray("count");
+}
+    QHash<int, QByteArray> roleNames()
+{
+    return _roles;
 }
 
 int NotificationsModel::rowCount(const QModelIndex &parent) const
