@@ -7,44 +7,29 @@ QTM_USE_NAMESPACE
 using namespace sowatch;
 
 MetaWatchScanner::MetaWatchScanner(QObject *parent) :
-	WatchScanner(parent),
-	_agent(new QBluetoothServiceDiscoveryAgent(this))
+	BluetoothWatchScanner(parent)
 {
-	_agent->setUuidFilter(QBluetoothUuid::SerialPort);
-	connect(_agent, SIGNAL(finished()), this, SIGNAL(finished()));
-	connect(_agent, SIGNAL(serviceDiscovered(QBluetoothServiceInfo)),
-			this, SLOT(handleDiscoveredService(QBluetoothServiceInfo)));
-}
-
-void MetaWatchScanner::start()
-{
-	if (_agent->isActive()) {
-		_agent->stop();
-	}
-	_agent->start();
-	qDebug() << "started metawatch bluetooth scan";
-	emit started();
 }
 
 void MetaWatchScanner::handleDiscoveredService(const QBluetoothServiceInfo &info)
 {
 	const QBluetoothDeviceInfo dev = info.device();
 	QString deviceName = dev.name();
-	if (deviceName.contains("MetaWatch", Qt::CaseInsensitive)) {
+	if (deviceName.startsWith("MetaWatch")) {
 		QVariantMap foundInfo;
 		foundInfo["address"] = dev.address().toString();
 		foundInfo["name"] = deviceName;
 		qDebug() << "metawatch bluetooth scan found:" << deviceName;
-		if (deviceName.contains("Digital", Qt::CaseInsensitive)) {
-			foundInfo["driver"] = QString("metawatch-digital");
-			foundInfo["next-watchlet-button"] = QString("A");
-			emit watchFound(foundInfo);
-		} else if (deviceName.contains("Analog", Qt::CaseInsensitive)) {
+		if (deviceName.contains("Analog")) {
+			// This is Analog metawatch.
 			foundInfo["driver"] = QString("metawatch-analog");
-			foundInfo["next-watchlet-button"] = QString("A");
 			emit watchFound(foundInfo);
 		} else {
-			qWarning() << "Unknown MetaWatch device found:" << deviceName;
+			// For now, assume Digital metawatch.
+			foundInfo["driver"] = QString("metawatch-digital");
+			foundInfo["idle-watchlet"] = QString("com.javispedro.sowatch.metawatch.watchface");
+			foundInfo["notification-watchlet"] = QString("com.javispedro.sowatch.metawatch.notification");
+			emit watchFound(foundInfo);
 		}
 	}
 }

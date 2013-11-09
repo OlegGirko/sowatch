@@ -3,9 +3,8 @@
 
 using namespace sowatch;
 
-MetaWatchPaintEngine::MetaWatchPaintEngine(MetaWatch* watch) :
-	WatchPaintEngine(),
-	_watch(watch)
+MetaWatchPaintEngine::MetaWatchPaintEngine()
+    : WatchPaintEngine()
 {
 }
 

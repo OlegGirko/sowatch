@@ -36,9 +36,12 @@ res_files.files += res/graphics res/fonts
 qml_files.files += qml/com qml/metawatch-digital-config.qml
 
 LIBS += -L$$OUT_PWD/../libsowatch/ -lsowatch
-
 INCLUDEPATH += $$PWD/../libsowatch
 DEPENDPATH += $$PWD/../libsowatch
+
+LIBS += -L$$OUT_PWD/../libsowatchbt/ -lsowatchbt
+INCLUDEPATH += $$PWD/../libsowatchbt
+DEPENDPATH += $$PWD/../libsowatchbt
 
 !isEmpty(MEEGO_VERSION_MAJOR)|maemo5 {
 	QMAKE_RPATHDIR += /opt/sowatch/lib

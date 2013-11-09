@@ -15,7 +15,7 @@ class QMafwWatchlet : public DeclarativeWatchlet
 {
     Q_OBJECT
 public:
-	explicit QMafwWatchlet(WatchServer* server);
+	explicit QMafwWatchlet(Watch* watch);
 
 private:
 	MafwRegistry *_registry;

@@ -3,22 +3,24 @@
 
 #include <QtCore/QQueue>
 #include <QtCore/QTimer>
-#include <QtCore/QSettings>
 #include <QtConnectivity/QBluetoothAddress>
 #include <QtConnectivity/QBluetoothSocket>
+#include <QtConnectivity/QBluetoothLocalDevice>
 #include <QtSystemInfo/QSystemAlignedTimer>
 #include <sowatch.h>
-
-using QTM_PREPEND_NAMESPACE(QBluetoothSocket);
-using QTM_PREPEND_NAMESPACE(QBluetoothAddress);
-using QTM_PREPEND_NAMESPACE(QSystemAlignedTimer);
+#include <sowatchbt.h>
 
 namespace sowatch
 {
 
+using QTM_PREPEND_NAMESPACE(QBluetoothSocket);
+using QTM_PREPEND_NAMESPACE(QBluetoothAddress);
+using QTM_PREPEND_NAMESPACE(QSystemAlignedTimer);
+using QTM_PREPEND_NAMESPACE(QBluetoothLocalDevice);
+
 class MetaWatchPaintEngine;
 
-class MetaWatch : public Watch
+class MetaWatch : public BluetoothWatch
 {
     Q_OBJECT
 
@@ -47,8 +49,8 @@ public:
 		SetRealTimeClock = 0x26,
 		GetRealTimeClock = 0x27,
 		GetRealTimeClockResponse = 0x28,
-		NvalOperation = 0x30,
-		NvalOperationResponse = 0x31,
+		PropertyOperation = 0x30,
+		PropertyOperationResponse = 0x31,
 		StatusChangeEvent = 0x33,
 		ButtonEvent = 0x34,
 		GeneralPurposePhone = 0x35,
@@ -65,22 +67,15 @@ public:
 		ReadBatteryVoltage = 0x56,
 		ReadBatteryVoltageResponse = 0x57,
 		ReadLightSensor = 0x58,
-		ReadLightSensorResponse = 0x59
-	};
-
-	enum NvalValue {
-		ReservedNval = 0,
-		LinkKey = 0x1,
-		IdleBufferConfiguration = 0x2,
-		TimeFormat = 0x2009,
-		DateFormat = 0x200a,
-		DisplaySeconds = 0x200b
+		ReadLightSensorResponse = 0x59,
+		ChangeMode = 0xa6
 	};
 
 	enum Mode {
 		IdleMode = 0,
 		ApplicationMode = 1,
-		NotificationMode = 2
+		NotificationMode = 2,
+		MusicMode = 3 // Please note that the music mode is currently not used
 	};
 
 	enum Button {
@@ -104,7 +99,7 @@ public:
 
 	QString model() const;
 	QStringList buttons() const;
-	bool isConnected() const;
+
 	bool busy() const;
 
 	void setDateTime(const QDateTime& dateTime);
@@ -116,9 +111,6 @@ public:
 
 	void queryCharging();
 	bool charging() const;
-
-	void updateNotificationCount(Notification::Type type, int count);
-	void updateWeather(WeatherNotification *weather);
 
 	void displayIdleScreen();
 	void displayNotification(Notification *notification);
@@ -138,47 +130,6 @@ public:
 	void ungrabButton(Mode mode, Button button);
 
 protected:
-	ConfigKey *_settings;
-
-	// Some configurable stuff.
-	short _notificationTimeout;
-	bool _24hMode : 1;
-	bool _dayMonthOrder : 1;
-
-	// Notifications: timers
-	QTimer* _idleTimer;
-	QTimer* _ringTimer;
-
-	// Buttons
-	static const char btnToWatch[8];
-	QStringList _buttonNames;
-
-	// Current watch state
-	QDateTime _watchTime;
-	short _watchBattery;
-	short _watchBatteryAverage;
-	bool _watchCharging;
-	Mode _currentMode;
-	Mode _paintMode;
-
-	// Required by QPaintDevice
-	mutable MetaWatchPaintEngine* _paintEngine;
-
-	/** The shadow framebuffers for each of the watch modes */
-	QImage _image[3];
-
-	// Timers to retry the connection when the watch is not found.
-	static const int connectRetryTimesSize = 6;
-	static const int connectRetryTimes[connectRetryTimesSize];
-	short _connectRetries;
-	bool _connected;
-	QTimer* _connectTimer;
-	QSystemAlignedTimer* _connectAlignedTimer;
-
-	// Connection stuff
-	QBluetoothAddress _address;
-	QBluetoothSocket* _socket;
-
 	// Base watch protocol stuff
 	struct Message {
 		MessageType type;
@@ -189,21 +140,58 @@ protected:
 		{ }
 	};
 
+protected:
+	ConfigKey *_settings;
+
+	// Some configurable stuff.
+	short _notificationTimeout;
+	bool _24hMode : 1;
+	bool _dayMonthOrder : 1;
+	bool _showSeconds : 1;
+	bool _separationLines : 1;
+	bool _autoBacklight : 1;
+
+	// Notifications: timers
+	QTimer* _idleTimer;
+	QTimer* _ringTimer;
+
+	// Buttons
+	static const char btnToWatch[8];
+	QStringList _buttonNames;
+
+	// Current watch state
+	/** The watch's currently displayed date & time. */
+	QDateTime _watchTime;
+	/** The current watch battery level (from 0 to 100). */
+	short _watchBattery;
+	/** Whether the watch is currently charging. */
+	bool _watchCharging;
+	/** The watch's current display mode. */
+	Mode _currentMode;
+	/** The mode where paint operations done using QPaintDevice go into */
+	Mode _paintMode;
+
+	// Required by QPaintDevice
+	mutable MetaWatchPaintEngine* _paintEngine;
+
+	/** The framebuffers for each of the watch modes */
+	QImage _image[3];
+
 	/** The "packets to be sent" asynchronous queue **/
 	QQueue<Message> _toSend;
 	QTimer* _sendTimer;
 	Message _partialReceived;
 
-	/** Pending nvals to be written once the read operation is finished. */
-	QMap<NvalValue, int> _nvals;
+	// Watch connect/disconnect handling
+	void setupBluetoothWatch();
+	void desetupBluetoothWatch();
 
+	// Message passing
+	/** Used to calculate CRC fields in message header */
 	static const quint8 bitRevTable[16];
 	static const quint16 crcTable[256];
 	static quint16 calcCrc(const QByteArray& data, int size);
 	static quint16 calcCrc(const Message& msg);
-
-	/** Attempt a connection to the watch. */
-	virtual void retryConnect();
 
 	/** Sends a message to the watch. Does not block. */
 	virtual void send(const Message& msg);
@@ -212,44 +200,34 @@ protected:
 	 */
 	void sendIfNotQueued(const Message& msg);
 
-	static uint nvalSize(NvalValue value);
-	void nvalWrite(NvalValue value, int data);
-
 	/* Some functions that wrap sending some watch messages. */
+	void updateWatchProperties();
 	void setVibrateMode(bool enable, uint on, uint off, uint cycles);
 	void updateLcdLine(Mode mode, const QImage& image, int line);
 	void updateLcdLines(Mode mode, const QImage& image, int lineA, int lineB);
 	void updateLcdLines(Mode mode, const QImage& image, const QVector<bool>& lines);
 	void configureLcdIdleSystemArea(bool entireScreen);
-	void updateLcdDisplay(Mode mode, bool copy = true);
+	void updateLcdDisplay(Mode mode, int startRow = 0, int numRows = 0);
 	void loadLcdTemplate(Mode mode, int templ);
+	void changeMode(Mode mode);
 	void enableButton(Mode mode, Button button, ButtonPress press);
 	void disableButton(Mode mode, Button button, ButtonPress press);
 
 	void handleMessage(const Message& msg);
 	void handleDeviceTypeMessage(const Message& msg);
 	void handleRealTimeClockMessage(const Message& msg);
-	void handleNvalOperationMessage(const Message& msg);
+	void handlePropertyOperationMessage(const Message& msg);
 	void handleStatusChangeMessage(const Message& msg);
 	void handleButtonEventMessage(const Message& msg);
 	void handleBatteryVoltageMessage(const Message& msg);
 
-	/** To be overriden; should configure a newly connected watch. */
-	virtual void handleWatchConnected() = 0;
-
 private slots:
 	void settingChanged(const QString& key);
-	void socketConnected();
-	void socketDisconnected();
-	void socketData();
-	void socketError(QBluetoothSocket::SocketError error);
-	void socketState(QBluetoothSocket::SocketState error);
-	void timedReconnect();
+	void dataReceived();
 	void timedSend();
 	void timedRing();
 
 private:
-	void realNvalWrite(NvalValue value, int data);
 	void realSend(const Message& msg);
 	void realReceive(bool block);
 };

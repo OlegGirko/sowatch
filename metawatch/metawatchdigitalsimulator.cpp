@@ -16,10 +16,18 @@ MetaWatchDigitalSimulator::MetaWatchDigitalSimulator(ConfigKey *config, QObject 
 	_pixmap[IdleMode] = QPixmap(screenWidth, screenHeight);
 	_pixmap[ApplicationMode] = QPixmap(screenWidth, screenHeight);
 	_pixmap[NotificationMode] = QPixmap(screenWidth, screenHeight);
-	_form->showNormal();
+
+	// Connect form signals
 	connect(_form, SIGNAL(buttonPressed(int)), SIGNAL(buttonPressed(int)));
 	connect(_form, SIGNAL(buttonReleased(int)), SIGNAL(buttonReleased(int)));
+	connect(_form, SIGNAL(buttonPressed(int)), SLOT(handleButtonPressed(int)));
 	connect(_form, SIGNAL(destroyed()), SLOT(handleFormDestroyed()));
+
+	// Show the form
+	_form->showNormal();
+
+	// Schedule a connection even if BT is off or anything like that.
+	scheduleConnect();
 }
 
 MetaWatchDigitalSimulator::~MetaWatchDigitalSimulator()
@@ -79,6 +87,13 @@ void MetaWatchDigitalSimulator::update(Mode mode, const QList<QRect> &rects)
 
 		p.drawImage(r, _image[mode], r);
 	}
+
+	if (mode == IdleMode) {
+		QRect systemArea(0, 0, screenWidth, systemAreaHeight);
+		p.fillRect(systemArea, Qt::BDiagPattern);
+		p.drawText(systemArea, Qt::AlignCenter, "System area");
+	}
+
 	p.end();
 
 	int totalRows = rows.count(true);
@@ -100,8 +115,10 @@ void MetaWatchDigitalSimulator::vibrate(bool on)
 	qDebug() << "vibrate" << on;
 }
 
-void MetaWatchDigitalSimulator::retryConnect()
+void MetaWatchDigitalSimulator::connectToWatch()
 {
+	// Skip BluetoothWatch connection stuff
+
 	if (!_connected && _form) {
 		qDebug() << "simulator connected";
 
@@ -109,7 +126,7 @@ void MetaWatchDigitalSimulator::retryConnect()
 		_currentMode = IdleMode;
 		_paintMode = IdleMode;
 
-		handleWatchConnected();
+		MetaWatchDigital::setupBluetoothWatch();
 
 		emit connected();
 	}
@@ -128,5 +145,12 @@ void MetaWatchDigitalSimulator::handleFormDestroyed()
 		qDebug() << "simulator disconnected";
 		emit disconnected();
 		_form = 0;
+	}
+}
+
+void MetaWatchDigitalSimulator::handleButtonPressed(int button)
+{
+	if (button == BtnA) {
+		emit nextWatchletRequested();
 	}
 }

@@ -9,17 +9,20 @@
 #include "watch.h"
 #include "watchserver.h"
 #include "watchscanner.h"
+#include "watchpaintengine.h"
 #include "watchplugininterface.h"
 
 #include "notification.h"
 #include "weathernotification.h"
 #include "notificationprovider.h"
 #include "notificationplugininterface.h"
+#include "notificationsmodel.h"
 
 #include "watchlet.h"
 #include "graphicswatchlet.h"
 #include "declarativewatchlet.h"
 #include "watchletplugininterface.h"
+#include "watchletsmodel.h"
 
 #include "registry.h"
 #include "allwatchscanner.h"

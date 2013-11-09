@@ -1,9 +1,8 @@
 #ifndef METAWATCHPAINTENGINE_H
 #define METAWATCHPAINTENGINE_H
 
-#include <QtCore/QRect>
+#include <sowatch.h>
 #include "metawatch.h"
-#include "watchpaintengine.h"
 
 namespace sowatch
 {
@@ -12,7 +11,7 @@ namespace sowatch
 class MetaWatchPaintEngine : public WatchPaintEngine
 {
 public:
-	explicit MetaWatchPaintEngine(MetaWatch* watch);
+	MetaWatchPaintEngine();
 
 	bool begin(QPaintDevice *pdev);
 	bool end();

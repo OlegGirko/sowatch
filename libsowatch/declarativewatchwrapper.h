@@ -19,7 +19,7 @@ class SOWATCH_EXPORT DeclarativeWatchWrapper : public QObject
 	Q_PROPERTY(bool active READ active NOTIFY activeChanged)
 
 public:
-	explicit DeclarativeWatchWrapper(WatchServer *server, Watch *watch, QObject *parent = 0);
+	explicit DeclarativeWatchWrapper(Watch *watch, QObject *parent = 0);
 
 	QString model() const;
 	bool active() const;
@@ -32,10 +32,8 @@ signals:
 	void buttonReleased(int button);
 
 	void activeChanged();
-	void notificationsChanged();
 
 private:
-	WatchServer *_server;
 	Watch* _watch;
 	bool _active;
 

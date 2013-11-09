@@ -11,7 +11,7 @@ class QMsgWatchlet : public DeclarativeWatchlet
 {
     Q_OBJECT
 public:
-	explicit QMsgWatchlet(WatchServer* server);
+	explicit QMsgWatchlet(Watch* watch);
 
 private:
 	QtMobility::QMessageService *_qms;

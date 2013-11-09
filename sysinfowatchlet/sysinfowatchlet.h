@@ -14,7 +14,7 @@ class SysInfoWatchlet : public DeclarativeWatchlet
 {
     Q_OBJECT
 public:
-	explicit SysInfoWatchlet(WatchServer* server);
+	explicit SysInfoWatchlet(Watch* watch);
 
 private slots:
 	void handleActivated();

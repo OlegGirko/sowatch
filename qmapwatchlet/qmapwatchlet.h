@@ -10,7 +10,7 @@ class QMapWatchlet : public DeclarativeWatchlet
 {
     Q_OBJECT
 public:
-	explicit QMapWatchlet(WatchServer* server);
+	explicit QMapWatchlet(Watch* watch);
 
 	static const QLatin1String myId;
 };

@@ -16,8 +16,8 @@ public:
 	~SysInfoPlugin();
 
 	QStringList watchlets();
-	WatchletInfo describeWatchlet(const QString &id);
-	Watchlet* getWatchlet(const QString &id, ConfigKey *settings, WatchServer *server);
+	WatchletInfo describeWatchlet(const QString &id, const QString &watchModel);
+	Watchlet* getWatchlet(const QString &id, ConfigKey *settings, Watch *watch);
 };
 
 }

@@ -11,6 +11,11 @@ Notification::~Notification()
 {
 }
 
+Notification::Priority Notification::priority() const
+{
+	return Normal;
+}
+
 QString Notification::displayTime() const
 {
 	QDateTime dt = dateTime();

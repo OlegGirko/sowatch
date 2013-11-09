@@ -2,6 +2,8 @@
 #include <QtDeclarative/QtDeclarative>
 #include "watchserver.h"
 #include "watch.h"
+#include "watchletsmodel.h"
+#include "notificationsmodel.h"
 #include "gconfkey.h"
 #include "declarativewatchwrapper.h"
 #include "declarativewatchlet.h"
@@ -10,8 +12,8 @@ using namespace sowatch;
 
 bool DeclarativeWatchlet::_registered = false;
 
-DeclarativeWatchlet::DeclarativeWatchlet(WatchServer* server, const QString& id) :
-	GraphicsWatchlet(server, id),
+DeclarativeWatchlet::DeclarativeWatchlet(Watch* watch, const QString& id) :
+	GraphicsWatchlet(watch, id),
 	_engine(0),
 	_component(0),
 	_item(0),
@@ -22,28 +24,49 @@ DeclarativeWatchlet::DeclarativeWatchlet(WatchServer* server, const QString& id)
 	scene()->setStickyFocus(true);
 
 	if (!_registered) {
+		qRegisterMetaType<Notification::Type>("Notification::Type");
+		qRegisterMetaType<Notification::Priority>("Notification::Priority");
+		qRegisterMetaType<WeatherNotification::WeatherType>("WeatherNotification::WeatherType");
+		qRegisterMetaType<WeatherNotification::Unit>("WeatherNotification::Unit");
 		qmlRegisterUncreatableType<DeclarativeWatchWrapper>("com.javispedro.sowatch", 1, 0,
 			"Watch", "Watch is only available via the 'watch' context property");
+		qmlRegisterUncreatableType<WatchletsModel>("com.javispedro.sowatch", 1, 0,
+			"Notification", "WatchletsModel is only available via the 'notifications' context property");
+		qmlRegisterUncreatableType<Watchlet>("com.javispedro.sowatch", 1, 0,
+			"Notification", "Watchlet is an abstract class");
 		qmlRegisterUncreatableType<NotificationsModel>("com.javispedro.sowatch", 1, 0,
 			"NotificationsModel", "NotificationsModel is only available via the 'notifications' context property");
+		qmlRegisterUncreatableType<Notification>("com.javispedro.sowatch", 1, 0,
+			"Notification", "Notification is an abstract class");
+		qmlRegisterUncreatableType<WeatherNotification>("com.javispedro.sowatch", 1, 0,
+			"WeatherNotification", "WeatherNotification is an abstract class");
 		qmlRegisterType<ConfigKey>();
 		qmlRegisterType<GConfKey>("com.javispedro.sowatch", 1, 0, "GConfKey");
 		_registered = true;
 	}
 
-	_engine = new QDeclarativeEngine(this);
-#if !defined(QT_NO_DEBUG)
-	QString qmlDir = QDir::current().absoluteFilePath(SOWATCH_QML_DIR);
-	qDebug() << "Using debug QML import path: " << qmlDir;
-	_engine->addImportPath(SOWATCH_QML_DIR);
-#else
-	_engine->addImportPath(SOWATCH_QML_DIR);
-#endif
+	// A dynamic property on the Watch object is used to share a single
+	// DeclarativeEngine amongst all DeclarativeWatchlet instances.
+	QVariant watchEngine = watch->property("declarativeEngine");
+	if (!watchEngine.isValid()) {
+		// Create the shared engine
+		qDebug() << "Starting QDeclarativeEngine";
+		_engine = new QDeclarativeEngine(watch);
+		_engine->addImportPath(SOWATCH_QML_DIR);
 
-	_wrapper = new DeclarativeWatchWrapper(server, server->watch(), this);
-	_engine->rootContext()->setContextProperty("watch", _wrapper);
-	_engine->rootContext()->setContextProperty("notifications",
-	                                           const_cast<NotificationsModel*>(server->notifications()));
+		// Set context properties that are shared by all watchlets here
+		_engine->rootContext()->setContextProperty("watchlets", 0);
+		_engine->rootContext()->setContextProperty("notifications", 0);
+
+		watch->setProperty("declarativeEngine", QVariant::fromValue(_engine));
+	} else {
+		_engine = watchEngine.value<QDeclarativeEngine*>();
+	}
+
+	_context = new QDeclarativeContext(_engine, this);
+
+	_wrapper = new DeclarativeWatchWrapper(watch, this);
+	_context->setContextProperty("watch", _wrapper);
 }
 
 DeclarativeWatchlet::~DeclarativeWatchlet()
@@ -76,14 +99,9 @@ void DeclarativeWatchlet::setSource(const QUrl &url)
 	}
 }
 
-QDeclarativeEngine* DeclarativeWatchlet::engine()
+QDeclarativeContext* DeclarativeWatchlet::context()
 {
-	return _engine;
-}
-
-QDeclarativeContext* DeclarativeWatchlet::rootContext()
-{
-	return _engine->rootContext();
+	return _context;
 }
 
 QDeclarativeItem* DeclarativeWatchlet::rootObject()
@@ -105,6 +123,8 @@ void DeclarativeWatchlet::activate()
 			qDebug() << "Resizing root object to height" << watch->width();
 			_item->setHeight(watch->height());
 		}
+	} else {
+		qWarning() << "Declarative watchlet will not render: missing root object";
 	}
 	GraphicsWatchlet::activate();
 	_wrapper->activate();
@@ -114,6 +134,16 @@ void DeclarativeWatchlet::deactivate()
 {
 	_wrapper->deactivate();
 	GraphicsWatchlet::deactivate();
+}
+
+void DeclarativeWatchlet::setWatchletsModel(WatchletsModel *model)
+{
+	_context->setContextProperty("watchlets", model);
+}
+
+void DeclarativeWatchlet::setNotificationsModel(NotificationsModel *model)
+{
+	_context->setContextProperty("notifications", model);
 }
 
 void DeclarativeWatchlet::setRootObject(QDeclarativeItem *item)
@@ -128,6 +158,34 @@ void DeclarativeWatchlet::setRootObject(QDeclarativeItem *item)
 	scene()->addItem(_item);
 }
 
+bool DeclarativeWatchlet::handlesNotification(Notification *notification) const
+{
+	if (_item) {
+		QVariant arg = QVariant::fromValue(notification);
+		QVariant result;
+		if (QMetaObject::invokeMethod(_item, "handlesNotification",
+									   Q_RETURN_ARG(QVariant, result),
+									   Q_ARG(QVariant, arg))) {
+			return result.toBool();
+		}
+	}
+
+	return false;
+}
+
+void DeclarativeWatchlet::openNotification(Notification *notification)
+{
+	if (_item) {
+		QVariant arg = QVariant::fromValue(notification);
+		QVariant result;
+		if (!QMetaObject::invokeMethod(_item, "openNotification",
+		                               Q_RETURN_ARG(QVariant, result),
+		                               Q_ARG(QVariant, arg))) {
+			qWarning() << "No openNotification method in QML root object";
+		}
+	}
+}
+
 void DeclarativeWatchlet::handleComponentStatus(QDeclarativeComponent::Status status)
 {
 	QObject *obj;
@@ -139,7 +197,7 @@ void DeclarativeWatchlet::handleComponentStatus(QDeclarativeComponent::Status st
 		/* Nothing to do */
 		break;
 	case QDeclarativeComponent::Ready:
-		obj = _component->create();
+		obj = _component->create(_context);
 		if (_component->isError()) {
 			qWarning() << "QML has errors found while creating:";
 			qWarning() <<  _component->errors();

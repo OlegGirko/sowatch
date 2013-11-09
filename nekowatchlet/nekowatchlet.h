@@ -10,7 +10,7 @@ class NekoWatchlet : public DeclarativeWatchlet
 {
     Q_OBJECT
 public:
-	explicit NekoWatchlet(WatchServer* server);
+	explicit NekoWatchlet(Watch* watch);
 
 	static const QLatin1String myId;
 };

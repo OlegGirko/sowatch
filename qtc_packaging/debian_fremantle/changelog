@@ -1,3 +1,48 @@
+sowatch (0.5.2) unstable; urgency=low
+
+  * Fix some packaging issues.
+  * Fix MW notifications, including incoming call one.
+  * Add some support for LiveView notifications (currently fails to turn
+    (the LV on, but it does vibrate at least).
+  * Support more watchlets in LV.
+  * Removal of more old code.
+
+ -- Javier S. Pedro <maemo@javispedro.com>  Sun, 07 Jul 2013 15:37:12 +0200
+
+sowatch (0.5.1) unstable; urgency=low
+
+  * Fix issues with MW configuration crashing.
+
+ -- Javier S. Pedro <maemo@javispedro.com>  Fri, 28 Jun 2013 15:40:46 +0200
+
+sowatch (0.5.0) unstable; urgency=low
+
+  * MetaWatch face and notifications are now rendered using QML.
+  * Sony's LiveView watch is now supported.
+  * Removal of lots of old code.
+
+ -- Javier S. Pedro <maemo@javispedro.com>  Mon, 13 May 2013 01:06:03 +0200
+
+sowatch (0.4.6) unstable; urgency=low
+
+  * New status bar for metawatch watchlets
+  * New Calendar watchlet
+
+ -- Javier S. Pedro <maemo@javispedro.com>  Sat, 04 May 2013 01:22:40 +0200
+
+sowatch (0.4.5) unstable; urgency=low
+
+  * Change button assignments for media player watchlet.
+
+ -- Javier S. Pedro <maemo@javispedro.com>  Fri, 29 Mar 2013 18:53:20 +0100
+
+sowatch (0.4.4) unstable; urgency=low
+
+  * Updated to use gen2 protocol (still v1 UI)
+  * Disable connection timer if host Bluetooth is disabled
+
+ -- Javier S. Pedro <maemo@javispedro.com>  Thu, 28 Mar 2013 16:08:05 +0100
+
 sowatch (0.4.3) unstable; urgency=low
 
   * Improved volume controls in media player.

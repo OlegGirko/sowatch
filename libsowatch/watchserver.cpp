@@ -1,28 +1,38 @@
 #include <QtCore/QDebug>
 
-#include "notificationprovider.h"
 #include "watch.h"
 #include "watchlet.h"
+#include "watchletsmodel.h"
+#include "notificationprovider.h"
+#include "notificationsmodel.h"
 #include "watchserver.h"
 
 using namespace sowatch;
 
 WatchServer::WatchServer(Watch* watch, QObject* parent) :
-	QObject(parent), _watch(watch),
-	_nextWatchletButton(-1),
-	_oldNotificationThreshold(300),
+    QObject(parent), _watch(watch),
+    _oldNotificationThreshold(300),
+    _idleWatchlet(0), _notificationWatchlet(0),
+    _watchlets(new WatchletsModel(this)),
     _notifications(new NotificationsModel(this)),
-	_currentWatchlet(0), _currentWatchletActive(false), _currentWatchletIndex(-1),
-	_syncTimeTimer(new QTimer(this))
+    _activeWatchlet(0), _currentWatchlet(0), _currentWatchletIndex(-1),
+    _syncTimeTimer(new QTimer(this))
 {
 	connect(_watch, SIGNAL(connected()), SLOT(handleWatchConnected()));
 	connect(_watch, SIGNAL(disconnected()), SLOT(handleWatchDisconnected()));
 	connect(_watch, SIGNAL(idling()), SLOT(handleWatchIdling()));
-	connect(_watch, SIGNAL(buttonPressed(int)), SLOT(handleWatchButtonPress(int)));
+	connect(_watch, SIGNAL(nextWatchletRequested()), SLOT(handleNextWatchletRequested()));
+	connect(_watch, SIGNAL(watchletRequested(QString)),
+	        SLOT(handleWatchletRequested(QString)));
+	connect(_watch, SIGNAL(closeWatchledRequested()), SLOT(handleCloseWatchletRequested()));
 	connect(_syncTimeTimer, SIGNAL(timeout()), SLOT(syncTime()));
 
 	_syncTimeTimer->setSingleShot(true);
 	_syncTimeTimer->setInterval(24 * 3600 * 1000); // Once a day
+
+	_watchlets->setWatchModel(_watch->model());
+	_watch->setWatchletsModel(_watchlets);
+	_watch->setNotificationsModel(_notifications);
 }
 
 Watch* WatchServer::watch()
@@ -35,69 +45,91 @@ const Watch* WatchServer::watch() const
 	return _watch;
 }
 
-QString WatchServer::nextWatchletButton() const
+Watchlet * WatchServer::idleWatchlet()
 {
-	if (_nextWatchletButton >= 0) {
-		return _watch->buttons().at(_nextWatchletButton);
-	} else {
-		return QString();
+	return _idleWatchlet;
+}
+
+void WatchServer::setIdleWatchlet(Watchlet *watchlet)
+{
+	if (_idleWatchlet) {
+		removeWatchlet(_idleWatchlet);
+		unsetWatchletProperties(_idleWatchlet);
+	}
+	_idleWatchlet = watchlet;
+	if (watchlet) {
+		_watchletIds[watchlet->id()] = watchlet;
+		setWatchletProperties(_idleWatchlet);
+		// TODO Possibly activate this watchlet now if we are on the idle screen.
 	}
 }
 
-void WatchServer::setNextWatchletButton(const QString& value)
+Watchlet * WatchServer::notificationWatchlet()
 {
-	if (value.isEmpty()) {
-		_nextWatchletButton = -1;
-		return;
+	return _notificationWatchlet;
+}
+
+void WatchServer::setNotificationWatchlet(Watchlet *watchlet)
+{
+	if (_notificationWatchlet) {
+		removeWatchlet(_notificationWatchlet);
+		unsetWatchletProperties(_notificationWatchlet);
 	}
-	_nextWatchletButton = _watch->buttons().indexOf(value);
-	if (_nextWatchletButton < 0) {
-		qWarning() << "Invalid watch button" << value;
+	_notificationWatchlet = watchlet;
+	if (watchlet) {
+		_watchletIds[watchlet->id()] = watchlet;
+		setWatchletProperties(_notificationWatchlet);
 	}
+}
+
+const WatchletsModel * WatchServer::watchlets() const
+{
+	return _watchlets;
 }
 
 void WatchServer::addWatchlet(Watchlet *watchlet)
 {
-	Q_ASSERT(watchlet);
-	insertWatchlet(_watchlets.size(), watchlet);
+	insertWatchlet(_watchlets->size(), watchlet);
 }
 
 void WatchServer::insertWatchlet(int position, Watchlet *watchlet)
 {
 	Q_ASSERT(watchlet);
-	Q_ASSERT(watchlet->_server == this);
+	Q_ASSERT(watchlet->watch() == _watch);
 
 	const QString id = watchlet->id();
 	Q_ASSERT(!_watchletIds.contains(id));
 
-	_watchlets.insert(position, watchlet);
+	setWatchletProperties(watchlet);
+
+	_watchlets->insert(position, watchlet);
 	_watchletIds[id] = watchlet;
 }
 
 void WatchServer::moveWatchlet(const Watchlet *watchlet, int to)
 {
 	const QString id = watchlet->id();
-	int index = _watchlets.indexOf(const_cast<Watchlet*>(watchlet));
 
-	Q_ASSERT(watchlet->_server == this);
+	Q_ASSERT(watchlet->watch() == _watch);
 	Q_ASSERT(_watchletIds.contains(id));
-	Q_ASSERT(index >= 0);
 
-	_watchlets.move(index, to);
+	_watchlets->move(watchlet, to);
 }
 
 void WatchServer::removeWatchlet(const Watchlet *watchlet)
 {
 	const QString id = watchlet->id();
 
-	Q_ASSERT(watchlet->_server == this);
+	Q_ASSERT(watchlet->watch() == _watch);
 	Q_ASSERT(_watchletIds.contains(id));
 
 	if (_currentWatchlet == watchlet) {
 		closeWatchlet();
 	}
 
-	_watchlets.removeAll(const_cast<Watchlet*>(watchlet));
+	unsetWatchletProperties(const_cast<Watchlet*>(watchlet));
+
+	_watchlets->remove(watchlet);
 	_watchletIds.remove(id);
 }
 
@@ -120,7 +152,7 @@ const NotificationsModel * WatchServer::notifications() const
 
 void WatchServer::postNotification(Notification *notification)
 {
-	const Notification::Type type = notification->type();
+	const Notification::Priority priority = notification->priority();
 
 	// Add notification to model
 	_notifications->add(notification);
@@ -132,14 +164,8 @@ void WatchServer::postNotification(Notification *notification)
 
 	qDebug() << "notification received" << notification->title() << "(" << notification->count() << ")";
 
-	_watch->updateNotificationCount(type, getNotificationCount(type));
-
-	if (type == Notification::WeatherNotification) {
-		// Weather notifications, we handle differently.
-		WeatherNotification* weather = static_cast<WeatherNotification*>(notification);
-		_weather = weather;
-		_watch->updateWeather(weather);
-		return; // And do not display it the usual way
+	if (priority == Notification::Silent) {
+		return; // Do not display notification in the usual way
 	}
 
 	QDateTime oldThreshold = QDateTime::currentDateTime().addSecs(-_oldNotificationThreshold);
@@ -150,8 +176,9 @@ void WatchServer::postNotification(Notification *notification)
 	if (_pendingNotifications.isEmpty()) {
 		_pendingNotifications.enqueue(notification);
 		nextNotification();
-	} else if (type == Notification::CallNotification) {
-		// Oops, priority!!!!
+	} else if (priority == Notification::Urgent) {
+		// Notification has priority, so we switch to it even if there is
+		// an active notification.
 		_pendingNotifications.prepend(notification);
 		nextNotification();
 	} else {
@@ -162,14 +189,19 @@ void WatchServer::postNotification(Notification *notification)
 void WatchServer::nextNotification()
 {
 	if (!_watch->isConnected()) return;
+	if (_activeWatchlet) {
+		// Deactive active watchlet, if any.
+		deactivateActiveWatchlet();
+	}
 	if (!_pendingNotifications.empty()) {
 		Notification *n = _pendingNotifications.head();
-		if (_currentWatchlet && _currentWatchletActive) {
-			deactivateCurrentWatchlet();
-		}
 		_watch->displayNotification(n);
+		if (_notificationWatchlet) {
+			activateWatchlet(_notificationWatchlet);
+			_notificationWatchlet->openNotification(n);
+		}
 	} else if (_currentWatchlet) {
-		reactivateCurrentWatchlet();
+		activateCurrentWatchlet();
 	} else {
 		goToIdle();
 	}
@@ -177,64 +209,97 @@ void WatchServer::nextNotification()
 
 void WatchServer::runWatchlet(Watchlet *watchlet)
 {
-	Q_ASSERT(watchlet->_server == this);
-	if (_currentWatchlet && _currentWatchletActive) {
-		deactivateCurrentWatchlet();
+	Q_ASSERT(watchlet->watch() == _watch);
+	if (_activeWatchlet) {
+		deactivateActiveWatchlet();
 	}
-	_currentWatchlet = watchlet;
 	if (_watch->isConnected()) {
-		reactivateCurrentWatchlet();
+		activateWatchlet(watchlet);
 	}
 }
 
-void WatchServer::runWatchlet(const QString& id)
+void WatchServer::openWatchlet(Watchlet *watchlet)
+{
+	Q_ASSERT(watchlet->watch() == _watch);
+	if (_activeWatchlet) {
+		deactivateActiveWatchlet();
+	}
+	_currentWatchlet = watchlet;
+	if (_watch->isConnected()) {
+		activateCurrentWatchlet();
+	}
+}
+
+void WatchServer::openWatchlet(const QString& id)
 {
 	Q_ASSERT(_watchletIds.contains(id));
-	runWatchlet(_watchletIds[id]);
+	openWatchlet(_watchletIds[id]);
 }
 
 void WatchServer::closeWatchlet()
 {
 	if (_currentWatchlet) {
-		if (_currentWatchletActive) {
-			deactivateCurrentWatchlet();
+		if (_currentWatchlet == _activeWatchlet) {
+			deactivateActiveWatchlet();
 		}
 		_currentWatchlet = 0;
-		if (_watch->isConnected() && _pendingNotifications.empty()) {
+		if (_watch->isConnected()) {
 			goToIdle();
 		}
 	}
 }
 
-void WatchServer::deactivateCurrentWatchlet()
+void WatchServer::setWatchletProperties(Watchlet *watchlet)
 {
-	Q_ASSERT(_currentWatchlet != 0);
-	Q_ASSERT(_currentWatchletActive);
-	qDebug() << "deactivating watchlet" << _currentWatchlet->id();
-	_currentWatchlet->deactivate();
-	_currentWatchletActive = false;
+	Q_ASSERT(watchlet->watch() == _watch);
+	watchlet->setWatchletsModel(_watchlets);
+	watchlet->setNotificationsModel(_notifications);
 }
 
-void WatchServer::reactivateCurrentWatchlet()
+void WatchServer::unsetWatchletProperties(Watchlet *watchlet)
 {
-	Q_ASSERT(_currentWatchlet != 0);
-	Q_ASSERT(!_currentWatchletActive);
-	qDebug() << "activating watchlet" << _currentWatchlet->id();
+	Q_ASSERT(watchlet->watch() == _watch);
+	watchlet->setWatchletsModel(0);
+	watchlet->setNotificationsModel(0);
+}
+
+void WatchServer::activateWatchlet(Watchlet *watchlet)
+{
+	Q_ASSERT(!_activeWatchlet);
+
+	qDebug() << "activating watchlet" << watchlet->id();
+	_activeWatchlet = watchlet;
+	_activeWatchlet->activate();
+}
+
+void WatchServer::deactivateActiveWatchlet()
+{
+	Q_ASSERT(_activeWatchlet);
+
+	qDebug() << "deactivating watchlet" << _activeWatchlet->id();
+	_activeWatchlet->deactivate();
+	_activeWatchlet = 0;
+}
+
+void WatchServer::activateCurrentWatchlet()
+{
+	Q_ASSERT(_currentWatchlet);
+	Q_ASSERT(!_activeWatchlet);
+
 	_watch->displayApplication();
-	_currentWatchlet->activate();
-	_currentWatchletActive = true;
+	activateWatchlet(_currentWatchlet);
 }
 
 void WatchServer::nextWatchlet()
 {
 	qDebug() << "current watchlet index" << _currentWatchletIndex;
 	_currentWatchletIndex++;
-	if (_currentWatchletIndex >= _watchlets.size() || _currentWatchletIndex < 0) {
+	if (_currentWatchletIndex >= _watchlets->size() || _currentWatchletIndex < 0) {
 		_currentWatchletIndex = -1;
 		closeWatchlet();
 	} else {
-		Watchlet* watchlet = _watchlets.at(_currentWatchletIndex);
-		runWatchlet(watchlet);
+		Watchlet* watchlet = _watchlets->at(_currentWatchletIndex);
+		openWatchlet(watchlet);
 	}
 }
 
@@ -247,18 +312,11 @@ void WatchServer::syncTime()
 	}
 }
 
-uint WatchServer::getNotificationCount(Notification::Type type)
-{
-	return _notifications->fullCountByType(type);
-}
-
 void WatchServer::removeNotification(Notification::Type type, Notification *n)
 {
 	// Warning: This function might be called with n being deleted.
 	_notifications->remove(type, n);
 	_notificationCounts.remove(n);
-
-	_watch->updateNotificationCount(type, getNotificationCount(type));
 
 	if (!_pendingNotifications.isEmpty() && _pendingNotifications.head() == n) {
 		qDebug() << "removing top notification";
@@ -267,12 +325,6 @@ void WatchServer::removeNotification(Notification::Type type, Notification *n)
 	} else {
 		_pendingNotifications.removeAll(n);
 	}
-	if (type == Notification::WeatherNotification) {
-		WeatherNotification* w = static_cast<WeatherNotification*>(n);
-		if (_weather == w) {
-			_weather = 0;
-		}
-	}
 
 	// No longer interested in this notification
 	disconnect(n, 0, this, 0);
@@ -280,8 +332,14 @@ void WatchServer::removeNotification(Notification::Type type, Notification *n)
 
 void WatchServer::goToIdle()
 {
-	Q_ASSERT(!_currentWatchletActive);
+	Q_ASSERT(!_currentWatchlet);
+	if (_activeWatchlet) {
+		deactivateActiveWatchlet();
+	}
 	_watch->displayIdleScreen();
+	if (_idleWatchlet) {
+		activateWatchlet(_idleWatchlet);
+	}
 }
 
 void WatchServer::handleWatchConnected()
@@ -290,7 +348,7 @@ void WatchServer::handleWatchConnected()
 	if (!_pendingNotifications.isEmpty()) {
 		nextNotification();
 	} else if (_currentWatchlet) {
-		reactivateCurrentWatchlet();
+		activateCurrentWatchlet();
 	} else {
 		goToIdle();
 	}
@@ -300,8 +358,8 @@ void WatchServer::handleWatchConnected()
 void WatchServer::handleWatchDisconnected()
 {
 	_syncTimeTimer->stop();
-	if (_currentWatchlet && _currentWatchletActive) {
-		deactivateCurrentWatchlet();
+	if (_activeWatchlet) {
+		deactivateActiveWatchlet();
 	}
 	_pendingNotifications.clear();
 	emit watchDisconnected();
@@ -316,19 +374,27 @@ void WatchServer::handleWatchIdling()
 	}
 }
 
-void WatchServer::handleWatchButtonPress(int button)
+void WatchServer::handleNextWatchletRequested()
 {
-	if (button == _nextWatchletButton) {
-		qDebug() << "next watchlet button pressed";
-		if (_pendingNotifications.empty()) {
-			// No notifications: either app or idle mode.
-			nextWatchlet();
-		} else {
-			// Skip to next notification if any
-			_pendingNotifications.dequeue();
-			nextNotification();
-		}
+	qDebug() << "next watchlet button pressed";
+	if (_pendingNotifications.empty()) {
+		// No notifications: either app or idle mode.
+		nextWatchlet();
+	} else {
+		// Skip to next notification if any
+		_pendingNotifications.dequeue();
+		nextNotification();
 	}
+}
+
+void WatchServer::handleWatchletRequested(const QString &id)
+{
+	openWatchlet(id);
+}
+
+void WatchServer::handleCloseWatchletRequested()
+{
+	closeWatchlet();
 }
 
 void WatchServer::handleNotificationChanged()
@@ -336,27 +402,10 @@ void WatchServer::handleNotificationChanged()
 	QObject *obj = sender();
 	if (obj) {
 		Notification* n = static_cast<Notification*>(obj);
-		const Notification::Type type = n->type();
 		const uint lastCount = _notificationCounts[n];
 		_notificationCounts[n] = n->count();
 
 		qDebug() << "notification changed" << n->title() << "(" << n->count() << ")";
-
-		_watch->updateNotificationCount(type, getNotificationCount(type));
-
-		if (type == Notification::WeatherNotification) {
-			WeatherNotification* w = static_cast<WeatherNotification*>(n);
-			if (!_weather || _weather->dateTime() < w->dateTime()) {
-				// Prefer showing the most recent data
-				_weather = w;
-			}
-			if (_weather == w) {
-				// This is the weather notification we are currently displaying on the watch
-				// Therefore, update the displayed information
-				_watch->updateWeather(w);
-			}
-			return; // Do not display it the usual way
-		}
 
 		if (!_pendingNotifications.isEmpty() && _pendingNotifications.head() == n) {
 			// This is the notification that is being currently signaled on the watch

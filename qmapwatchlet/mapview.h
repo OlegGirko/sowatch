@@ -21,6 +21,7 @@ class MapView : public QDeclarativeItem
 	Q_OBJECT
 	Q_PROPERTY(bool updateEnabled READ updateEnabled WRITE setUpdateEnabled NOTIFY updateEnabledChanged)
 	Q_PROPERTY(int updateInterval READ updateInterval WRITE setUpdateInterval NOTIFY updateIntervalChanged)
+	Q_PROPERTY(bool decolor READ decolor WRITE setDecolor NOTIFY decolorChanged)
 	Q_PROPERTY(qreal zoomLevel READ zoomLevel WRITE setZoomLevel NOTIFY zoomLevelChanged)
 	Q_PROPERTY(QString currentLocationName READ currentLocationName NOTIFY currentLocationNameChanged)
 
@@ -33,6 +34,9 @@ public:
 
 	int updateInterval() const;
 	void setUpdateInterval(int msec);
+
+	bool decolor() const;
+	void setDecolor(bool decolor);
 
 	qreal zoomLevel() const;
 	void setZoomLevel(qreal level);
@@ -49,6 +53,7 @@ signals:
 	void updateIntervalChanged();
 	void zoomLevelChanged();
 	void currentLocationNameChanged();
+	void decolorChanged();
 
 protected:
 	void geometryChanged(const QRectF &newGeometry, const QRectF &oldGeometry);
@@ -61,6 +66,7 @@ private slots:
 
 private:
 	bool _enabled;
+	bool _decolor;
 	QImage _arrow;
 	QGeoMapData *_mapData;
 	QGeoPositionInfoSource *_posSource;

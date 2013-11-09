@@ -9,7 +9,7 @@ Rectangle {
 
 	Column {
 		anchors.fill: parent
-		spacing: 4
+		spacing: 2
 
 		MWTitle {
 			id: title
@@ -23,7 +23,7 @@ Rectangle {
 
 		Rectangle {
 			id: battery
-			x: 12
+			anchors.horizontalCenter: parent.horizontalCenter
 			width: 72
 			height: 16
 

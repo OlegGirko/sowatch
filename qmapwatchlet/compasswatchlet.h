@@ -10,7 +10,7 @@ class CompassWatchlet : public DeclarativeWatchlet
 {
     Q_OBJECT
 public:
-	explicit CompassWatchlet(WatchServer* server);
+	explicit CompassWatchlet(Watch* watch);
 
 	static const QLatin1String myId;
 };

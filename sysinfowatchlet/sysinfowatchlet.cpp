@@ -5,14 +5,14 @@
 using namespace sowatch;
 QTM_USE_NAMESPACE
 
-SysInfoWatchlet::SysInfoWatchlet(WatchServer* server) :
-	DeclarativeWatchlet(server, "com.javispedro.sowatch.sysinfo"),
+SysInfoWatchlet::SysInfoWatchlet(Watch* watch) :
+	DeclarativeWatchlet(watch, "com.javispedro.sowatch.sysinfo"),
 	_devInfo(new QSystemDeviceInfo(this)),
 	_netMgr(new QNetworkConfigurationManager(this))
 {
-	rootContext()->setContextProperty("batteryLevel", 0);
-	rootContext()->setContextProperty("networkName", "");
-	setSource(QUrl(SOWATCH_QML_DIR "/sysinfowatchlet/" + server->watch()->model() + ".qml"));
+	context()->setContextProperty("batteryLevel", 0);
+	context()->setContextProperty("networkName", "");
+	setSource(QUrl(SOWATCH_QML_DIR "/sysinfowatchlet/" + watch->model() + ".qml"));
 	connect(this, SIGNAL(activated()), SLOT(handleActivated()));
 	connect(this, SIGNAL(deactivated()), SLOT(handleDeactivated()));
 }
@@ -35,10 +35,10 @@ void SysInfoWatchlet::updateInformation()
 	QList<QNetworkConfiguration> cfgs = _netMgr->allConfigurations(QNetworkConfiguration::Active);
 	int batteryLevel = _devInfo->batteryLevel();
 	qDebug() << "Updating system information (batteryLevel =" << batteryLevel << "%)";
-	rootContext()->setContextProperty("batteryLevel", batteryLevel);
+	context()->setContextProperty("batteryLevel", batteryLevel);
 	if (cfgs.size() > 0) {
-		rootContext()->setContextProperty("networkName", cfgs[0].name());
+		context()->setContextProperty("networkName", cfgs[0].name());
 	} else {
-		rootContext()->setContextProperty("networkName", "-");
+		context()->setContextProperty("networkName", "-");
 	}
 }

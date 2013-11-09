@@ -20,6 +20,7 @@ MWPage {
 		anchors.bottom: parent.bottom
 		clip: true
 		model: MessageModel {
+			id: model
 			sortBy: MessageModel.Timestamp
 			sortOrder: MessageModel.DescendingOrder
 			filter: MessageIntersectionFilter {
@@ -32,6 +33,16 @@ MWPage {
 						type: MessageFilter.StandardFolder
 						comparator: MessageFilter.Equal
 						value: MessageFilter.InboxFolder
+					}
+					MessageFilter {
+						type: MessageFilter.Status
+						comparator: MessageFilter.Includes
+						value: MessageFilter.Incoming
+					}
+					MessageFilter {
+						type: MessageFilter.Status
+						comparator: MessageFilter.Excludes
+						value: MessageFilter.Removed
 					}
 			}
 			limit: 20

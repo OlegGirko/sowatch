@@ -13,6 +13,9 @@
 namespace sowatch
 {
 
+class WatchletsModel;
+class NotificationsModel;
+
 class SOWATCH_EXPORT Watch : public QObject, public QPaintDevice
 {
 	Q_OBJECT
@@ -41,7 +44,9 @@ public:
 	virtual void setDateTime(const QDateTime& dateTime) = 0;
 	/** Asynchronously queries battery date/time from the watch; once the
 	 *  query is finished, dateTimeChanged() will be signaled and dateTime()
-	 *  will return the updated value. */
+	 *  will return the updated value.
+	 *  This is not mandatory and returning currentDateTime() is just fine.
+     */
 	virtual void queryDateTime() = 0;
 	/** Gets the current date/time as last fetched from the watch. */
 	virtual QDateTime dateTime() const = 0;
@@ -55,11 +60,8 @@ public:
 	virtual void queryCharging() = 0;
 	virtual bool charging() const = 0;
 
-	/** Tells the watch to update the unread notifications count, if visible. */
-	virtual void updateNotificationCount(Notification::Type type, int count) = 0;
-
-	/** Tells the watch to update the current weather forecast, if visible. */
-	virtual void updateWeather(WeatherNotification* weather) = 0;
+	virtual void setWatchletsModel(WatchletsModel *model);
+	virtual void setNotificationsModel(NotificationsModel *model);
 
 public slots:
 	/** Go back to the idle screen. */
@@ -89,6 +91,12 @@ signals:
 	void buttonPressed(int button);
 	/** A button has been pressed and then released. */
 	void buttonReleased(int button);
+	/** Emitted when e.g. either via the watch menu, or similar, advancing watchlet carrousel is requested. */
+	void nextWatchletRequested();
+	/** Emitted when e.g. either via the watch menu, or similar, a given watchlet is requested. */
+	void watchletRequested(const QString& id);
+	/** Emitted when closing the current watchlet is requested. */
+	void closeWatchledRequested();
 };
 
 }

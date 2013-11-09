@@ -34,7 +34,8 @@ SOURCES += \
     allwatchscanner.cpp \
     configkey.cpp \
     gconfkey.cpp \
-    notificationsmodel.cpp
+    notificationsmodel.cpp \
+    watchletsmodel.cpp
 
 HEADERS += \
     watchserver.h \
@@ -57,7 +58,8 @@ HEADERS += \
     allwatchscanner.h \
     configkey.h \
     gconfkey.h \
-    notificationsmodel.h
+    notificationsmodel.h \
+    watchletsmodel.h
 
 TRANSLATIONS += libsowatch_en.ts libsowatch_es.ts
 

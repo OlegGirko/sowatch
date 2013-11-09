@@ -1,4 +1,5 @@
 #include "testnotification.h"
+#include "testweathernotification.h"
 #include "testnotificationprovider.h"
 
 using namespace sowatch;
@@ -9,17 +10,18 @@ TestNotificationProvider::TestNotificationProvider(QObject *parent) :
     NotificationProvider(parent),
     _timer(new QTimer(this))
 {
-	QTimer::singleShot(1000, this, SLOT(generateInitialNotification()));
-	QTimer::singleShot(1200, this, SLOT(generateNotification()));
-	QTimer::singleShot(1400, this, SLOT(generateNotification()));
-	QTimer::singleShot(1600, this, SLOT(generateNotification()));
-	QTimer::singleShot(1800, this, SLOT(generateNotification()));
-	QTimer::singleShot(2000, this, SLOT(generateNotification()));
-	QTimer::singleShot(2200, this, SLOT(generateNotification()));
-	QTimer::singleShot(2400, this, SLOT(generateInitialNotification()));
+	const int initial_delay = 2000;
+	const int burst_num = 1;
+	const int burst_delay = 500;
+	const int extra_delay = 100 * 1000;
+	QTimer::singleShot(initial_delay, this, SLOT(generateInitialNotification()));
+	QTimer::singleShot(initial_delay + 100, this, SLOT(generateWeatherNotification()));
+	for (int i = 0; i < burst_num; i++) {
+		QTimer::singleShot(initial_delay + burst_delay * (i+1), this, SLOT(generateNotification()));
+	}
 	connect(_timer, SIGNAL(timeout()), SLOT(generateNotification()));
-	_timer->setInterval(60000);
-	//_timer->start();
+	_timer->setInterval(extra_delay);
+	_timer->start();
 }
 
 TestNotificationProvider::~TestNotificationProvider()
@@ -28,9 +30,15 @@ TestNotificationProvider::~TestNotificationProvider()
 
 void TestNotificationProvider::generateInitialNotification()
 {
-	TestNotification *n = new TestNotification(Notification::EmailNotification,
+	TestNotification *n = new TestNotification(Notification::MissedCallNotification,
 	                                           "A friend",
 	                                           "This is a test email notification");
+	emit incomingNotification(n);
+}
+
+void TestNotificationProvider::generateWeatherNotification()
+{
+	TestWeatherNotification *n = new TestWeatherNotification;
 	emit incomingNotification(n);
 }
 

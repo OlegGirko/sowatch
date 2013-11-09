@@ -88,21 +88,37 @@ void WatchesModel::addFoundWatch(const QVariantMap &info)
 	QString name = base.arg("");
 	int num = 1;
 
+	// Create the setting keys in numerical order
+	// e.g. if watch1 is already existing, use watch2, etc.
 	while (existing.contains(name)) {
 		num++;
 		name = base.arg(num);
 	}
 
-	// Load the autodetected settings
+	// Load the autodetected settings into the new key
 	ConfigKey* newkey = _config->getSubkey(name);
 	foreach (const QString& key, info.keys()) {
 		newkey->set(key, info[key]);
 	}
 
 	// Set some defaults
+	const QString watchModel = info["model"].toString();
 	Registry *registry = Registry::registry();
+
 	newkey->set("providers", registry->allNotificationProviders());
-	newkey->set("watchlets", registry->allWatchlets());
+
+	QStringList allWatchlets = registry->allWatchlets();
+	QStringList configuredWatchlets;
+	foreach(const QString& watchletId, allWatchlets) {
+		WatchletPluginInterface *plugin = registry->getWatchletPlugin(watchletId);
+		if (plugin) {
+			WatchletPluginInterface::WatchletInfo info = plugin->describeWatchlet(watchletId, watchModel);
+			if (info.visible) {
+				configuredWatchlets += watchletId;
+			}
+		}
+	}
+	newkey->set("watchlets", configuredWatchlets);
 
 	// Now add to the watches list
 	QStringList active = _watches_list->value().toStringList();

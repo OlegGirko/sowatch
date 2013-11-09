@@ -115,12 +115,14 @@ Rectangle {
 				volumeBar.show();
 				break;
 			}
-			case 4:
+			case 3: {
 				player.playPause();
 				break;
-			case 5:
+			}
+			case 4: {
 				player.next();
 				break;
+			}
 			}
 		}
 	}

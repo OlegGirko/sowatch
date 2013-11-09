@@ -15,7 +15,9 @@ HEADERS += qmafwwatchlet.h \
     qmafwwatchletplayer.h \
     qmafwwatchletvolumecontrol.h
 
-qml_files.files = metawatch-digital.qml icon.png volume.png
+qml_files.files = icon.png volume.png \
+	metawatch-digital.qml metawatch-digital-icon.png \
+	liveview.qml liveview-icon.png
 
 LIBS += -L$$OUT_PWD/../libsowatch/ -lsowatch
 INCLUDEPATH += $$PWD/../libsowatch

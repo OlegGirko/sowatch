@@ -10,7 +10,7 @@ class NotificationsWatchlet : public DeclarativeWatchlet
 {
     Q_OBJECT
 public:
-	explicit NotificationsWatchlet(WatchServer* server);
+	explicit NotificationsWatchlet(Watch* watch);
 };
 
 }

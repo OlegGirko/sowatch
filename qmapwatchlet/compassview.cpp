@@ -75,7 +75,9 @@ qreal CompassView::currentAltitude() const
 
 void CompassView::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
+	Q_UNUSED(option);
 	Q_UNUSED(widget);
+
 	// Now render the arrow indicator
 	const int centerX = _size.width() / 2, centerY = _size.height() / 2;
 

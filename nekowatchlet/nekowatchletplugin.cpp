@@ -19,20 +19,22 @@ QStringList NekoWatchletPlugin::watchlets()
 	return l;
 }
 
-WatchletPluginInterface::WatchletInfo NekoWatchletPlugin::describeWatchlet(const QString &id)
+WatchletPluginInterface::WatchletInfo NekoWatchletPlugin::describeWatchlet(const QString &id, const QString &watchModel)
 {
 	WatchletInfo info;
 	if (id != NekoWatchlet::myId) return info;
 	info.name = "Neko";
-	info.icon = QUrl::fromLocalFile(SOWATCH_QML_DIR "/nekowatchlet/icon.png");
+	info.icon = QUrl::fromLocalFile(SOWATCH_QML_DIR "/nekowatchlet/" + watchModel + "-icon.png");
+	info.phoneIcon = QUrl::fromLocalFile(SOWATCH_QML_DIR "/nekowatchlet/icon.png");
+	info.visible = true;
 	return info;
 }
 
-Watchlet* NekoWatchletPlugin::getWatchlet(const QString& driver, ConfigKey *settings, WatchServer *server)
+Watchlet* NekoWatchletPlugin::getWatchlet(const QString& driver, ConfigKey *settings, Watch *watch)
 {
 	Q_UNUSED(driver);
 	Q_UNUSED(settings);
-	return new NekoWatchlet(server);
+	return new NekoWatchlet(watch);
 }
 
 Q_EXPORT_PLUGIN2(notificationswatchlet, NekoWatchletPlugin)

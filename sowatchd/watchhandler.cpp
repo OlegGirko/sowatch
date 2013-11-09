@@ -4,7 +4,9 @@ using namespace sowatch;
 
 WatchHandler::WatchHandler(ConfigKey *config, QObject *parent)
     : QObject(parent),
-      _config(config->getSubkey("", this))
+      _config(config->getSubkey("", this)),
+      _watch(0),
+      _server(0)
 {
 	Registry *registry = Registry::registry();
 
@@ -32,7 +34,6 @@ WatchHandler::WatchHandler(ConfigKey *config, QObject *parent)
 		return;
 	}
 
-
 	WatchPluginInterface *watchPlugin = registry->getWatchPlugin(driver);
 	if (!watchPlugin) {
 		qWarning() << "Invalid driver" << driver;
@@ -56,7 +57,21 @@ WatchHandler::WatchHandler(ConfigKey *config, QObject *parent)
 	_server = new WatchServer(_watch, this);
 
 	// Configure the server
-	_server->setNextWatchletButton(_config->value("next-watchlet-button").toString());
+	QString idle_watchlet_id = _config->value("idle-watchlet").toString();
+	if (!idle_watchlet_id.isEmpty()) {
+		Watchlet *watchlet = createWatchlet(idle_watchlet_id);
+		if (watchlet) {
+			_server->setIdleWatchlet(watchlet);
+		}
+	}
+
+	QString notif_watchlet_id = _config->value("notification-watchlet").toString();
+	if (!notif_watchlet_id.isEmpty()) {
+		Watchlet *watchlet = createWatchlet(notif_watchlet_id);
+		if (watchlet) {
+			_server->setNotificationWatchlet(watchlet);
+		}
+	}
 
 	updateProviders();
 	updateWatchlets();
@@ -83,7 +98,7 @@ Watchlet* WatchHandler::createWatchlet(const QString &id)
 	}
 
 	ConfigKey *subconfig = _config->getSubkey(id);
-	Watchlet* watchlet = plugin->getWatchlet(id, subconfig, _server);
+	Watchlet* watchlet = plugin->getWatchlet(id, subconfig, _watch);
 	delete subconfig;
 
 	return watchlet;
@@ -200,8 +215,22 @@ void WatchHandler::handleConfigSubkeyChanged(const QString &subkey)
 	} else if (subkey == "providers") {
 		qDebug() << "Providers list changed";
 		updateProviders();
-	} else if (subkey == "next-watchlet-button" && _server) {
-		_server->setNextWatchletButton(_config->value("next-watchlet-button").toString());
+	} else if (subkey == "idle-watchlet" && _server) {
+		qDebug() << "Idle watchlet changed";
+		QString id(_config->value("idle-watchlet").toString());
+		if (!id.isEmpty()) {
+			_server->setIdleWatchlet(createWatchlet(id));
+		} else {
+			_server->setIdleWatchlet(0);
+		}
+	} else if (subkey == "notification-watchlet" && _server) {
+		qDebug() << "Notification watchlet changed";
+		QString id(_config->value("notification-watchlet").toString());
+		if (!id.isEmpty()) {
+			_server->setNotificationWatchlet(createWatchlet(id));
+		} else {
+			_server->setNotificationWatchlet(0);
+		}
 	}
 }
 

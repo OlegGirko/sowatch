@@ -60,5 +60,7 @@ int main(int argc, char *argv[])
 		qCritical("Could not register daemon object");
 	}
 
+	qDebug("sowatchd is now running");
+
 	return app.exec();
 }

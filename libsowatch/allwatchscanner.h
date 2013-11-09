@@ -9,6 +9,7 @@
 namespace sowatch
 {
 
+/** This is just a simple wrapper class that runs all registered WatchScanners */
 class AllWatchScanner : public WatchScanner
 {
 	Q_OBJECT

@@ -5,10 +5,12 @@ CONFIG += mobility
 MOBILITY += systeminfo
 
 SOURCES += testnotificationplugin.cpp testnotificationprovider.cpp \
-    testnotification.cpp
+    testnotification.cpp \
+    testweathernotification.cpp
 
 HEADERS += testnotificationplugin.h testnotificationprovider.h \
-    testnotification.h
+    testnotification.h \
+    testweathernotification.h
 
 unix: LIBS += -L$$OUT_PWD/../libsowatch/ -lsowatch
 INCLUDEPATH += $$PWD/../libsowatch

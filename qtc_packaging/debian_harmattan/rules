@@ -49,8 +49,9 @@ install: build
 	dh_clean -k 
 	dh_installdirs
 
-	$(MAKE) INSTALL_ROOT="$(CURDIR)"/debian/sowatch install
-
+	$(MAKE) INSTALL_ROOT="$(CURDIR)/debian/sowatch" install
+	mkdir -p "$(CURDIR)/debian/sowatch-dev/usr"
+	mv "$(CURDIR)/debian/sowatch/usr/include" "$(CURDIR)/debian/sowatch-dev/usr"
 
 # Build architecture-independent files here.
 binary-indep: build install
@@ -60,20 +61,15 @@ binary-indep: build install
 binary-arch: build install
 	dh_testdir
 	dh_testroot
-	dh_installchangelogs 
+	dh_installchangelogs
 	dh_installdocs
-	dh_installexamples
-#	dh_install
-#	dh_installmime
-#	dh_installinit
-	dh_installman
 	dh_link
 	dh_strip
 	dh_compress
 	dh_fixperms
-	dh_makeshlibs
+	# dh_makeshlibs # Uncomment this line for use without Qt Creator
 	dh_installdeb
-	# dh_shlibdeps # Uncomment this line for use without Qt Creator
+	# dh_shlibdeps -l/opt/sowatch/lib # Uncomment this line for use without Qt Creator
 	dh_gencontrol
 	dh_md5sums
 	dh_builddeb

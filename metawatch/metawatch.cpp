@@ -7,13 +7,10 @@ using namespace sowatch;
 QTM_USE_NAMESPACE
 
 #define SINGLE_LINE_UPDATE 0
+#define PROTOCOL_DEBUG 0
 
 const char MetaWatch::btnToWatch[8] = {
 	0, 1, 2, 3, 5, 6, -1, -1
-};
-
-const int MetaWatch::connectRetryTimes[] = {
-	5, 10, 30, 60, 120, 300
 };
 
 const quint8 MetaWatch::bitRevTable[16] = {
@@ -78,27 +75,27 @@ const quint16 MetaWatch::crcTable[256] = {
 #endif
 
 MetaWatch::MetaWatch(ConfigKey* settings, QObject* parent) :
-    Watch(parent),
-    _settings(settings->getSubkey(QString(), this)),
+	BluetoothWatch(QBluetoothAddress(settings->value("address").toString()), parent),
+	_settings(settings->getSubkey(QString(), this)),
 	_idleTimer(new QTimer(this)), _ringTimer(new QTimer(this)),
-	_watchTime(), _watchBattery(0), _watchBatteryAverage(0), _watchCharging(false),
+	_watchTime(), _watchBattery(0), _watchCharging(false),
 	_currentMode(IdleMode),	_paintMode(IdleMode),
 	_paintEngine(0),
-	_connectRetries(0),	_connected(false),
-	_connectTimer(new QTimer(this)),
-	_connectAlignedTimer(new QSystemAlignedTimer(this)),
-	_socket(0),
 	_sendTimer(new QTimer(this))
 {
+	// Read current device settings
 	connect(_settings, SIGNAL(subkeyChanged(QString)), SLOT(settingChanged(QString)));
 
-	_address = QBluetoothAddress(settings->value("address").toString());
 	_notificationTimeout = settings->value("notification-timeout", 15).toInt();
 	_24hMode = settings->value("24h-mode", false).toBool();
 	_dayMonthOrder = settings->value("day-month-order", false).toBool();
+	_showSeconds = settings->value("show-seconds", false).toBool();
+	_separationLines = false; // Seems to be v2 UI only
+	_autoBacklight = settings->value("auto-backlight", false).toBool();
 
 	_buttonNames << "A" << "B" << "C" << "D" << "E" << "F";
 
+	// Configure timers (but do not turn them on yet)
 	_idleTimer->setInterval(_notificationTimeout * 1000);
 	_idleTimer->setSingleShot(true);
 	connect(_idleTimer, SIGNAL(timeout()), SIGNAL(idling()));
@@ -106,24 +103,12 @@ MetaWatch::MetaWatch(ConfigKey* settings, QObject* parent) :
 	_ringTimer->setInterval(DelayBetweenRings);
 	connect(_ringTimer, SIGNAL(timeout()), SLOT(timedRing()));
 
-	_connectTimer->setSingleShot(true);
-	_connectAlignedTimer->setSingleShot(true);
-	connect(_connectTimer, SIGNAL(timeout()), SLOT(timedReconnect()));
-	connect(_connectAlignedTimer, SIGNAL(timeout()), SLOT(timedReconnect()));
-
 	_sendTimer->setInterval(DelayBetweenMessages);
 	connect(_sendTimer, SIGNAL(timeout()), SLOT(timedSend()));
-
-	// Do an initial connection attempt after a short delay
-	_connectTimer->start(100);
 }
 
 MetaWatch::~MetaWatch()
 {
-	if (_socket) {
-		_socket->close();
-		delete _socket;
-	}
 	if (_paintEngine) {
 		delete _paintEngine;
 	}
@@ -132,7 +117,7 @@ MetaWatch::~MetaWatch()
 QPaintEngine* MetaWatch::paintEngine() const
 {
 	if (!_paintEngine) {
-		_paintEngine = new MetaWatchPaintEngine(const_cast<MetaWatch*>(this));
+		_paintEngine = new MetaWatchPaintEngine;
 	}
 
 	return _paintEngine;
@@ -146,11 +131,6 @@ QString MetaWatch::model() const
 QStringList MetaWatch::buttons() const
 {
 	return _buttonNames;
-}
-
-bool MetaWatch::isConnected() const
-{
-	return _connected;
 }
 
 bool MetaWatch::busy() const
@@ -170,7 +150,7 @@ void MetaWatch::setDateTime(const QDateTime &dateTime)
 	msg.data[1] = date.year() & 0xFF;
 	msg.data[2] = date.month();
 	msg.data[3] = date.day();
-	// Qt week starts on Monday([1-7]), MW starts on Sunday([0-6]).
+	// Qt week starts on Monday([1-7]), MetaWatch week starts on Sunday([0-6]).
 	msg.data[4] = date.dayOfWeek() % 7;
 	msg.data[5] = time.hour();
 	msg.data[6] = time.minute();
@@ -198,12 +178,7 @@ void MetaWatch::queryBatteryLevel()
 
 int MetaWatch::batteryLevel() const
 {
-	// TODO This "estimation" is quite awful, could be way more accurate.
-	int level = (_watchBatteryAverage - 3500) / (4100-3500);
-	if (level < 0) level = 0;
-	if (level > 100) level = 100;
-
-	return level;
+	return _watchBattery;
 }
 
 void MetaWatch::queryCharging()
@@ -217,23 +192,12 @@ bool MetaWatch::charging() const
 	return _watchCharging;
 }
 
-void MetaWatch::updateNotificationCount(Notification::Type type, int count)
-{
-	Q_UNUSED(type);
-	Q_UNUSED(count);
-	// Default implementation does nothing
-}
-
-void MetaWatch::updateWeather(WeatherNotification *weather)
-{
-	Q_UNUSED(weather);
-	// Default implementation does nothing
-}
-
 void MetaWatch::displayIdleScreen()
 {
 	_currentMode = IdleMode;
 	_paintMode = IdleMode;
+	changeMode(_currentMode);
+
 	_ringTimer->stop();
 	_idleTimer->stop();
 	setVibrateMode(false, 0, 0, 0);
@@ -243,6 +207,8 @@ void MetaWatch::displayNotification(Notification *notification)
 {
 	_currentMode = NotificationMode;
 	_paintMode = NotificationMode;
+	changeMode(_currentMode);
+
 	if (notification->type() == Notification::CallNotification) {
 		timedRing();
 		_ringTimer->start();
@@ -258,6 +224,8 @@ void MetaWatch::displayApplication()
 {
 	_currentMode = ApplicationMode;
 	_paintMode = ApplicationMode;
+	changeMode(_currentMode);
+
 	_ringTimer->stop();
 	_idleTimer->stop();
 }
@@ -294,6 +262,33 @@ void MetaWatch::ungrabButton(Mode mode, Button button)
 	disableButton(mode, button, PressAndRelease);
 }
 
+void MetaWatch::setupBluetoothWatch()
+{
+	_partialReceived.type = NoMessage;
+	_partialReceived.data.clear();
+	_currentMode = IdleMode;
+	_paintMode = IdleMode;
+
+	if (_socket) {
+		// If we are running under the simulator, there might not be
+		// a socket.
+		connect(_socket, SIGNAL(readyRead()),
+	        SLOT(dataReceived()));
+	}
+
+	// Configure the watch according to user preferences
+	updateWatchProperties();
+
+	// Sync watch date & time
+	setDateTime(QDateTime::currentDateTime());
+}
+
+void MetaWatch::desetupBluetoothWatch()
+{
+	_toSend.clear();
+	_sendTimer->stop();
+}
+
 quint16 MetaWatch::calcCrc(const QByteArray &data, int size)
 {
 	quint16 remainder = 0xFFFF;
@@ -322,22 +317,6 @@ quint16 MetaWatch::calcCrc(const Message& msg)
 	return calcCrc(data, msgSize + 4);
 }
 
-void MetaWatch::retryConnect()
-{
-	delete _socket;
-	_socket = new QBluetoothSocket(QBluetoothSocket::RfcommSocket);
-
-	connect(_socket, SIGNAL(connected()), SLOT(socketConnected()));
-	connect(_socket, SIGNAL(disconnected()), SLOT(socketDisconnected()));
-	connect(_socket, SIGNAL(readyRead()), SLOT(socketData()));
-	connect(_socket, SIGNAL(error(QBluetoothSocket::SocketError)),
-			SLOT(socketError(QBluetoothSocket::SocketError)));
-	connect(_socket, SIGNAL(stateChanged(QBluetoothSocket::SocketState)),
-			SLOT(socketState(QBluetoothSocket::SocketState)));
-
-	_socket->connectToService(_address, 1, QIODevice::ReadWrite | QIODevice::Unbuffered);
-}
-
 void MetaWatch::send(const Message &msg)
 {
 	_toSend.enqueue(msg);
@@ -358,38 +337,24 @@ void MetaWatch::sendIfNotQueued(const Message& msg)
 	send(msg);
 }
 
-uint MetaWatch::nvalSize(NvalValue value)
+void MetaWatch::updateWatchProperties()
 {
-	switch (value) {
-	case ReservedNval:
-	case LinkKey:
-		return 0;
-	case IdleBufferConfiguration:
-		return 1;
-	case TimeFormat:
-	case DateFormat:
-	case DisplaySeconds:
-		return 1;
-	}
-	return 0;
-}
+	quint8 optBits = 0;
 
-void MetaWatch::nvalWrite(NvalValue value, int data)
-{
-	uint id = static_cast<uint>(value);
-	int size = nvalSize(value);
-	Q_ASSERT(size > 0);
+	if (_24hMode)
+		optBits |= 1 << 0;
+	if (_dayMonthOrder)
+		optBits |= 1 << 1;
+	if (_showSeconds)
+		optBits |= 1 << 2;
+	if (_separationLines)
+		optBits |= 1 << 3;
+	if (_autoBacklight)
+		optBits |= 1 << 4;
 
-	// Do a read operation first to get the current value
-	// If the current value matches what we want, avoid rewriting it to flash.
-	Message msg(NvalOperation, QByteArray(3, 0), 1);
+	qDebug() << "Setting watch properties to" << optBits;
 
-	msg.data[0] = id & 0xFF;
-	msg.data[1] = id >> 8;
-	msg.data[2] = size;
-
-	_nvals[value] = data;
-	send(msg);
+	send(Message(PropertyOperation, QByteArray(), optBits));
 }
 
 void MetaWatch::setVibrateMode(bool enable, uint on, uint off, uint cycles)
@@ -408,7 +373,7 @@ void MetaWatch::setVibrateMode(bool enable, uint on, uint off, uint cycles)
 
 void MetaWatch::updateLcdLine(Mode mode, const QImage& image, int line)
 {
-	Message msg(WriteLcdBuffer, QByteArray(13, 0), (1 << 4) | (mode & 0xF));
+	Message msg(WriteLcdBuffer, QByteArray(13, 0), (1 << 4) | (mode & 0x3));
 	const char * scanLine = (const char *) image.constScanLine(line);
 
 	msg.data[0] = line;
@@ -419,7 +384,7 @@ void MetaWatch::updateLcdLine(Mode mode, const QImage& image, int line)
 
 void MetaWatch::updateLcdLines(Mode mode, const QImage& image, int lineA, int lineB)
 {
-	Message msg(WriteLcdBuffer, QByteArray(26, 0), mode & 0xF);
+	Message msg(WriteLcdBuffer, QByteArray(26, 0), mode & 0x3);
 	const char * scanLine = (const char *) image.constScanLine(lineA);
 
 	msg.data[0] = lineA;
@@ -467,22 +432,30 @@ void MetaWatch::updateLcdLines(Mode mode, const QImage& image, const QVector<boo
 
 void MetaWatch::configureLcdIdleSystemArea(bool entireScreen)
 {
-	Message msg(ConfigureLcdIdleBufferSize, QByteArray(26, 0));
-	msg.data[0] = entireScreen ? 1 : 0;
+	Message msg(ConfigureLcdIdleBufferSize, QByteArray(1, entireScreen ? 1 : 0));
 	send(msg);
 }
 
-void MetaWatch::updateLcdDisplay(Mode mode, bool copy)
+void MetaWatch::updateLcdDisplay(Mode mode, int startRow, int numRows)
 {
-	Message msg(UpdateLcdDisplay, QByteArray(),
-				(copy ? 0x10 : 0) | (mode & 0xF));
+	Message msg(UpdateLcdDisplay, QByteArray(), mode & 0x3);
+	if (startRow != 0 || numRows != 0) {
+		msg.data = QByteArray(2, 0);
+		msg.data[0] = startRow;
+		msg.data[1] = numRows;
+	}
 	send(msg);
 }
 
 void MetaWatch::loadLcdTemplate(Mode mode, int templ)
 {
-	Message msg(LoadLcdTemplate, QByteArray(1, templ), mode & 0xF);
+	Message msg(LoadLcdTemplate, QByteArray(1, templ), mode & 0x3);
 	send(msg);
+}
+
+void MetaWatch::changeMode(Mode mode)
+{
+	send(Message(ChangeMode, QByteArray(), mode & 0x3));
 }
 
 void MetaWatch::enableButton(Mode mode, Button button, ButtonPress press)
@@ -524,8 +497,8 @@ void MetaWatch::handleMessage(const Message &msg)
 	case GetRealTimeClockResponse:
 		handleRealTimeClockMessage(msg);
 		break;
-	case NvalOperationResponse:
-		handleNvalOperationMessage(msg);
+	case PropertyOperationResponse:
+		handlePropertyOperationMessage(msg);
 		break;
 	case StatusChangeEvent:
 		handleStatusChangeMessage(msg);
@@ -568,77 +541,21 @@ void MetaWatch::handleRealTimeClockMessage(const Message &msg)
 	emit dateTimeChanged();
 }
 
-void MetaWatch::handleNvalOperationMessage(const Message& msg)
+void MetaWatch::handlePropertyOperationMessage(const Message& msg)
 {
-	Q_ASSERT(msg.type == NvalOperationResponse);
+	Q_ASSERT(msg.type == PropertyOperationResponse);
 
-	// Nval operation response packet format is:
-	//  2 bytes for id
-	//  Rest for contents
-
-	if (msg.data.size() < 2) {
-		qWarning() << "NVAL operation response too short";
-	}
-
-	uint id = ((msg.data[1] & 0xFF) << 8) | (msg.data[0] & 0xFF);
-	NvalValue value = static_cast<NvalValue>(id);
-
-	qDebug() << "nval operation response for value" << hex << value;
-
-	switch (msg.options) {
-	case 0: // Success
-	{
-		int got_size = msg.data.size() - 2;
-		int size = nvalSize(value);
-		if (got_size != size) {
-			qWarning() << "Unexpected NVAL size" << got_size;
-			return;
-		}
-		// Read it
-		int data;
-		switch (size) {
-		case 1:
-			data = msg.data[2];
-			break;
-		default:
-			qWarning() << "Yet to implement this nval size";
-			return;
-		}
-
-		// Check if there's a pending write for this nval.
-		if (_nvals.contains(value)) {
-			int new_data = _nvals[value];
-			qDebug() << "nval" << hex << value << "currently =" << dec << data << "is pending write to =" << new_data;
-			if (new_data != data) {
-				realNvalWrite(value, _nvals[value]);
-			} else {
-				qDebug() << " not rewriting it";
-			}
-			_nvals.remove(value);
-		}
-	}
-	break;
-	case 1: // Failure
-		qWarning() << "NVAL operation failed";
-		break;
-	case 0x9:
-		qWarning() << "NVAL operation failed: Identifier not found";
-		break;
-	case 0xA:
-		qWarning() << "NVAL operation failed: Operation failed";
-		break;
-	case 0xC:
-		qWarning() << "NVAL operation failed: Bad Item length";
-		break;
-	default:
-		qWarning() << "NVAL operation unknown response: " << msg.options;
-		break;
+	qDebug() << "got property operation result message";
+	if (msg.options != 0) {
+		qWarning() << "set property operation failed";
 	}
 }
 
 void MetaWatch::handleStatusChangeMessage(const Message &msg)
 {
-	Q_UNUSED(msg);
+	Q_ASSERT(msg.type == StatusChangeEvent);
+
+	// TODO: Maybe something could be done...
 	qDebug() << "got status change message";
 }
 
@@ -660,7 +577,11 @@ void MetaWatch::handleButtonEventMessage(const Message &msg)
 	qDebug() << "button event" << button << " (" << press << ")";
 
 	if (press == PressOnly) {
-		emit buttonPressed(button);
+		if (button == BtnA) { // This is the next watchlet button
+			emit nextWatchletRequested();
+		} else {
+			emit buttonPressed(button);
+		}
 	} else if (press == PressAndRelease) {
 		emit buttonReleased(button);
 	}
@@ -673,16 +594,24 @@ void MetaWatch::handleBatteryVoltageMessage(const Message &msg)
 		qWarning() << "Short battery voltage response:" << msg.data.size();
 		return;
 	}
-	_watchCharging = msg.data[1];
-	_watchBattery = ((msg.data[3] & 0xFF) << 8) | (msg.data[2] & 0xFF);
-	_watchBatteryAverage = ((msg.data[5] & 0xFF) << 8) | (msg.data[4] & 0xFF);
+	bool charging = msg.data[1];
+	unsigned char level = msg.data[2];
 
-	qDebug() << "got battery voltage" << _watchBattery << "mV "
-			 << "average" << _watchBatteryAverage << "mV "
+	qDebug() << "got battery level" << level << "% "
 			 << (_watchCharging ? "charging" : "discharging");
 
-	emit chargingChanged();
-	emit batteryLevelChanged();
+	// Just in case
+	if (level > 100) level = 100;
+
+	// Emit changed() signals as necessary
+	if (charging != _watchCharging) {
+		_watchCharging = charging;
+		emit chargingChanged();
+	}
+	if (level != _watchBattery) {
+		_watchBattery = level;
+		emit batteryLevelChanged();
+	}
 }
 
 void MetaWatch::settingChanged(const QString &key)
@@ -695,97 +624,34 @@ void MetaWatch::settingChanged(const QString &key)
 		_notificationTimeout = _settings->value(key, 15).toInt();
 	} else if (key == "day-month-order") {
 		_dayMonthOrder = _settings->value(key, false).toBool();
-		if (isConnected()) {
-			nvalWrite(DateFormat, _dayMonthOrder ? 1 : 0);
-		}
+		if (isConnected()) updateWatchProperties();
 	} else if (key == "24h-mode") {
 		_24hMode = _settings->value(key, false).toBool();
-		if (isConnected()) {
-			nvalWrite(TimeFormat, _24hMode ? 1 : 0);
-		}
+		if (isConnected()) updateWatchProperties();
+	} else if (key == "show-seconds") {
+		_showSeconds = _settings->value(key, false).toBool();
+		if (isConnected()) updateWatchProperties();
+	} else if (key == "auto-backlight") {
+		_autoBacklight = _settings->value(key, false).toBool();
+		if (isConnected()) updateWatchProperties();
 	}
 }
 
-void MetaWatch::socketConnected()
-{
-	if (!_connected) {
-		qDebug() << "connected";
-
-		_connected = true;
-		_connectRetries = 0;
-		_partialReceived.type = NoMessage;
-		_partialReceived.data.clear();
-		_currentMode = IdleMode;
-		_paintMode = IdleMode;
-
-		// Configure the watch according to user preferences
-		nvalWrite(TimeFormat, _24hMode ? 1 : 0);
-		nvalWrite(DateFormat, _dayMonthOrder ? 1 : 0);
-
-		// Sync watch date & time
-		setDateTime(QDateTime::currentDateTime());
-
-		// Call the MetaWatch Model-specific setup routines
-		handleWatchConnected();
-
-		emit connected();
-	}
-}
-
-void MetaWatch::socketDisconnected()
-{
-	if (_connected) {
-		qDebug() << "disconnected";
-
-		_connected = false;
-		_toSend.clear();
-		_sendTimer->stop();
-
-		emit disconnected();
-	}
-
-	int timeToNextRetry;
-	if (_connectRetries >= connectRetryTimesSize) {
-		timeToNextRetry = connectRetryTimes[connectRetryTimesSize - 1];
-	} else {
-		timeToNextRetry = connectRetryTimes[_connectRetries];
-		_connectRetries++;
-	}
-	qDebug() << "Backing off for" << timeToNextRetry << "seconds for next retry";
-	_connectAlignedTimer->start(timeToNextRetry / 2, timeToNextRetry * 2);
-	if (_connectAlignedTimer->lastError() != QSystemAlignedTimer::NoError) {
-		// I would like to know why QtM couldn't _emulate_ here using a QTimer by itself.
-		qDebug() << "Note: using plain QTimer for retry";
-		_connectTimer->start(timeToNextRetry * 1000);
-	}
-}
-
-void MetaWatch::socketData()
+void MetaWatch::dataReceived()
 {
 	realReceive(false);
 }
 
-void MetaWatch::socketError(QBluetoothSocket::SocketError error)
-{
-	qWarning() << "Socket error:" << error;
-}
-
-void MetaWatch::socketState(QBluetoothSocket::SocketState error)
-{
-	qDebug() << "socket is in" << error;
-}
-
-void MetaWatch::timedReconnect()
-{
-	retryConnect();
-}
-
 void MetaWatch::timedSend()
 {
+	// If there are packets to be sent...
 	if (_toSend.count() > 0) {
+		// Send the packets to the watch
 		realSend(_toSend.dequeue());
 	}
+	// If we sent all packets...
 	if (_toSend.count() == 0) {
+		// Stop the send timer to save battery
 		_sendTimer->stop();
 	}
 }
@@ -793,30 +659,6 @@ void MetaWatch::timedSend()
 void MetaWatch::timedRing()
 {
 	setVibrateMode(true, RingLength, RingLength, 3);
-}
-
-void MetaWatch::realNvalWrite(NvalValue value, int data)
-{
-	int size = nvalSize(value);
-	uint id = static_cast<uint>(value);
-	Message msg(NvalOperation, QByteArray(3 + size, 0), 2);
-
-	qDebug() << "nval" << hex << value << "will be written with" << dec << data;
-
-	msg.data[0] = id & 0xFF;
-	msg.data[1] = id >> 8;
-	msg.data[2] = size;
-
-	switch (size) {
-	case 1:
-		msg.data[3] = data & 0xFF;
-		break;
-	default:
-		qWarning() << "NVAL size not yet handled";
-		return;
-	}
-
-	send(msg);
 }
 
 void MetaWatch::realSend(const Message &msg)
@@ -837,7 +679,9 @@ void MetaWatch::realSend(const Message &msg)
 	data[msgSize+4] = crc & 0xFF;
 	data[msgSize+5] = crc >> 8;
 
-	//qDebug() << "sending" << data.toHex();
+#if PROTOCOL_DEBUG
+	qDebug() << "sending" << data.toHex();
+#endif
 
 	_socket->write(data);
 }
@@ -847,7 +691,9 @@ void MetaWatch::realReceive(bool block)
 	do {
 		qint64 dataRead;
 
+#if PROTOCOL_DEBUG
 		qDebug() << "received" << _socket->bytesAvailable() << "bytes";
+#endif
 
 		if (_partialReceived.type == 0) {
 			/* Still not received even the packet type */
@@ -856,18 +702,38 @@ void MetaWatch::realReceive(bool block)
 				/* Still not enough data available. */
 				return; /* Wait for more, if non blocking. */
 			}
-			char header[4];
+			static const int HEADER_SIZE = 4;
+			char header[HEADER_SIZE];
 
-			dataRead = _socket->read(header, 4);
-			if (dataRead < 4 || header[0] != 0x01) {
-				qWarning() << "TODO: Resync to start of frame";
+			dataRead = _socket->read(header, HEADER_SIZE);
+#if PROTOCOL_DEBUG
+			qDebug() << "received" << QByteArray(header, HEADER_SIZE).toHex();
+#endif
+			if (dataRead < 4) {
+				qWarning() << "Short read";
 				return;
+			} else if (header[0] != 0x01 || header[1] > 32) {
+				qWarning() << "Header not found, trying to recover";
+				// Let's try to find the header in one of the four bits we read
+				for (int i = 1; i < HEADER_SIZE; i++) {
+					if (header[i] == 0x01) {
+						// Header possibly found, try to recover by pushing
+						// the partial header back into the buffer and retrying
+						for (int j = HEADER_SIZE - 1; j >= i; j--) {
+							_socket->ungetChar(header[j]);
+						}
+					}
+				}
+				// In any case, try to repeat.
+				continue;
 			}
 
 			_partialReceived.type = static_cast<MessageType>(header[2]);
 			_partialReceived.data.resize(header[1] - 6);
 			_partialReceived.options = header[3];
+#if PROTOCOL_DEBUG
 			qDebug() << "got header";
+#endif
 		}
 
 		/* We have the header; now, try to get the complete packet. */
@@ -891,6 +757,10 @@ void MetaWatch::realReceive(bool block)
 		quint16 realCrc = calcCrc(_partialReceived);
 		quint16 expectedCrc = tail[1] << 8 | (tail[0] & 0xFFU);
 		if (realCrc == expectedCrc) {
+#if PROTOCOL_DEBUG
+			qDebug() << "received" << _partialReceived.type << _partialReceived.options
+			         << _partialReceived.data.toHex();
+#endif
 			handleMessage(_partialReceived);
 		} else {
 			qWarning() << "CRC error?";

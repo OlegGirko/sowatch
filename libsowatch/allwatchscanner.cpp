@@ -23,6 +23,7 @@ AllWatchScanner::AllWatchScanner(QObject *parent) :
 
 void AllWatchScanner::start()
 {
+	_finishedCount = 0;
 	if (_scanners.empty()) {
 		emit finished();
 	} else {
@@ -40,5 +41,6 @@ void AllWatchScanner::handleFinished()
 	if (_finishedCount >= _scanners.length()) {
 		qDebug() << "all finished";
 		emit finished();
+		_finishedCount = 0;
 	}
 }

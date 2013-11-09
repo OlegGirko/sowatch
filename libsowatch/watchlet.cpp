@@ -1,10 +1,10 @@
 #include "watchlet.h"
-#include "watchserver.h"
+#include "watch.h"
 
 using namespace sowatch;
 
-Watchlet::Watchlet(WatchServer *server, const QString& id) :
-	QObject(server), _id(id), _active(false), _server(server)
+Watchlet::Watchlet(Watch *watch, const QString& id) :
+	QObject(watch), _id(id), _active(false), _watch(watch)
 {
 
 }
@@ -14,24 +14,14 @@ Watchlet::~Watchlet()
 
 }
 
-WatchServer* Watchlet::server()
+const Watch* Watchlet::watch() const
 {
-	return _server;
+	return _watch;
 }
 
 Watch* Watchlet::watch()
 {
-	return _server->watch();
-}
-
-const WatchServer* Watchlet::server() const
-{
-	return _server;
-}
-
-const Watch* Watchlet::watch() const
-{
-	return _server->watch();
+	return _watch;
 }
 
 QString Watchlet::id() const
@@ -56,4 +46,26 @@ void Watchlet::deactivate()
 	_active = false;
 	emit activeChanged();
 	emit deactivated();
+}
+
+void Watchlet::setWatchletsModel(WatchletsModel *model)
+{
+	Q_UNUSED(model);
+}
+
+void Watchlet::setNotificationsModel(NotificationsModel *model)
+{
+	Q_UNUSED(model);
+}
+
+bool Watchlet::handlesNotification(Notification *notification) const
+{
+	Q_UNUSED(notification);
+	return false;
+}
+
+void Watchlet::openNotification(Notification *notification)
+{
+	Q_UNUSED(notification);
+	qDebug() << "Watchlet" << _id << "does not override openNotification()";
 }

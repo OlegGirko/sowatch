@@ -35,26 +35,30 @@ QStringList QMapWatchletPlugin::watchlets()
 	return l;
 }
 
-WatchletPluginInterface::WatchletInfo QMapWatchletPlugin::describeWatchlet(const QString &id)
+WatchletPluginInterface::WatchletInfo QMapWatchletPlugin::describeWatchlet(const QString &id, const QString &watchModel)
 {
 	WatchletInfo info;
 	if (id == QMapWatchlet::myId) {
 		info.name = tr("Map");
-		info.icon = QUrl::fromLocalFile(SOWATCH_QML_DIR "/qmapwatchlet/map-icon.png");
+		info.phoneIcon = QUrl::fromLocalFile(SOWATCH_QML_DIR "/qmapwatchlet/map-icon.png");
+		info.icon = QUrl::fromLocalFile(SOWATCH_QML_DIR "/qmapwatchlet/map-" + watchModel + "-icon.png");
+		info.visible = true;
 	} else if (id == CompassWatchlet::myId) {
 		info.name = tr("Compass");
-		info.icon = QUrl::fromLocalFile(SOWATCH_QML_DIR "/qmapwatchlet/compass-icon.png");
+		info.phoneIcon = QUrl::fromLocalFile(SOWATCH_QML_DIR "/qmapwatchlet/compass-icon.png");
+		info.icon = QUrl::fromLocalFile(SOWATCH_QML_DIR "/qmapwatchlet/compass-" + watchModel + "-icon.png");
+		info.visible = true;
 	}
 	return info;
 }
 
-Watchlet* QMapWatchletPlugin::getWatchlet(const QString &id, ConfigKey *config, WatchServer *server)
+Watchlet* QMapWatchletPlugin::getWatchlet(const QString &id, ConfigKey *config, Watch *watch)
 {
 	Q_UNUSED(config);
 	if (id == QMapWatchlet::myId) {
-		return new QMapWatchlet(server);
+		return new QMapWatchlet(watch);
 	} else if (id == CompassWatchlet::myId) {
-		return new CompassWatchlet(server);
+		return new CompassWatchlet(watch);
 	}
 	return 0;
 }

@@ -39,13 +39,13 @@ SOURCES += main.cpp \
     watchesmodel.cpp daemonproxy.cpp \
     watchscannermodel.cpp \
     providersmodel.cpp \
-    watchletsmodel.cpp
+    configuredwatchletsmodel.cpp
 
 HEADERS += \
     watchesmodel.h daemonproxy.h \
     watchscannermodel.h \
     providersmodel.h \
-    watchletsmodel.h
+    configuredwatchletsmodel.h
 
 OTHER_FILES += qml/main.qml \
 	qml/MainPage.qml \

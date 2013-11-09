@@ -6,7 +6,9 @@ SOURCES += nekowatchletplugin.cpp nekowatchlet.cpp
 
 HEADERS += nekowatchletplugin.h nekowatchlet.h
 
-qml_files.files = metawatch-digital.qml Neko.qml icon.png neko.png
+qml_files.files = metawatch-digital.qml liveview.qml \
+	icon.png metawatch-digital-icon.png liveview-icon.png \
+	Neko.qml neko.png neko-inv.png
 
 LIBS += -L$$OUT_PWD/../libsowatch/ -lsowatch
 INCLUDEPATH += $$PWD/../libsowatch

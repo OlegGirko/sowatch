@@ -7,8 +7,8 @@
 
 using namespace sowatch;
 
-GraphicsWatchlet::GraphicsWatchlet(WatchServer* server, const QString& id)
-    : Watchlet(server, id),
+GraphicsWatchlet::GraphicsWatchlet(Watch* watch, const QString& id)
+    : Watchlet(watch, id),
       _scene(0), _frameTimer(),
       _fullUpdateMode(false), _damaged()
 {

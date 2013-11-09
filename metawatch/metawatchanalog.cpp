@@ -95,7 +95,7 @@ void MetaWatchAnalog::clear(Mode mode, bool black)
 	// TODO Still need to understand this
 }
 
-void MetaWatchAnalog::handleWatchConnected()
+void MetaWatchAnalog::setupBluetoothWatch()
 {
-
+	// TODO
 }
