@@ -22,7 +22,9 @@ BluetoothWatch::BluetoothWatch(const QBluetoothAddress& address, QObject *parent
 #endif
 {
 	_connectTimer->setSingleShot(true);
+#if QT_VERSION < QT_VERSION_CHECK(5,0,0)
 	_connectAlignedTimer->setSingleShot(true);
+#endif
 
 	connect(_connectTimer, SIGNAL(timeout()), SLOT(handleConnectTimer()));
 #if QT_VERSION < QT_VERSION_CHECK(5,0,0)
