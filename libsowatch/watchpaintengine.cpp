@@ -105,9 +105,11 @@ void WatchPaintEngine::updateClipRegion(const QRegion& region, Qt::ClipOperation
 			_clipEnabled = true;
 			_clipRegion &= mapped;
 			break;
-		case Qt::UniteClip:
+#if QT_VERSION < QT_VERSION_CHECK(5,0,0)
+    case Qt::UniteClip:
 			_clipEnabled = true;
 			_clipRegion |= mapped;
+#endif
 			break;
 	}
 }
