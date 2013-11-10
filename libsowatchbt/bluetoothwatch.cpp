@@ -15,14 +15,18 @@ BluetoothWatch::BluetoothWatch(const QBluetoothAddress& address, QObject *parent
       _connected(false),
       _connectRetries(0),
 	  _connectTimer(new QTimer(this)),
+#if QT_VERSION < QT_VERSION_CHECK(5,0,0)
 	  _connectAlignedTimer(new QSystemAlignedTimer(this))
+#endif
 {
 	_connectTimer->setSingleShot(true);
 	_connectAlignedTimer->setSingleShot(true);
 
 	connect(_connectTimer, SIGNAL(timeout()), SLOT(handleConnectTimer()));
-	connect(_connectAlignedTimer, SIGNAL(timeout()), SLOT(handleConnectTimer()));
-	connect(_localDev, SIGNAL(hostModeStateChanged(QBluetoothLocalDevice::HostMode)),
+#if QT_VERSION < QT_VERSION_CHECK(5,0,0)
+    connect(_connectAlignedTimer, SIGNAL(timeout()), SLOT(handleConnectTimer()));
+#endif
+    connect(_localDev, SIGNAL(hostModeStateChanged(QBluetoothLocalDevice::HostMode)),
 	        SLOT(handleLocalDevModeChanged(QBluetoothLocalDevice::HostMode)));
 
 	// Check to see if we can connect right away
@@ -52,8 +56,12 @@ bool BluetoothWatch::isConnected() const
 void BluetoothWatch::scheduleConnect()
 {
 	if (_connected ||
-	        _connectAlignedTimer->isActive() || _connectTimer->isActive()) {
-		// Already connected or already scheduled to connect.
+        #if QT_VERSION < QT_VERSION_CHECK(5,0,0)
+            _connectAlignedTimer->isActive() || _connectTimer->isActive()) {
+        #else
+            _connectTimer->isActive()) {
+        #endif
+        // Already connected or already scheduled to connect.
 		return;
 	}
 
@@ -64,8 +72,12 @@ void BluetoothWatch::scheduleConnect()
 void BluetoothWatch::scheduleRetryConnect()
 {
 	if (_connected ||
-	        _connectAlignedTimer->isActive() || _connectTimer->isActive()) {
-		// Already connected or already scheduled to connect.
+        #if QT_VERSION < QT_VERSION_CHECK(5,0,0)
+            _connectAlignedTimer->isActive() || _connectTimer->isActive()) {
+        #else
+            _connectTimer->isActive()) {
+        #endif
+        // Already connected or already scheduled to connect.
 		return;
 	}
 
@@ -78,8 +90,13 @@ void BluetoothWatch::scheduleRetryConnect()
 	}
 
 	qDebug() << "Backing off for" << timeToNextRetry << "seconds for next retry";
-	_connectAlignedTimer->start(timeToNextRetry / 2, timeToNextRetry * 2);
+#if QT_VERSION < QT_VERSION_CHECK(5,0,0)
+    _connectAlignedTimer->start(timeToNextRetry / 2, timeToNextRetry * 2);
 	if (_connectAlignedTimer->lastError() != QSystemAlignedTimer::NoError) {
+#else
+    _connectTimer->start(timeToNextRetry / 2, timeToNextRetry * 2);
+    if (_connectTimer->lastError() != QSystemTimer::NoError) {
+#endif
 		// Hopefully a future version of QSystemAlignedTimer implements this fallback
 		// For now, we have to do it ourselves.
 		qDebug() << "Note: using plain QTimer for retry";
@@ -89,8 +106,10 @@ void BluetoothWatch::scheduleRetryConnect()
 
 void BluetoothWatch::unscheduleConnect()
 {
+#if QT_VERSION < QT_VERSION_CHECK(5,0,0)
 	_connectAlignedTimer->stop();
-	_connectTimer->stop();
+#endif
+    _connectTimer->stop();
 }
 
 void BluetoothWatch::connectToWatch()
