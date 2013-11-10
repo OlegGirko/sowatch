@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT        += gui declarative
+QT        += gui declarative widgets
 
 CONFIG    += link_pkgconfig
 PKGCONFIG += gconf-2.0

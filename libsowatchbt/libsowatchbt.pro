@@ -10,6 +10,8 @@ maemo5 {
 }
 MOBILITY += connectivity systeminfo
 
+QT += bluetooth widgets
+
 DEFINES += SOWATCHBT_LIBRARY
 
 SOURCES += \
