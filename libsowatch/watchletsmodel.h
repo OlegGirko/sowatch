@@ -54,7 +54,6 @@ private:
 	QString _watchModel;
 	QList<Watchlet*> _list;
 	QList<WatchletInfo> _info;
-//    QHash<int, QByteArray> _roles;
 
 };
 
