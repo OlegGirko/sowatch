@@ -1,9 +1,9 @@
 #ifndef SOWATCH_GRAPHICSWATCHLET_H
 #define SOWATCH_GRAPHICSWATCHLET_H
 
-#include <QtCore/QTimer>
+#include <QTimer>
 #include <QGraphicsScene>
-#include <QtGui/QRegion>
+#include <QRegion>
 #include "watchlet.h"
 #include "sowatch_global.h"
 
