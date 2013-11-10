@@ -3,17 +3,23 @@
 #include "registry.h"
 #include "watchletplugininterface.h"
 #include "watchletsmodel.h"
-
 using namespace sowatch;
-
 WatchletsModel::WatchletsModel(QObject *parent) :
     QAbstractListModel(parent)
 {
-	QHash<int, QByteArray> roles = roleNames();
-	roles[TitleRole] = QByteArray("title");
-	roles[IconRole] = QByteArray("icon");
-	roles[ObjectRole] = QByteArray("object");
-	setRoleNames(roles);
+#if QT_VERSION < QT_VERSION_CHECK(5,0,0)
+    setRoleNames(roleNames());
+#endif
+}
+
+QHash<int, QByteArray> WatchletsModel::roleNames() const
+{
+    QHash<int, QByteArray> _roles = roleNames();
+     _roles[TitleRole] = QByteArray("title");
+     _roles[IconRole] = QByteArray("icon");
+     _roles[ObjectRole] = QByteArray("object");
+
+    return _roles;
 }
 
 QString WatchletsModel::watchModel() const

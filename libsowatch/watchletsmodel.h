@@ -23,6 +23,8 @@ public:
 		IconRole = Qt::DecorationRole
 	};
 
+    virtual QHash<int, QByteArray> roleNames() const;
+
 	QString watchModel() const;
 	void setWatchModel(const QString& s);
 
@@ -52,6 +54,7 @@ private:
 	QString _watchModel;
 	QList<Watchlet*> _list;
 	QList<WatchletInfo> _info;
+//    QHash<int, QByteArray> _roles;
 
 };
 
