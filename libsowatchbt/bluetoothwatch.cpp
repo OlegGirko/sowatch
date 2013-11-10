@@ -1,7 +1,9 @@
 #include "bluetoothwatch.h"
 
 using namespace sowatch;
+#if QT_VERSION < QT_VERSION_CHECK(5,0,0)
 QTM_USE_NAMESPACE
+#endif
 
 const int BluetoothWatch::connectRetryTimes[] = {
 	5, 10, 30, 60, 120, 300

@@ -12,13 +12,17 @@
 
 namespace sowatch
 {
-
+#if QT_VERSION < QT_VERSION_CHECK(5,0,0)
 using QTM_PREPEND_NAMESPACE(QBluetoothSocket);
 using QTM_PREPEND_NAMESPACE(QBluetoothAddress);
-#if QT_VERSION < QT_VERSION_CHECK(5,0,0)
 using QTM_PREPEND_NAMESPACE(QSystemAlignedTimer);
-#endif
 using QTM_PREPEND_NAMESPACE(QBluetoothLocalDevice);
+#else
+QT_FORWARD_DECLARE_CLASS(QBluetoothSocket)
+QT_FORWARD_DECLARE_CLASS(QBluetoothAddress)
+QT_FORWARD_DECLARE_CLASS(QBluetoothLocalDevice)
+QT_USE_NAMESPACE
+#endif
 
 class SOWATCHBT_EXPORT BluetoothWatch : public Watch
 {
