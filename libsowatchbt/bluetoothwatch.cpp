@@ -1,7 +1,6 @@
 #include "bluetoothwatch.h"
 
 using namespace sowatch;
-QTM_USE_NAMESPACE
 
 const int BluetoothWatch::connectRetryTimes[] = {
 	5, 10, 30, 60, 120, 300
@@ -14,14 +13,14 @@ BluetoothWatch::BluetoothWatch(const QBluetoothAddress& address, QObject *parent
 	  _socket(0),
       _connected(false),
       _connectRetries(0),
-	  _connectTimer(new QTimer(this)),
-	  _connectAlignedTimer(new QSystemAlignedTimer(this))
+      _connectTimer(new QTimer(this))
+//	  _connectAlignedTimer(new QSystemAlignedTimer(this))
 {
 	_connectTimer->setSingleShot(true);
-	_connectAlignedTimer->setSingleShot(true);
+//	_connectAlignedTimer->setSingleShot(true);
 
 	connect(_connectTimer, SIGNAL(timeout()), SLOT(handleConnectTimer()));
-	connect(_connectAlignedTimer, SIGNAL(timeout()), SLOT(handleConnectTimer()));
+//	connect(_connectAlignedTimer, SIGNAL(timeout()), SLOT(handleConnectTimer()));
 	connect(_localDev, SIGNAL(hostModeStateChanged(QBluetoothLocalDevice::HostMode)),
 	        SLOT(handleLocalDevModeChanged(QBluetoothLocalDevice::HostMode)));
 
@@ -51,8 +50,8 @@ bool BluetoothWatch::isConnected() const
 
 void BluetoothWatch::scheduleConnect()
 {
-	if (_connected ||
-	        _connectAlignedTimer->isActive() || _connectTimer->isActive()) {
+    if (_connected) {
+//	        || _connectAlignedTimer->isActive() || _connectTimer->isActive()) {
 		// Already connected or already scheduled to connect.
 		return;
 	}
@@ -63,8 +62,8 @@ void BluetoothWatch::scheduleConnect()
 
 void BluetoothWatch::scheduleRetryConnect()
 {
-	if (_connected ||
-	        _connectAlignedTimer->isActive() || _connectTimer->isActive()) {
+    if (_connected) {
+//	        || _connectAlignedTimer->isActive() || _connectTimer->isActive()) {
 		// Already connected or already scheduled to connect.
 		return;
 	}
@@ -78,18 +77,18 @@ void BluetoothWatch::scheduleRetryConnect()
 	}
 
 	qDebug() << "Backing off for" << timeToNextRetry << "seconds for next retry";
-	_connectAlignedTimer->start(timeToNextRetry / 2, timeToNextRetry * 2);
-	if (_connectAlignedTimer->lastError() != QSystemAlignedTimer::NoError) {
+//    _connectAlignedTimer->start(timeToNextRetry / 2, timeToNextRetry * 2);
+//	if (_connectAlignedTimer->lastError() != QSystemAlignedTimer::NoError) {
 		// Hopefully a future version of QSystemAlignedTimer implements this fallback
 		// For now, we have to do it ourselves.
-		qDebug() << "Note: using plain QTimer for retry";
-		_connectTimer->start(timeToNextRetry * 1000);
-	}
+//		qDebug() << "Note: using plain QTimer for retry";
+//		_connectTimer->start(timeToNextRetry * 1000);
+//	}
 }
 
 void BluetoothWatch::unscheduleConnect()
 {
-	_connectAlignedTimer->stop();
+//	_connectAlignedTimer->stop();
 	_connectTimer->stop();
 }
 

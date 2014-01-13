@@ -1,20 +1,16 @@
 #ifndef SOWATCHBT_BLUETOOTHWATCH_H
 #define SOWATCHBT_BLUETOOTHWATCH_H
 
-#include <QtConnectivity/QBluetoothAddress>
-#include <QtConnectivity/QBluetoothSocket>
-#include <QtConnectivity/QBluetoothLocalDevice>
-#include <QtSystemInfo/QSystemAlignedTimer>
+#include <QBluetoothAddress>
+#include <QBluetoothSocket>
+#include <QBluetoothLocalDevice>
 #include <sowatch.h>
 #include "sowatchbt_global.h"
 
 namespace sowatch
 {
 
-using QTM_PREPEND_NAMESPACE(QBluetoothSocket);
-using QTM_PREPEND_NAMESPACE(QBluetoothAddress);
-using QTM_PREPEND_NAMESPACE(QSystemAlignedTimer);
-using QTM_PREPEND_NAMESPACE(QBluetoothLocalDevice);
+using namespace QtBluetooth;
 
 class SOWATCHBT_EXPORT BluetoothWatch : public Watch
 {
@@ -66,7 +62,8 @@ private:
 	static const int connectRetryTimes[connectRetryTimesSize];
 	short _connectRetries;
 	QTimer *_connectTimer;
-	QSystemAlignedTimer *_connectAlignedTimer;
+//  FIXME: How to handle missing QSystemAlignedTimer?
+//	QSystemAlignedTimer *_connectAlignedTimer;
 };
 
 }

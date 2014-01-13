@@ -1,9 +1,8 @@
-#include <QtConnectivity/QBluetoothDeviceInfo>
-#include <QtConnectivity/QBluetoothAddress>
+#include <QBluetoothDeviceInfo>
+#include <QBluetoothAddress>
 
 #include "bluetoothwatchscanner.h"
 
-QTM_USE_NAMESPACE
 using namespace sowatch;
 
 

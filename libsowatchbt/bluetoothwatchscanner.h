@@ -2,16 +2,14 @@
 #define BLUETOOTHWATCHSCANNER_H
 
 #include <sowatch.h>
-#include <QtConnectivity/QBluetoothServiceDiscoveryAgent>
+#include <QBluetoothServiceDiscoveryAgent>
 
 #include "sowatchbt_global.h"
 
 namespace sowatch
 {
 
-using QTM_PREPEND_NAMESPACE(QBluetoothServiceDiscoveryAgent);
-using QTM_PREPEND_NAMESPACE(QBluetoothServiceInfo);
-using QTM_PREPEND_NAMESPACE(QBluetoothUuid);
+using namespace QtBluetooth;
 
 class SOWATCHBT_EXPORT BluetoothWatchScanner : public WatchScanner
 {

@@ -2,6 +2,8 @@ TARGET    = sowatchbt
 TEMPLATE  = lib
 VERSION   = 1.0.0
 
+QT += bluetooth widgets
+
 # Qt Mobility 1.2
 maemo5 {
 	CONFIG += mobility12
