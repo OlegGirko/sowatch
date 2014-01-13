@@ -1,5 +1,5 @@
-#include <QtGui/QFontDatabase>
-#include <QtConnectivity/QBluetoothAddress>
+#include <QFontDatabase>
+#include <QBluetoothAddress>
 #include "metawatchanalog.h"
 #include "metawatchdigital.h"
 #include "metawatchdigitalsimulator.h"
@@ -7,7 +7,7 @@
 #include "metawatchplugin.h"
 
 using namespace sowatch;
-QTM_USE_NAMESPACE
+using namespace QtBluetooth;
 
 bool MetaWatchPlugin::fontsLoaded = false;
 
@@ -61,4 +61,4 @@ Watch* MetaWatchPlugin::getWatch(const QString& driver, ConfigKey* settings, QOb
 	}
 }
 
-Q_EXPORT_PLUGIN2(metawatch, MetaWatchPlugin)
+//Q_EXPORT_PLUGIN2(metawatch, MetaWatchPlugin)

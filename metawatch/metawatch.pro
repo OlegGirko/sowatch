@@ -1,7 +1,7 @@
 TARGET = metawatchdriver
 TEMPLATE = lib
 CONFIG   += plugin
-QT       += gui
+QT       += gui bluetooth widgets
 
 # Qt Mobility 1.2
 maemo5 {

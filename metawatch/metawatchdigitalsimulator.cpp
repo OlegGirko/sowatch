@@ -1,5 +1,5 @@
-#include <QtCore/QDebug>
-#include <QtGui/QPainter>
+#include <QDebug>
+#include <QPainter>
 
 #include "metawatchdigitalsimulator.h"
 
@@ -80,7 +80,7 @@ void MetaWatchDigitalSimulator::update(Mode mode, const QList<QRect> &rects)
 
 	p.begin(&_pixmap[mode]);
 	foreach (const QRect& rect, rects) {
-		QRect r = rect.intersect(imageRect);
+        QRect r = rect.intersected(imageRect);
 		for (int i = r.top(); i <= r.bottom(); i++) {
 			rows[i] = true;
 		}

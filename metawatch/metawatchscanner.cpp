@@ -1,10 +1,10 @@
-#include <QtConnectivity/QBluetoothDeviceInfo>
-#include <QtConnectivity/QBluetoothAddress>
+#include <QBluetoothDeviceInfo>
+#include <QBluetoothAddress>
 
 #include "metawatchscanner.h"
 
-QTM_USE_NAMESPACE
 using namespace sowatch;
+using namespace QtBluetooth;
 
 MetaWatchScanner::MetaWatchScanner(QObject *parent) :
 	BluetoothWatchScanner(parent)

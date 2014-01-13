@@ -3,20 +3,17 @@
 
 #include <QtCore/QQueue>
 #include <QtCore/QTimer>
-#include <QtConnectivity/QBluetoothAddress>
-#include <QtConnectivity/QBluetoothSocket>
-#include <QtConnectivity/QBluetoothLocalDevice>
-#include <QtSystemInfo/QSystemAlignedTimer>
+#include <QBluetoothAddress>
+#include <QBluetoothSocket>
+#include <QBluetoothLocalDevice>
+//#include <QtSystemInfo/QSystemAlignedTimer>
 #include <sowatch.h>
 #include <sowatchbt.h>
 
 namespace sowatch
 {
 
-using QTM_PREPEND_NAMESPACE(QBluetoothSocket);
-using QTM_PREPEND_NAMESPACE(QBluetoothAddress);
-using QTM_PREPEND_NAMESPACE(QSystemAlignedTimer);
-using QTM_PREPEND_NAMESPACE(QBluetoothLocalDevice);
+using namespace QtBluetooth;
 
 class MetaWatchPaintEngine;
 

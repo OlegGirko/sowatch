@@ -1,10 +1,9 @@
-#include <QtCore/QDebug>
+#include <QDebug>
 
 #include "metawatchpaintengine.h"
 #include "metawatch.h"
 
 using namespace sowatch;
-QTM_USE_NAMESPACE
 
 #define SINGLE_LINE_UPDATE 0
 #define PROTOCOL_DEBUG 0

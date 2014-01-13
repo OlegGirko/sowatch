@@ -1,5 +1,5 @@
-#include <QtCore/QDebug>
-#include <QtGui/QFileDialog>
+#include <QDebug>
+#include <QFileDialog>
 
 #include "metawatchdigitalsimulatorform.h"
 #include "ui_metawatchdigitalsimulatorform.h"

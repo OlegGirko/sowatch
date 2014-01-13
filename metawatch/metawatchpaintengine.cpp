@@ -94,5 +94,5 @@ bool MetaWatchPaintEngine::fillsEntireImage(const QRect& rect)
 {
 	return rect == _area &&
 			(!_clipEnabled ||
-			 (_clipRegion.numRects() == 1 && _clipRegion.rects().at(0) == _area));
+             (_clipRegion.rectCount() == 1 && _clipRegion.rects().at(0) == _area));
 }

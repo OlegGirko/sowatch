@@ -78,7 +78,7 @@ void MetaWatchDigital::update(Mode mode, const QList<QRect> &rects)
 	QVector<bool> lines(screenHeight, false);
 
 	foreach (const QRect& rect, rects) {
-		QRect r = rect.intersect(clipRect);
+        QRect r = rect.intersected(clipRect);
 		for (int i = r.top(); i <= r.bottom(); i++) {
 			lines[i] = true;
 		}

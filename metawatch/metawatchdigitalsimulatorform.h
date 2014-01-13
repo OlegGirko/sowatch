@@ -1,7 +1,7 @@
 #ifndef METAWATCHSIMULATORFORM_H
 #define METAWATCHSIMULATORFORM_H
 
-#include <QtGui/QMainWindow>
+#include <QMainWindow>
 
 namespace Ui {
 	class MetaWatchDigitalSimulatorForm;
