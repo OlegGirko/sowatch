@@ -10,11 +10,9 @@ ProvidersModel::ProvidersModel(QObject *parent) :
     QAbstractListModel(parent),
     _config(0)
 {
-	QHash<int, QByteArray> roles = roleNames();
-	roles[Qt::DisplayRole] = QByteArray("title");
-	roles[NameRole] = QByteArray("name");
-	roles[EnabledRole] = QByteArray("enabled");
-	setRoleNames(roles);
+    _roles[Qt::DisplayRole] = QByteArray("title");
+    _roles[NameRole] = QByteArray("name");
+    _roles[EnabledRole] = QByteArray("enabled");
 }
 
 QString ProvidersModel::configKey() const

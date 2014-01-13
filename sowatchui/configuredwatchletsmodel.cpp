@@ -9,12 +9,10 @@ ConfiguredWatchletsModel::ConfiguredWatchletsModel(QObject *parent) :
     _config(0),
     _unadded(false)
 {
-	QHash<int, QByteArray> roles = roleNames();
-	roles[Qt::DisplayRole] = QByteArray("title");
-	roles[Qt::DecorationRole] = QByteArray("iconSource");
-	roles[NameRole] = QByteArray("name");
-	roles[ConfigQmlUrlRole] = QByteArray("configQmlUrl");
-	setRoleNames(roles);
+    _roles[Qt::DisplayRole] = QByteArray("title");
+    _roles[Qt::DecorationRole] = QByteArray("iconSource");
+    _roles[NameRole] = QByteArray("name");
+    _roles[ConfigQmlUrlRole] = QByteArray("configQmlUrl");
 }
 
 QString ConfiguredWatchletsModel::configKey() const

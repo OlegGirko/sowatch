@@ -6,12 +6,10 @@ WatchScannerModel::WatchScannerModel(QObject *parent) :
     _timer(new QTimer(this)),
     _enabled(false), _active(false)
 {
-	QHash<int, QByteArray> roles = roleNames();
-	roles[Qt::DisplayRole] = QByteArray("title");
-	roles[Qt::DecorationRole] = QByteArray("iconSource");
-	roles[Qt::StatusTipRole] = QByteArray("subtitle");
-	roles[ObjectRole] = QByteArray("object");
-	setRoleNames(roles);
+    _roles[Qt::DisplayRole] = QByteArray("title");
+    _roles[Qt::DecorationRole] = QByteArray("iconSource");
+    _roles[Qt::StatusTipRole] = QByteArray("subtitle");
+    _roles[ObjectRole] = QByteArray("object");
 
 	_timer->setSingleShot(true);
 	_timer->setInterval(3000);

@@ -10,14 +10,12 @@ WatchesModel::WatchesModel(QObject *parent) :
     _watches_list(_config->getSubkey("watches", this)),
     _daemon(new DaemonProxy("com.javispedro.sowatchd", "/com/javispedro/sowatch/daemon", QDBusConnection::sessionBus()))
 {
-	QHash<int, QByteArray> roles = roleNames();
-	roles[Qt::DisplayRole] = QByteArray("title");
-	roles[Qt::DecorationRole] = QByteArray("iconSource");
-	roles[Qt::StatusTipRole] = QByteArray("subtitle");
-	roles[EnabledRole] = QByteArray("enabled");
-	roles[ConfigKeyRole] = QByteArray("configKey");
-	roles[ConfigQmlUrlRole] = QByteArray("configQmlUrl");
-	setRoleNames(roles);
+    _roles[Qt::DisplayRole] = QByteArray("title");
+    _roles[Qt::DecorationRole] = QByteArray("iconSource");
+    _roles[Qt::StatusTipRole] = QByteArray("subtitle");
+    _roles[EnabledRole] = QByteArray("enabled");
+    _roles[ConfigKeyRole] = QByteArray("configKey");
+    _roles[ConfigQmlUrlRole] = QByteArray("configQmlUrl");
 
 	connect(_watches_list, SIGNAL(changed()),
 	        SLOT(handleWatchesListChanged()));

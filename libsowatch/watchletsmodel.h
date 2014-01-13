@@ -39,6 +39,7 @@ public:
 	void remove(const Watchlet *w);
 	void remove(int position);
 
+    QHash<int, QByteArray> getRoleNames() { return _roles; }
 signals:
 	void watchModelChanged();
 	void modelChanged();
@@ -52,6 +53,7 @@ private:
 	QString _watchModel;
 	QList<Watchlet*> _list;
 	QList<WatchletInfo> _info;
+    QHash<int, QByteArray> _roles;
 
 };
 

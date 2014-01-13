@@ -45,6 +45,7 @@ public:
 
 	Notification::Type getTypeOfDeletedNotification(Notification *n) const;
 
+    QHash<int, QByteArray> getRoleNames() { return _roles; }
 signals:
 	void modelChanged();
 
@@ -58,6 +59,7 @@ private slots:
 
 private:
 	QList<Notification*> _list[Notification::TypeCount];
+    QHash<int, QByteArray> _roles;
 };
 
 }

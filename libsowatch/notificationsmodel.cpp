@@ -12,12 +12,10 @@ using namespace sowatch;
 NotificationsModel::NotificationsModel(QObject *parent) :
     QAbstractListModel(parent)
 {
-	QHash<int, QByteArray> roles = roleNames();
-	roles[Qt::DisplayRole] = QByteArray("title");
-	roles[ObjectRole] = QByteArray("object");
-	roles[BodyRole] = QByteArray("body");
-	roles[CountRole] = QByteArray("count");
-	setRoleNames(roles);
+    _roles[Qt::DisplayRole] = QByteArray("title");
+    _roles[ObjectRole] = QByteArray("object");
+    _roles[BodyRole] = QByteArray("body");
+    _roles[CountRole] = QByteArray("count");
 }
 
 int NotificationsModel::rowCount(const QModelIndex &parent) const

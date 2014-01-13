@@ -25,6 +25,7 @@ public:
 	QVariant data(const QModelIndex &index, int role) const;
 	bool setData(const QModelIndex &index, const QVariant &value, int role);
 
+    QHash<int, QByteArray> getRoleNames() { return _roles; }
 public slots:
 	void setProviderEnabled(const QString& id, bool enabled);
 
@@ -40,6 +41,7 @@ private:
 	QStringList _all_list;
 	QList<sowatch::NotificationPluginInterface::NotificationProviderInfo> _info_list;
 	QSet<QString> _enabled;
+    QHash<int, QByteArray> _roles;
 };
 
 #endif // PROVIDERSMODEL_H

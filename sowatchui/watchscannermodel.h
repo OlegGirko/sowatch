@@ -27,6 +27,8 @@ public:
 	int rowCount(const QModelIndex &parent) const;
 	QVariant data(const QModelIndex &index, int role) const;
 
+    QHash<int, QByteArray> getRoleNames() { return _roles; }
+
 signals:
 	void activeChanged();
 
@@ -42,6 +44,7 @@ private:
 	QTimer *_timer;
 	bool _enabled;
 	bool _active;
+    QHash<int, QByteArray> _roles;
 };
 
 #endif // WATCHSCANNERMODEL_H

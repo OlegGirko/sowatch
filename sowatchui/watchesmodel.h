@@ -23,6 +23,8 @@ public:
 	int rowCount(const QModelIndex &parent) const;
 	QVariant data(const QModelIndex &index, int role) const;
 
+    QHash<int, QByteArray> getRoleNames() { return _roles; }
+
 public slots:
 	void addFoundWatch(const QVariantMap& info);
 	void removeWatch(const QString& id);
@@ -41,6 +43,7 @@ private:
 	DaemonProxy *_daemon;
 	QList<sowatch::ConfigKey*> _list;
 	QMap<QString, QString> _status;
+    QHash<int, QByteArray> _roles;
 };
 
 #endif // WATCHESMODEL_H

@@ -28,6 +28,8 @@ public:
 	int rowCount(const QModelIndex &parent) const;
 	QVariant data(const QModelIndex &index, int role) const;
 
+    QHash<int, QByteArray> getRoleNames() { return _roles; }
+
 public slots:
 	void addWatchlet(const QString& name);
 	void removeWatchlet(const QString& name);
@@ -48,6 +50,7 @@ private:
 	QStringList _list;
 	QMap<QString, sowatch::WatchletPluginInterface::WatchletInfo> _info;
 	QSet<QString> _enabled;
+    QHash<int, QByteArray> _roles;
 };
 
 #endif // WATCHLETSMODEL_H

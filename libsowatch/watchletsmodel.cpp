@@ -9,11 +9,9 @@ using namespace sowatch;
 WatchletsModel::WatchletsModel(QObject *parent) :
     QAbstractListModel(parent)
 {
-	QHash<int, QByteArray> roles = roleNames();
-	roles[TitleRole] = QByteArray("title");
-	roles[IconRole] = QByteArray("icon");
-	roles[ObjectRole] = QByteArray("object");
-	setRoleNames(roles);
+    _roles[TitleRole] = QByteArray("title");
+    _roles[IconRole] = QByteArray("icon");
+    _roles[ObjectRole] = QByteArray("object");
 }
 
 QString WatchletsModel::watchModel() const
