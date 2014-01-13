@@ -104,11 +104,7 @@ void WatchPaintEngine::updateClipRegion(const QRegion& region, Qt::ClipOperation
 		case Qt::IntersectClip:
 			_clipEnabled = true;
 			_clipRegion &= mapped;
-			break;
-		case Qt::UniteClip:
-			_clipEnabled = true;
-			_clipRegion |= mapped;
-			break;
+            break;
 	}
 }
 
