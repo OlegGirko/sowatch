@@ -2,7 +2,7 @@ TARGET = sowatchd
 
 TEMPLATE = app
 
-QT       += core gui dbus
+QT       += core gui dbus widgets
 CONFIG   -= app_bundle
 
 SOURCES += main.cpp daemon.cpp daemonadaptor.cpp watchhandler.cpp

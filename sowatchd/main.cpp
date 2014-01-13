@@ -1,7 +1,7 @@
-#include <QtCore/QDebug>
-#include <QtCore/QTranslator>
-#include <QtGui/QApplication>
-#include <QtDBus/QDBusConnection>
+#include <QDebug>
+#include <QTranslator>
+#include <QApplication>
+#include <QDBusConnection>
 
 #include <sowatch.h>
 #include "daemon.h"
