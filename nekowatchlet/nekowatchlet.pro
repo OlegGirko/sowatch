@@ -2,6 +2,8 @@ TARGET = nekowatchlet
 TEMPLATE = lib
 CONFIG   += plugin
 
+QT += widgets
+
 SOURCES += nekowatchletplugin.cpp nekowatchlet.cpp
 
 HEADERS += nekowatchletplugin.h nekowatchlet.h

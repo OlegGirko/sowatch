@@ -3,6 +3,8 @@ TARGET = notificationswatchlet
 TEMPLATE = lib
 CONFIG   += plugin
 
+QT += widgets
+
 SOURCES += notificationswatchletplugin.cpp notificationswatchlet.cpp
 
 HEADERS += notificationswatchletplugin.h notificationswatchlet.h

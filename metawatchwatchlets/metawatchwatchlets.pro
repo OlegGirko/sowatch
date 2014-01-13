@@ -2,6 +2,8 @@ TARGET = metawatchwatchlets
 TEMPLATE = lib
 CONFIG   += plugin
 
+QT += gui widgets
+
 SOURCES += metawatchwatchletsplugin.cpp \
 	metawatchfacewatchlet.cpp metawatchnotificationwatchlet.cpp
 

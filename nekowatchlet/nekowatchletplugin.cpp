@@ -37,4 +37,4 @@ Watchlet* NekoWatchletPlugin::getWatchlet(const QString& driver, ConfigKey *sett
 	return new NekoWatchlet(watch);
 }
 
-Q_EXPORT_PLUGIN2(notificationswatchlet, NekoWatchletPlugin)
+//Q_EXPORT_PLUGIN2(notificationswatchlet, NekoWatchletPlugin)
