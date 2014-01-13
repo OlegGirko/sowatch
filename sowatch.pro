@@ -15,31 +15,31 @@ SUBDIRS += metawatch metawatchwatchlets
 metawatch.depends = libsowatch libsowatchbt
 metawatchwatchlets.depends = metawatch
 
-# LiveView driver plugin
-SUBDIRS += liveview liveviewwatchlets
-liveview.depends = libsowatch libsowatchbt
-liveviewwatchlets.depends = liveview
+## LiveView driver plugin
+#SUBDIRS += liveview liveviewwatchlets
+#liveview.depends = libsowatch libsowatchbt
+#liveviewwatchlets.depends = liveview
 
 # Some watchlets
 # This just shows a list of pending notifications and has no dependencies.
 SUBDIRS += notificationswatchlet
 notificationswatchlet.depends = libsowatch
 
-# This shows some values from Qt SystemInfo on the watch
-SUBDIRS += sysinfowatchlet
-sysinfowatchlet.depends = libsowatch
+## This shows some values from Qt SystemInfo on the watch
+#SUBDIRS += sysinfowatchlet
+#sysinfowatchlet.depends = libsowatch
 
-# This shows some inbox messages using QtMobility
-SUBDIRS += qmsgwatchlet
-qmsgwatchlet.depends = libsowatch
+## This shows some inbox messages using QtMobility
+#SUBDIRS += qmsgwatchlet
+#qmsgwatchlet.depends = libsowatch
 
-# This shows some calendar appointments using QtMobility
-SUBDIRS += qorgwatchlet
-qorgwatchlet.depends = libsowatch
+## This shows some calendar appointments using QtMobility
+#SUBDIRS += qorgwatchlet
+#qorgwatchlet.depends = libsowatch
 
-# This shows a map around the current position using QtMobility Mapping features
-SUBDIRS += qmapwatchlet
-qmapwatchlet.depends = libsowatch
+## This shows a map around the current position using QtMobility Mapping features
+#SUBDIRS += qmapwatchlet
+#qmapwatchlet.depends = libsowatch
 
 # Toy watchlets
 # Shows a cat running around. No dependencies.
@@ -77,11 +77,11 @@ contains(MEEGO_EDITION,harmattan) {
 	qmafwwatchlet.depends = libsowatch
 }
 
-# Debug only watchlets
-CONFIG(debug, debug|release) {
-	SUBDIRS += testnotification
-	testnotification.depends = libsowatch
-}
+## Debug only watchlets
+#CONFIG(debug, debug|release) {
+#	SUBDIRS += testnotification
+#	testnotification.depends = libsowatch
+#}
 
 # Packaging stuff
 OTHER_FILES += \
