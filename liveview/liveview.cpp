@@ -792,7 +792,7 @@ void LiveView::handleDisplayProperties(const Message &msg)
 void LiveView::handleSoftwareVersion(const Message &msg)
 {
 	qDebug() << "LiveView software version is"
-	         << QString::fromAscii(msg.data.constData(), msg.data.size());
+	         << QString::fromLocal8Bit(msg.data.constData(), msg.data.size());
 }
 
 

@@ -93,12 +93,12 @@ static GConfValue * convert_value(const QVariant& v)
 
 static QByteArray convert_key(const QString &key)
 {
-	return key.toAscii();
+	return key.toLocal8Bit();
 }
 
 static QString convert_key(const gchar *key)
 {
-	return QString::fromAscii(key);
+	return QString::fromLocal8Bit(key);
 }
 
 static void notify_func(GConfClient* client, guint cnxn_id, GConfEntry *entry, gpointer user_data)
@@ -237,7 +237,7 @@ QStringList GConfKey::dirs() const
 	QStringList r;
 	GSList *l = gconf_client_all_dirs(get_client(), getNativeKey(), NULL);
 	for (GSList *i = l; i; i = i->next) {
-		QString path = QString::fromAscii(static_cast<char*>(i->data));
+		QString path = QString::fromLocal8Bit(static_cast<char*>(i->data));
 		r.append(get_basename(path));
 		g_free(i->data);
 	}
@@ -251,7 +251,7 @@ QStringList GConfKey::keys() const
 	GSList *l = gconf_client_all_entries(get_client(), getNativeKey(), NULL);
 	for (GSList *i = l; i; i = i->next) {
 		GConfEntry *e = static_cast<GConfEntry*>(i->data);
-		QString path = QString::fromAscii(e->key);
+		QString path = QString::fromLocal8Bit(e->key);
 		r.append(get_basename(path));
 		gconf_entry_free(e);
 	}
