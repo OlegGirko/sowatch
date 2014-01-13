@@ -15,7 +15,7 @@
 #include <QtDeclarative/QDeclarativeComponent>
 #include <QtDeclarative/QDeclarativeEngine>
 #include <QtDeclarative/QDeclarativeContext>
-#include <QtGui/QApplication>
+#include <QApplication>
 
 #include <qplatformdefs.h> // MEEGO_EDITION_HARMATTAN
 
@@ -167,17 +167,6 @@ void QmlApplicationViewer::setOrientation(ScreenOrientation orientation)
     default:
     case ScreenOrientationAuto:
         attribute = static_cast<Qt::WidgetAttribute>(130);
-        break;
-#else // QT_VERSION < 0x040702
-    case ScreenOrientationLockPortrait:
-        attribute = Qt::WA_LockPortraitOrientation;
-        break;
-    case ScreenOrientationLockLandscape:
-        attribute = Qt::WA_LockLandscapeOrientation;
-        break;
-    default:
-    case ScreenOrientationAuto:
-        attribute = Qt::WA_AutoOrientation;
         break;
 #endif // QT_VERSION < 0x040702
     };

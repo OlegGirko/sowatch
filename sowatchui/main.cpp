@@ -1,4 +1,4 @@
-#include <QtGui/QApplication>
+#include <QApplication>
 #include <QtDeclarative/QtDeclarative>
 #include "qmlapplicationviewer.h"
 
