@@ -1,0 +1,42 @@
+Name: sowatch
+Summary: A tool for using smart watches
+Version: 0.1.0
+Release: 1
+Group: Qt/Qt
+License: GPLv2
+Sources:
+- '%{name}-%{version}.tar.bz2'
+Description: |
+  sowatch is a tool that allows you to use smart watches with your phone.
+Configure: none
+Builder: qtc5
+PkgConfigBR:
+- Qt5Quick
+- Qt5Core
+- Qt5Qml
+PkgBR: []
+Requires: []
+Files:
+- /opt/%{name}
+- '%{_libdir}/lib%{name}*'
+- '%{_libdir}/%{name}'
+- '%{_includedir}/%{name}'
+- '%{_datadir}/%{name}'
+- '%{_bindir}/%{name}d'
+- 
+- /opt/sowatch/bin
+- /usr/share/sowatch
+- /opt/sowatch/.
+- /usr/bin
+- /usr/lib/sowatch/notifications
+- /usr/lib
+- /usr/include/sowatch
+- /usr/share/sowatch/i18n
+- /usr/lib/sowatch/watchlets
+- /usr/share/sowatch/qml/qmafwwatchlet
+- /usr/share/sowatch/qml/notificationswatchlet
+- /usr/lib/sowatch/drivers
+- /usr/share/sowatch/metawatch
+- /usr/share/sowatch/qml
+- /usr/share/sowatch/qml/nekowatchlet
+- /usr/share/sowatch/qml/metawatchwatchlets
