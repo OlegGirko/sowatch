@@ -32,6 +32,9 @@ HEADERS += metawatchplugin.h \
 FORMS += \
     metawatchdigitalsimulatorform.ui
 
+OTHER_FILES += \
+    metawatch.json
+
 res_files.files += res/graphics res/fonts
 qml_files.files += qml/com qml/metawatch-digital-config.qml
 

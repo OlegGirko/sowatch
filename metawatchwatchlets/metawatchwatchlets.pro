@@ -10,6 +10,9 @@ SOURCES += metawatchwatchletsplugin.cpp \
 HEADERS += metawatchwatchletsplugin.h \
 	metawatchfacewatchlet.h metawatchnotificationwatchlet.h
 
+OTHER_FILES += \
+    metawatchwatchlets.json
+
 qml_files.files = metawatch-digital-watchface.qml metawatch-digital-notification.qml ChatBubble.qml \
 	bubble.png bubble_tip.png idle-border.png idle-call.png idle-mail.png idle-msg.png \
 	notification-email.png notification-message.png notification-phone.png notification-timer.png \
