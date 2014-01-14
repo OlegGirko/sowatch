@@ -9,6 +9,7 @@ namespace sowatch
 class NekoWatchlet : public DeclarativeWatchlet
 {
     Q_OBJECT
+
 public:
 	explicit NekoWatchlet(Watch* watch);
 

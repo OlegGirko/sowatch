@@ -60,5 +60,3 @@ Watch* MetaWatchPlugin::getWatch(const QString& driver, ConfigKey* settings, QOb
 		return 0;
 	}
 }
-
-//Q_EXPORT_PLUGIN2(metawatch, MetaWatchPlugin)

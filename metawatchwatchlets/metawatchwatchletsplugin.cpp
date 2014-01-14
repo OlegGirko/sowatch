@@ -48,5 +48,3 @@ Watchlet* MetaWatchWatchletsPlugin::getWatchlet(const QString& id, ConfigKey *se
 		return 0;
 	}
 }
-
-//Q_EXPORT_PLUGIN2(metawatchwatchlets, MetaWatchWatchletsPlugin)

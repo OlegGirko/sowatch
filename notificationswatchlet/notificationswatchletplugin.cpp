@@ -36,5 +36,3 @@ Watchlet* NotificationsWatchletPlugin::getWatchlet(const QString& driver, Config
 	Q_UNUSED(settings);
 	return new NotificationsWatchlet(watch);
 }
-
-//Q_EXPORT_PLUGIN2(notificationswatchlet, NotificationsWatchletPlugin)

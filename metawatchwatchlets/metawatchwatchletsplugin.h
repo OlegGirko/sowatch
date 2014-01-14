@@ -10,6 +10,7 @@ class MetaWatchWatchletsPlugin : public QObject, public WatchletPluginInterface
 {
 	Q_OBJECT
 	Q_INTERFACES(sowatch::WatchletPluginInterface)
+    Q_PLUGIN_METADATA(IID "com.javispedro.sowatch.WatchletPluginInterface" FILE "metawatchwatchlets.json")
 
 public:
 	explicit MetaWatchWatchletsPlugin(QObject *parent = 0);

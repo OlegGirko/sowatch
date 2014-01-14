@@ -9,6 +9,7 @@ namespace sowatch
 class MetaWatchPlugin : public QObject, public WatchPluginInterface {
 	Q_OBJECT
 	Q_INTERFACES(sowatch::WatchPluginInterface)
+    Q_PLUGIN_METADATA(IID "com.javispedro.sowatch.WatchPluginInterface" FILE "metawatch.json")
 
 public:
 	MetaWatchPlugin();

@@ -10,6 +10,7 @@ class NekoWatchletPlugin : public QObject, public WatchletPluginInterface
 {
 	Q_OBJECT
 	Q_INTERFACES(sowatch::WatchletPluginInterface)
+    Q_PLUGIN_METADATA(IID "com.javispedro.sowatch.WatchletPluginInterface" FILE "nekowatchlet.json")
 
 public:
 	explicit NekoWatchletPlugin(QObject *parent = 0);

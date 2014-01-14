@@ -10,6 +10,7 @@ class NotificationsWatchletPlugin : public QObject, public WatchletPluginInterfa
 {
 	Q_OBJECT
 	Q_INTERFACES(sowatch::WatchletPluginInterface)
+    Q_PLUGIN_METADATA(IID "com.javispedro.sowatch.WatchletPluginInterface" FILE "notificationswatchlet.json")
 
 public:
 	explicit NotificationsWatchletPlugin(QObject *parent = 0);
