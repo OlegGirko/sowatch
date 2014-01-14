@@ -13,6 +13,7 @@ MetaWatchScanner::MetaWatchScanner(QObject *parent) :
 
 void MetaWatchScanner::handleDiscoveredService(const QBluetoothServiceInfo &info)
 {
+    qDebug() << "Found device: " << info;
 	const QBluetoothDeviceInfo dev = info.device();
 	QString deviceName = dev.name();
 	if (deviceName.startsWith("MetaWatch")) {

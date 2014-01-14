@@ -45,8 +45,9 @@ Registry::Registry()
 void Registry::loadDrivers()
 {
 	QDir dir(SOWATCH_DRIVERS_DIR);
-	foreach (QString entry, dir.entryList(QDir::Files)) {
+    foreach (QString entry, dir.entryList(QDir::Files)) {
 		QString file = dir.absoluteFilePath(entry);
+        qDebug() << "Loading driver from: " << file;
 		loadDriver(file);
 	}
 
@@ -86,6 +87,7 @@ void Registry::loadDriver(const QString &file)
 			_drivers += plugin;
 			QStringList drivers = plugin->drivers();
 			foreach (const QString& driver, drivers) {
+                qDebug() << "Got driver: " << driver;
 				_driverIds[driver] = plugin;
 				emit driverLoaded(driver);
 			}
