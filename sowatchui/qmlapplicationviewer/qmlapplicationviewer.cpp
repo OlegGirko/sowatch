@@ -180,6 +180,7 @@ void QmlApplicationViewer::showExpanded()
 #elif defined(Q_WS_MAEMO_5)
     d->view->showMaximized();
 #else
+    d->view->setResizeMode(QDeclarativeView::SizeRootObjectToView);
     d->view->show();
 #endif
 }

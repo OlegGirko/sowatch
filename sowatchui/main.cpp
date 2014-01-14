@@ -32,7 +32,7 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
 	viewer->rootContext()->setContextProperty("watches", watches);
 	viewer->rootContext()->setContextProperty("watchScanner", watchScanner);
 
-    viewer->setOrientation(QmlApplicationViewer::ScreenOrientationAuto);
+//    viewer->setOrientation(QmlApplicationViewer::ScreenOrientationAuto);
 	viewer->setMainQmlFile(QLatin1String("qml/main.qml"));
     viewer->showExpanded();
 
