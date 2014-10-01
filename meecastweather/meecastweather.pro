@@ -7,7 +7,7 @@ SOURCES += meecastplugin.cpp meecastprovider.cpp meecastweather.cpp
 
 HEADERS += meecastplugin.h meecastprovider.h meecastweather.h
 
-unix: LIBS += -L$$OUT_PWD/../libsowatch/ -lsowatch
+unix: LIBS += -Wl,-L$$OUT_PWD/../libsowatch/ -lsowatch
 
 INCLUDEPATH += $$PWD/../libsowatch
 DEPENDPATH += $$PWD/../libsowatch

@@ -12,7 +12,7 @@ HEADERS += testnotificationplugin.h testnotificationprovider.h \
     testnotification.h \
     testweathernotification.h
 
-unix: LIBS += -L$$OUT_PWD/../libsowatch/ -lsowatch
+unix: LIBS += -Wl,-L$$OUT_PWD/../libsowatch/ -lsowatch
 INCLUDEPATH += $$PWD/../libsowatch
 DEPENDPATH += $$PWD/../libsowatch
 

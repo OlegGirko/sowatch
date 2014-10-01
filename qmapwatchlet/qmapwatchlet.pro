@@ -22,7 +22,7 @@ qml_files.files = map-metawatch-digital.qml map-liveview.qml \
 	compass-metawatch-digital.qml compass-liveview.qml \
 	compass-icon.png compass-metawatch-digital-icon.png compass-liveview-icon.png compass.png
 
-LIBS += -L$$OUT_PWD/../libsowatch/ -lsowatch
+LIBS += -Wl,-L$$OUT_PWD/../libsowatch/ -lsowatch
 INCLUDEPATH += $$PWD/../libsowatch
 DEPENDPATH += $$PWD/../libsowatch
 

@@ -20,7 +20,7 @@ HEADERS += ckitcallplugin.h \
 CONFIG += link_pkgconfig
 PKGCONFIG += contextsubscriber-1.0
 
-unix: LIBS += -L$$OUT_PWD/../libsowatch/ -lsowatch
+unix: LIBS += -Wl,-L$$OUT_PWD/../libsowatch/ -lsowatch
 
 INCLUDEPATH += $$PWD/../libsowatch
 DEPENDPATH += $$PWD/../libsowatch

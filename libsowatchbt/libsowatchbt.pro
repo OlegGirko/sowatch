@@ -20,7 +20,7 @@ HEADERS += sowatchbt.h sowatchbt_global.h \
     bluetoothwatch.h \
     bluetoothwatchscanner.h
 
-LIBS += -L$$OUT_PWD/../libsowatch/ -lsowatch
+LIBS += -Wl,-L$$OUT_PWD/../libsowatch/ -lsowatch
 INCLUDEPATH += $$PWD/../libsowatch
 DEPENDPATH += $$PWD/../libsowatch
 

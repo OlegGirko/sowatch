@@ -18,7 +18,7 @@ HEADERS += meegohandsetplugin.h \
 
 CONFIG += notificationsystem
 
-unix: LIBS += -L$$OUT_PWD/../libsowatch/ -lsowatch
+unix: -Wl,LIBS += -L$$OUT_PWD/../libsowatch/ -lsowatch
 INCLUDEPATH += $$PWD/../libsowatch
 DEPENDPATH += $$PWD/../libsowatch
 

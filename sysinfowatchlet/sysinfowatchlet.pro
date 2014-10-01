@@ -17,7 +17,7 @@ HEADERS += sysinfoplugin.h sysinfowatchlet.h
 
 qml_files.files = metawatch-digital.qml liveview.qml icon.png metawatch-digital-icon.png liveview-icon.png
 
-LIBS += -L$$OUT_PWD/../libsowatch/ -lsowatch
+LIBS += -Wl,-L$$OUT_PWD/../libsowatch/ -lsowatch
 
 INCLUDEPATH += $$PWD/../libsowatch
 DEPENDPATH += $$PWD/../libsowatch

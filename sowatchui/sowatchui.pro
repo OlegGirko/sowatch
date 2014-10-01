@@ -27,7 +27,7 @@ simulator {
 CONFIG += qdeclarative-boostable
 
 # Dependency to the main Sowatch library
-LIBS += -L$$OUT_PWD/../libsowatch/ -lsowatch
+LIBS += -Wl,-L$$OUT_PWD/../libsowatch/ -lsowatch
 INCLUDEPATH += $$PWD/../libsowatch
 DEPENDPATH += $$PWD/../libsowatch
 !isEmpty(MEEGO_VERSION_MAJOR)|maemo5 {

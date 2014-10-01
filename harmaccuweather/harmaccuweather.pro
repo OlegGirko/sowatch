@@ -6,7 +6,7 @@ SOURCES += harmaccuplugin.cpp harmaccuprovider.cpp harmaccuweather.cpp
 
 HEADERS += harmaccuplugin.h harmaccuprovider.h harmaccuweather.h
 
-unix: LIBS += -L$$OUT_PWD/../libsowatch/ -lsowatch
+unix: LIBS += -Wl,-L$$OUT_PWD/../libsowatch/ -lsowatch
 
 INCLUDEPATH += $$PWD/../libsowatch
 DEPENDPATH += $$PWD/../libsowatch

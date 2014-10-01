@@ -13,7 +13,7 @@ qml_files.files = metawatch-digital-watchface.qml metawatch-digital-notification
 	notification-email.png notification-message.png notification-phone.png notification-timer.png \
 	weather-cloudy.png weather-rain.png weather-snow.png weather-sunny.png weather-thunderstorm.png weather-wind.png
 
-LIBS += -L$$OUT_PWD/../libsowatch/ -lsowatch
+LIBS += -Wl,-L$$OUT_PWD/../libsowatch/ -lsowatch
 INCLUDEPATH += $$PWD/../libsowatch
 DEPENDPATH += $$PWD/../libsowatch
 QML_IMPORT_PATH += $$PWD/../metawatch/qml

@@ -35,11 +35,11 @@ FORMS += \
 res_files.files += res/graphics res/fonts
 qml_files.files += qml/com qml/metawatch-digital-config.qml
 
-LIBS += -L$$OUT_PWD/../libsowatch/ -lsowatch
+LIBS += -Wl,-L$$OUT_PWD/../libsowatch/ -lsowatch
 INCLUDEPATH += $$PWD/../libsowatch
 DEPENDPATH += $$PWD/../libsowatch
 
-LIBS += -L$$OUT_PWD/../libsowatchbt/ -lsowatchbt
+LIBS += -Wl,-L$$OUT_PWD/../libsowatchbt/ -lsowatchbt
 INCLUDEPATH += $$PWD/../libsowatchbt
 DEPENDPATH += $$PWD/../libsowatchbt
 

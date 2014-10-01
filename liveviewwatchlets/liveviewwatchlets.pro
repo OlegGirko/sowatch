@@ -11,7 +11,7 @@ HEADERS += liveviewwatchletsplugin.h \
 
 qml_files.files = liveview-notification.qml
 
-LIBS += -L$$OUT_PWD/../libsowatch/ -lsowatch
+LIBS += -Wl,-L$$OUT_PWD/../libsowatch/ -lsowatch
 INCLUDEPATH += $$PWD/../libsowatch
 DEPENDPATH += $$PWD/../libsowatch
 QML_IMPORT_PATH += $$PWD/../liveview/qml
