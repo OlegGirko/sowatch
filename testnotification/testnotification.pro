@@ -1,7 +1,13 @@
 TARGET = testnotification
 TEMPLATE = lib
 CONFIG   += plugin
-CONFIG += mobility
+
+# Qt Mobility 1.2
+maemo5 {
+	CONFIG += mobility12
+} else {
+	CONFIG += mobility
+}
 MOBILITY += systeminfo
 
 SOURCES += testnotificationplugin.cpp testnotificationprovider.cpp \

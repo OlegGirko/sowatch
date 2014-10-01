@@ -1,7 +1,13 @@
 TARGET = qmsgwatchlet
 TEMPLATE = lib
 CONFIG   += plugin
-CONFIG   += mobility
+
+# Qt Mobility 1.2
+maemo5 {
+	CONFIG   += mobility12
+} else {
+	CONFIG   += mobility
+}
 MOBILITY += messaging
 
 SOURCES += qmsgwatchletplugin.cpp qmsgwatchlet.cpp
