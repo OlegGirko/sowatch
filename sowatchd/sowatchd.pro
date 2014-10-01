@@ -5,6 +5,14 @@ TEMPLATE = app
 QT       += core gui dbus
 CONFIG   -= app_bundle
 
+# Qt Mobility 1.2
+maemo5 {
+	CONFIG += mobility12
+} else {
+	CONFIG += mobility
+}
+MOBILITY += connectivity
+
 SOURCES += main.cpp daemon.cpp daemonadaptor.cpp watchhandler.cpp
 HEADERS += daemon.h daemonadaptor.h watchhandler.h
 

@@ -2,7 +2,13 @@
 TARGET = qmapwatchlet
 TEMPLATE = lib
 CONFIG   += plugin
-CONFIG   += mobility
+
+# Qt Mobility 1.2
+maemo5 {
+	CONFIG += mobility12
+} else {
+	CONFIG += mobility
+}
 MOBILITY += location
 
 SOURCES += qmapwatchletplugin.cpp qmapwatchlet.cpp mapview.cpp \
