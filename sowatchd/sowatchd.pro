@@ -8,6 +8,7 @@ CONFIG   -= app_bundle
 # Qt Mobility 1.2
 maemo5 {
 	CONFIG += mobility12
+	QMAKE_RPATHDIR-= /usr/lib
 } else {
 	CONFIG += mobility
 }
