@@ -8,10 +8,20 @@ Name:       sowatch
 # >> macros
 # << macros
 
-%{!?qtc_qmake:%define qtc_qmake %qmake}
-%{!?qtc_qmake5:%define qtc_qmake5 %qmake5}
-%{!?qtc_make:%define qtc_make make}
-%{?qtc_builddir:%define _builddir %qtc_builddir}
+%{!?_qt5_qmake_flags:%global _qt5_qmake_flags %{?nil: \\
+  QMAKE_CFLAGS_DEBUG="${CFLAGS:-%{_qt5_optflags} %{?_qt5_cflags}}" \\
+  QMAKE_CFLAGS_RELEASE="${CFLAGS:-%{_qt5_optflags} %{?_qt5_cflags}}" \\
+  QMAKE_CXXFLAGS_DEBUG="${CXXFLAGS:-%{_qt5_optflags} %{?_qt5_cxxflags}}" \\
+  QMAKE_CXXFLAGS_RELEASE="${CXXFLAGS:-%{_qt5_optflags} %{?_qt5_cxxflags}}" \\
+  QMAKE_LFLAGS_DEBUG="${LDFLAGS:-%{_qt5_ldflags}}" \\
+  QMAKE_LFLAGS_RELEASE="${LDFLAGS:-%{_qt5_ldflags}}" \\
+  QMAKE_STRIP= \\
+  %nil
+}}
+%{!?qmake5:%global qmake5 %{_qt5_bindir}/qmake %{?_qt5_qmake_flags}}
+%{!?qmake5_install:%global qmake5_install make install INSTALL_ROOT=%{buildroot}}
+%{!?qtc_qmake5:%global qtc_qmake5 %qmake5}
+%{!?qtc_make:%global qtc_make make}
 Summary:    A tool for using smart watches
 Version:    0.1.0
 Release:    1
