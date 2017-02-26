@@ -29,9 +29,15 @@ Group:      Qt/Qt
 License:    GPLv2
 Source0:    %{name}-%{version}.tar.bz2
 Source100:  sowatch.yaml
-BuildRequires:  pkgconfig(Qt5Quick)
 BuildRequires:  pkgconfig(Qt5Core)
-BuildRequires:  pkgconfig(Qt5Qml)
+BuildRequires:  pkgconfig(Qt5Gui)
+BuildRequires:  pkgconfig(Qt5Widgets)
+BuildRequires:  pkgconfig(Qt5Declarative)
+BuildRequires:  pkgconfig(Qt5Bluetooth)
+BuildRequires:  pkgconfig(Qt5Network)
+BuildRequires:  pkgconfig(Qt5DBus)
+BuildRequires:  pkgconfig(Qt5Xml)
+BuildRequires:  pkgconfig(gconf-2.0)
 
 %description
 sowatch is a tool that allows you to use smart watches with your phone.
