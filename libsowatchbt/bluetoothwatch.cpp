@@ -95,7 +95,7 @@ void BluetoothWatch::unscheduleConnect()
 void BluetoothWatch::connectToWatch()
 {
 	delete _socket; //Delete socket from previous connect if any.
-	_socket = new QBluetoothSocket(QBluetoothSocket::RfcommSocket);
+	_socket = new QBluetoothSocket(QBluetoothServiceInfo::RfcommProtocol);
 
 	connect(_socket, SIGNAL(connected()), SLOT(handleSocketConnected()));
 	connect(_socket, SIGNAL(disconnected()), SLOT(handleSocketDisconnected()));
