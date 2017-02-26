@@ -7,7 +7,6 @@
 #include "metawatchplugin.h"
 
 using namespace sowatch;
-using namespace QtBluetooth;
 
 bool MetaWatchPlugin::fontsLoaded = false;
 

@@ -10,8 +10,6 @@
 namespace sowatch
 {
 
-using namespace QtBluetooth;
-
 class SOWATCHBT_EXPORT BluetoothWatch : public Watch
 {
 	Q_OBJECT

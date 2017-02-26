@@ -13,8 +13,6 @@
 namespace sowatch
 {
 
-using namespace QtBluetooth;
-
 class MetaWatchPaintEngine;
 
 class MetaWatch : public BluetoothWatch

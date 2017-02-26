@@ -4,7 +4,6 @@
 #include "metawatchscanner.h"
 
 using namespace sowatch;
-using namespace QtBluetooth;
 
 MetaWatchScanner::MetaWatchScanner(QObject *parent) :
 	BluetoothWatchScanner(parent)
