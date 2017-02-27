@@ -113,13 +113,19 @@ symbian {
 			QMAKE_EXTRA_TARGETS += first copydeploymentfolders
 		}
 	}
-	installPrefix = /opt/$${TARGET}
+	!isEmpty(MEEGO_VERSION_MAJOR)|maemo5 {
+		installBin = /opt/$${TARGET}/bin
+		installData = /opt/$${TARGET}
+	} else {
+		installBin = /usr/bin
+		installData = /usr/share/$${TARGET}
+	}
 	for(deploymentfolder, DEPLOYMENTFOLDERS) {
 		item = item$${deploymentfolder}
 		itemfiles = $${item}.files
 		$$itemfiles = $$eval($${deploymentfolder}.source)
 		itempath = $${item}.path
-		$$itempath = $${installPrefix}/$$eval($${deploymentfolder}.target)
+		$$itempath = $${installData}/$$eval($${deploymentfolder}.target)
 		export($$itemfiles)
 		export($$itempath)
 		INSTALLS += $$item
@@ -133,7 +139,7 @@ symbian {
 		INSTALLS += icon desktopfile
 	}
 
-	target.path = $${installPrefix}/bin
+	target.path = $${installBin}
 	export(target.path)
 	INSTALLS += target
 }
