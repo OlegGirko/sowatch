@@ -71,25 +71,10 @@ rm -rf %{buildroot}
 
 %files
 %defattr(-,root,root,-)
-/opt/%{name}
 %{_libdir}/lib%{name}*
 %{_libdir}/%{name}
 %{_includedir}/%{name}
 %{_datadir}/%{name}
-%{_bindir}/%{name}d
-/opt/sowatch/bin
-/usr/share/sowatch
-/opt/sowatch/.
-/usr/bin
-/usr/lib
-/usr/include/sowatch
-/usr/share/sowatch/i18n
-/usr/lib/sowatch/watchlets
-/usr/share/sowatch/qml/notificationswatchlet
-/usr/lib/sowatch/drivers
-/usr/share/sowatch/metawatch
-/usr/share/sowatch/qml
-/usr/share/sowatch/qml/nekowatchlet
-/usr/share/sowatch/qml/metawatchwatchlets
+%{_bindir}/*
 # >> files
 # << files
