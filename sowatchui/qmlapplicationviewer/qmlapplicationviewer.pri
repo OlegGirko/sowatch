@@ -88,6 +88,7 @@ symbian {
 		for(deploymentfolder, DEPLOYMENTFOLDERS) {
 			source = $$MAINPROFILEPWD/$$eval($${deploymentfolder}.source)
 			source = $$replace(source, \\\\, /)
+			source = $$clean_path($$source)
 			macx {
 				target = $$OUT_PWD/$${TARGET}.app/Contents/Resources/$$eval($${deploymentfolder}.target)
 			} else {
@@ -96,6 +97,7 @@ symbian {
 			target = $$replace(target, \\\\, /)
 			sourcePathSegments = $$split(source, /)
 			targetFullPath = $$target/$$last(sourcePathSegments)
+			targetFullPath = $$clean_path($$targetFullPath)
 			!isEqual(source,$$targetFullPath) {
 				!isEmpty(copyCommand):copyCommand += &&
 				copyCommand += $(MKDIR) \"$$target\"
