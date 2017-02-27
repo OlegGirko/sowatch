@@ -22,7 +22,7 @@ unix:!symbian {
 		target.path = /opt/sowatch/lib/watchlets
 		qml_files.path = /opt/sowatch/qml/$$TARGET
 	} else {
-		target.path = /usr/lib/sowatch/watchlets
+		target.path = $$[QT_INSTALL_LIBS]/sowatch/watchlets
 		qml_files.path = /usr/share/sowatch/qml/$$TARGET
 	}
 	INSTALLS += target qml_files

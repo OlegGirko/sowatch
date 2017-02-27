@@ -21,7 +21,7 @@ unix {
 		QMAKE_RPATHDIR += /opt/sowatch/lib
 		target.path = /opt/sowatch/lib/notifications
 	} else {
-		target.path = /usr/lib/sowatch/notifications
+		target.path = $$[QT_INSTALL_LIBS]/sowatch/notifications
 	}
 	INSTALLS += target
 }

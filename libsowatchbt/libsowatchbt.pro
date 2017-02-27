@@ -33,7 +33,7 @@ install_headers.path = /usr/include/sowatch
 	target.path = /opt/sowatch/lib
 	install_translations.path = /opt/sowatch/i18n
 } else {
-	target.path = /usr/lib
+	target.path = $$[QT_INSTALL_LIBS]
 	install_translations.path = /usr/share/sowatch/i18n
 }
 

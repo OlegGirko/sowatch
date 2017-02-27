@@ -37,7 +37,7 @@ DEPENDPATH += $$PWD/../libsowatchbt
 	res_files.path = /opt/sowatch/share/liveview
 	qml_files.path = /opt/sowatch/qml
 } else {
-	target.path = /usr/lib/sowatch/drivers
+	target.path = $$[QT_INSTALL_LIBS]/sowatch/drivers
 	res_files.path = /usr/share/sowatch/liveview
 	qml_files.path = /usr/share/sowatch/qml
 }

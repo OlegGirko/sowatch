@@ -21,7 +21,7 @@
 #	define SOWATCH_QML_DIR          "/opt/sowatch/qml"
 #	define SOWATCH_I18N_DIR         "/opt/sowatch/i18n"
 #elif defined(Q_OS_LINUX)
-#	define SOWATCH_PLUGINS_DIR      "/usr/lib/sowatch"
+#	define SOWATCH_PLUGINS_DIR      LIBDIR "/sowatch"
 #	define SOWATCH_RESOURCES_DIR    "/usr/share/sowatch"
 #	define SOWATCH_QML_DIR          SOWATCH_RESOURCES_DIR "/qml"
 #	define SOWATCH_I18N_DIR         SOWATCH_RESOURCES_DIR "/i18n"
