@@ -6,7 +6,7 @@ using namespace sowatch;
 
 WatchesModel::WatchesModel(QObject *parent) :
     QAbstractListModel(parent),
-    _config(new GConfKey("/apps/sowatch", this)),
+    _config(new DefConfKey("/apps/sowatch", this)),
     _watches_list(_config->getSubkey("watches", this)),
     _daemon(new DaemonProxy("com.javispedro.sowatchd", "/com/javispedro/sowatch/daemon", QDBusConnection::sessionBus()))
 {

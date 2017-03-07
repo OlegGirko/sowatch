@@ -7,13 +7,37 @@
 QT        += gui declarative
 
 CONFIG    += link_pkgconfig
-PKGCONFIG += gconf-2.0
+
+packagesExist(dconf) {
+    PKGCONFIG += dconf
+    DEFCONFKEY = DConfKey
+    DEFINES += USE_DCONF
+} else:packagesExist(gconf-2.0) {
+    PKGCONFIG += gconf-2.0
+    DEFCONFKEY = GConfKey
+    DEFINES += USE_GCONF
+} else {
+    error("One of these libraries is requires: dconf, gconf")
+}
 
 TARGET    = sowatch
 TEMPLATE  = lib
 VERSION   = 1.0.0
 
 DEFINES += SOWATCH_LIBRARY
+
+defconfkey.target = $${OUT_PWD}/defconfkey.h
+defconfkey.commands = echo "'$${LITERAL_HASH}ifndef SOWATCH_DEFCONFKEY_H'" > $${OUT_PWD}/defconfkey.h;
+defconfkey.commands += echo "'$${LITERAL_HASH}define SOWATCH_DEFCONFKEY_H'" >> $${OUT_PWD}/defconfkey.h;
+defconfkey.commands += echo "'$${LITERAL_HASH}include \"$$lower($$DEFCONFKEY).h\"'" >> $${OUT_PWD}/defconfkey.h;
+defconfkey.commands += echo "'namespace sowatch { typedef $$DEFCONFKEY DefConfKey; }'" >> $${OUT_PWD}/defconfkey.h;
+defconfkey.commands += echo "'$${LITERAL_HASH}endif // SOWATCH_DEFCONFKEY_H'" >> $${OUT_PWD}/defconfkey.h
+
+QMAKE_EXTRA_TARGETS += defconfkey
+INCLUDEPATH += $$OUT_PWD
+DEPENDPATH += $$OUT_PWD
+HEADERS += $${OUT_PWD}/defconfkey.h
+PRE_TARGETDEPS += $${OUT_PWD}/defconfkey.h
 
 SOURCES += \
     watchserver.cpp \
@@ -33,7 +57,7 @@ SOURCES += \
     watchscanner.cpp \
     allwatchscanner.cpp \
     configkey.cpp \
-    gconfkey.cpp \
+    $$lower($$DEFCONFKEY).cpp \
     notificationsmodel.cpp \
     watchletsmodel.cpp
 
@@ -57,7 +81,7 @@ HEADERS += \
     watchscanner.h \
     allwatchscanner.h \
     configkey.h \
-    gconfkey.h \
+    $$lower($$DEFCONFKEY).h \
     notificationsmodel.h \
     watchletsmodel.h
 

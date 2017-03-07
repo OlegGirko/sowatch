@@ -16,8 +16,8 @@ qml_files.files = metawatch-digital.qml liveview.qml \
 	Neko.qml neko.png neko-inv.png
 
 LIBS += -L$$OUT_PWD/../libsowatch/ -lsowatch
-INCLUDEPATH += $$PWD/../libsowatch
-DEPENDPATH += $$PWD/../libsowatch
+INCLUDEPATH += $$PWD/../libsowatch $$OUT_PWD/../libsowatch
+DEPENDPATH += $$PWD/../libsowatch $$OUT_PWD/../libsowatch
 QML_IMPORT_PATH += $$PWD/../metawatch/qml
 
 unix:!symbian {

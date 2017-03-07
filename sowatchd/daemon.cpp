@@ -6,7 +6,7 @@ using namespace sowatch;
 
 Daemon::Daemon(QObject *parent) :
 	QObject(parent),
-	_config(new GConfKey("/apps/sowatch", this)),
+	_config(new DefConfKey("/apps/sowatch", this)),
 	_watches_list(_config->getSubkey("watches", this)),
 	_status_mapper(new QSignalMapper(this))
 {

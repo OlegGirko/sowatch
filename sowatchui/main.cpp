@@ -25,7 +25,7 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
 	qDebug() << "Starting" << watches << endl;
 
 	qmlRegisterType<sowatch::ConfigKey>();
-	qmlRegisterType<sowatch::GConfKey>("com.javispedro.sowatch", 1, 0, "GConfKey");
+	qmlRegisterType<sowatch::DefConfKey>("com.javispedro.sowatch", 1, 0, "ConfKey");
 	qmlRegisterType<ProvidersModel>("com.javispedro.sowatch", 1, 0, "ProvidersModel");
 	qmlRegisterType<ConfiguredWatchletsModel>("com.javispedro.sowatch", 1, 0, "ConfiguredWatchletsModel");
 

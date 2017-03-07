@@ -19,8 +19,8 @@ else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../libsowatch/debug
 else:symbian: LIBS += -lsowatch
 else:unix: LIBS += -L$$OUT_PWD/../libsowatch/ -lsowatch
 
-INCLUDEPATH += $$PWD/../libsowatch
-DEPENDPATH += $$PWD/../libsowatch
+INCLUDEPATH += $$PWD/../libsowatch $$OUT_PWD/../libsowatch
+DEPENDPATH += $$PWD/../libsowatch $$OUT_PWD/../libsowatch
 QML_IMPORT_PATH += $$PWD/../metawatch/qml
 
 unix:!symbian {

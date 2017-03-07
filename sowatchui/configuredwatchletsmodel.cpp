@@ -33,7 +33,7 @@ void ConfiguredWatchletsModel::setConfigKey(const QString &configKey)
 		_config = 0;
 	}
 	if (!configKey.isEmpty()) {
-		_config = new GConfKey(configKey + watchletsSubKey, this);
+		_config = new DefConfKey(configKey + watchletsSubKey, this);
 		connect(_config, SIGNAL(changed()), SLOT(handleConfigChanged()));
 	}
 	if (this->configKey() != oldConfigKey) {

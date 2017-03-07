@@ -37,7 +37,7 @@ BuildRequires:  pkgconfig(Qt5Bluetooth)
 BuildRequires:  pkgconfig(Qt5Network)
 BuildRequires:  pkgconfig(Qt5DBus)
 BuildRequires:  pkgconfig(Qt5Xml)
-BuildRequires:  pkgconfig(gconf-2.0)
+BuildRequires:  pkgconfig(dconf)
 
 %description
 sowatch is a tool that allows you to use smart watches with your phone.

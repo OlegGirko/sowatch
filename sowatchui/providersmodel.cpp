@@ -33,7 +33,7 @@ void ProvidersModel::setConfigKey(const QString &configKey)
 		_config = 0;
 	}
 	if (!configKey.isEmpty()) {
-		_config = new GConfKey(configKey + providersSubKey, this);
+		_config = new DefConfKey(configKey + providersSubKey, this);
 		connect(_config, SIGNAL(changed()), SLOT(handleConfigChanged()));
 	}
 	if (this->configKey() != oldConfigKey) {

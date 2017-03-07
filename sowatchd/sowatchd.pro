@@ -9,8 +9,8 @@ SOURCES += main.cpp daemon.cpp daemonadaptor.cpp watchhandler.cpp
 HEADERS += daemon.h daemonadaptor.h watchhandler.h
 
 LIBS += -L$$OUT_PWD/../libsowatch/ -lsowatch
-INCLUDEPATH += $$PWD/../libsowatch
-DEPENDPATH += $$PWD/../libsowatch
+INCLUDEPATH += $$PWD/../libsowatch $$OUT_PWD/../libsowatch
+DEPENDPATH += $$PWD/../libsowatch $$OUT_PWD/../libsowatch
 
 LIBS += -L$$OUT_PWD/../libsowatchbt/ -lsowatchbt
 INCLUDEPATH += $$PWD/../libsowatchbt

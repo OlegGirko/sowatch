@@ -4,7 +4,7 @@
 #include "watch.h"
 #include "watchletsmodel.h"
 #include "notificationsmodel.h"
-#include "gconfkey.h"
+#include "defconfkey.h"
 #include "declarativewatchwrapper.h"
 #include "declarativewatchlet.h"
 
@@ -41,7 +41,7 @@ DeclarativeWatchlet::DeclarativeWatchlet(Watch* watch, const QString& id) :
 		qmlRegisterUncreatableType<WeatherNotification>("com.javispedro.sowatch", 1, 0,
 			"WeatherNotification", "WeatherNotification is an abstract class");
 		qmlRegisterType<ConfigKey>();
-		qmlRegisterType<GConfKey>("com.javispedro.sowatch", 1, 0, "GConfKey");
+		qmlRegisterType<DefConfKey>("com.javispedro.sowatch", 1, 0, "ConfKey");
 		_registered = true;
 	}
 

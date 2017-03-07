@@ -71,7 +71,7 @@ Page {
 		configKey: watchPage.configKey
 	}
 
-	GConfKey {
+	ConfKey {
 		id: nameKey
 		key: configKey + "/name"
 	}
@@ -90,7 +90,7 @@ Page {
 				width: parent.width
 				height: UiConstants.ListItemHeightDefault
 
-				GConfKey {
+				ConfKey {
 					id: enableKey
 					key: configKey + "/enable"
 				}

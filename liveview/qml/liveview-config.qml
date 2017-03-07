@@ -10,7 +10,7 @@ Column {
 		width: parent.width
 		height: UiConstants.ListItemHeightDefault
 
-		GConfKey {
+		ConfKey {
 			id: hourModeKey
 			key: configKey + "/24h-mode"
 		}

@@ -28,8 +28,8 @@ CONFIG += qdeclarative-boostable
 
 # Dependency to the main Sowatch library
 LIBS += -L$$OUT_PWD/../libsowatch/ -lsowatch
-INCLUDEPATH += $$PWD/../libsowatch
-DEPENDPATH += $$PWD/../libsowatch
+INCLUDEPATH += $$PWD/../libsowatch $$OUT_PWD/../libsowatch
+DEPENDPATH += $$PWD/../libsowatch $$OUT_PWD/../libsowatch
 !isEmpty(MEEGO_VERSION_MAJOR)|maemo5 {
 	QMAKE_RPATHDIR += /opt/sowatch/lib
 }

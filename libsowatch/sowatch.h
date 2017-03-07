@@ -4,7 +4,7 @@
 #include "sowatch_global.h"
 
 #include "configkey.h"
-#include "gconfkey.h"
+#include "defconfkey.h"
 
 #include "watch.h"
 #include "watchserver.h"

@@ -39,8 +39,8 @@ res_files.files += res/graphics res/fonts
 qml_files.files += qml/com qml/metawatch-digital-config.qml
 
 LIBS += -L$$OUT_PWD/../libsowatch/ -lsowatch
-INCLUDEPATH += $$PWD/../libsowatch
-DEPENDPATH += $$PWD/../libsowatch
+INCLUDEPATH += $$PWD/../libsowatch $$OUT_PWD/../libsowatch
+DEPENDPATH += $$PWD/../libsowatch $$OUT_PWD/../libsowatch
 
 LIBS += -L$$OUT_PWD/../libsowatchbt/ -lsowatchbt
 INCLUDEPATH += $$PWD/../libsowatchbt
