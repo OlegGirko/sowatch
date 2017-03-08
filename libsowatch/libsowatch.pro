@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT        += gui declarative
+QT        += gui qml
 
 CONFIG    += link_pkgconfig
 
